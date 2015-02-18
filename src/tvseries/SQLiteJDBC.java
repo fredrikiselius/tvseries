@@ -5,6 +5,10 @@ import java.sql.*;
 public class SQLiteJDBC
 {
     private String DBNAME;
+    private String CREATE_SERIES = "CREATE TABLE SERIES " +
+				   "(THETVDBID INT PRIMARY KEY     NOT NULL," +
+				   " NAME           TEXT    NOT NULL)";
+    private String INSERT_BASE = "INSERT INTO SERIES (THETVDBID, NAME) ";
 
     public static void main(String args[])
     {
@@ -16,17 +20,14 @@ public class SQLiteJDBC
 	    System.out.println("Opened database successfully");
 
 	    stmt = c.createStatement();
-	    /*String sql = "CREATE TABLE SERIES " +
-			 "(THETVDBID INT PRIMARY KEY     NOT NULL," +
-			 " NAME           TEXT    NOT NULL)";
-	    String sql = "INSERT INTO SERIES (THETVDBID, NAME) " +
-			 "VALUES (257655, 'Arrow');";
+/*
+	    String sql = "INSERT INTO SERIES (THETVDBID, NAME) " + "VALUES (257655, 'Arrow');";
 	    stmt.executeUpdate(sql);
 	    stmt.close();
 	    c.close();*/
 
-	   ResultSet rs = stmt.executeQuery( "SELECT * FROM SERIES;");
-	    while ( rs.next() ) {
+	    ResultSet rs = stmt.executeQuery("SELECT * FROM SERIES;");
+	    while (rs.next()) {
 		int tid = rs.getInt("thetvdbid");
 		String name = rs.getString("name");
 		System.out.println(tid + " " + name);
@@ -38,8 +39,7 @@ public class SQLiteJDBC
 	} catch (Exception e) {
 	    System.err.println(e.getClass().getName() + ": " + e.getMessage());
 	    System.exit(0);
-	}
-	System.out.println("Records created successfully");
+	} System.out.println("Records created successfully");
     }
 
     public void addSeries(String name, int id) {
