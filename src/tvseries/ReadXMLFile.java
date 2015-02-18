@@ -9,7 +9,10 @@ import javax.swing.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -63,9 +66,22 @@ public class ReadXMLFile {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         for (String s : nameAndId.keySet()) {
-            System.out.println(s + " " + "(" + nameAndId.get(s) + ")");
+                    System.out.println(s + " " + "(" + nameAndId.get(s) + ")");
         }
+
+        String[] res = nameAndId.keySet().toArray(new String[10]);
+        List valid = Arrays.asList(res);
+
+        String something = JOptionPane.showInputDialog("Pick one");
+        if (valid.contains(something)) {
+            System.out.println("yay!");
+        }
+        /*
+        JComboBox resultList = new JComboBox(res);
+        resultList.setSelectedIndex(0);
+        resultList.addActionListener(this);
+        System.out.println(Arrays.toString(res));*/
+
     }
 }
