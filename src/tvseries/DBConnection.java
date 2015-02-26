@@ -5,12 +5,19 @@ import java.sql.*;
 public class DBConnection
 {
     public static void openDB(DbType type, String values) {
-	String INSERT_BASE = "INSERT INTO SERIES (THETVDBID, NAME) VALUES ";
+	String INSERT_BASE = "INSERT INTO series (thetvdb_id, show_name) VALUES ";
 	String SELECT_ALL = "SELECT * FROM SERIES;";
 	String DELETE_BASE = "DELETE from SERIES where THETVDBID=";
-	String CREATE_TABLE = "CREATE TABLE SERIES " +
-			      "(THETVDBID INT PRIMARY KEY     NOT NULL," +
-			      " NAME           TEXT    NOT NULL)";
+	String CREATE_TABLE = "CREATE TABLE series " +
+			      "(thetvdb_id INTEGER PRIMARY KEY     NOT NULL," +
+			      " show_name	TEXT	NOT NULL," +
+			      " network	TEXT," +
+			      " airday	TEXT," +
+			      " airtime	TEXT," +
+			      " overview	TEXT," +
+			      " status	TEXT," +
+			      " runtime	TEXT)";
+	System.out.println(CREATE_TABLE);
 	Connection connect = null;
 	Statement stmt = null;
 	try {
@@ -29,9 +36,12 @@ public class DBConnection
 		case SELECT_ALL:
 		    ResultSet rs = stmt.executeQuery(SELECT_ALL);
 		    while (rs.next()) {
-			int theTvDbId = rs.getInt("thetvdbid");
-			String name = rs.getString("name");
-			System.out.println(theTvDbId + " " + name);
+			int theTvDbId = rs.getInt("thetvdb_id");
+			String name = rs.getString("show_name");
+			String network = rs.getString("network");
+			String airday = rs.getString("airday");
+			String airtime = rs.getString("airtime");
+			System.out.println(theTvDbId + " " + name+ " "+ network+" "+airday+" "+airtime);
 		    }
 		    rs.close();
 		    break;
@@ -53,10 +63,12 @@ public class DBConnection
 	}
     }
 
+
+
     public static void main(String[] args) {
 	//DBConnection.openDB(DbType.INSERT, "(123123, 'something');");
 	//DBConnection.openDB(DbType.CREATE_TABLE, "");
-	//DBConnection.openDB(DbType.DELETE_SERIES, "107251");
+	//DBConnection.openDB(DbType.DELETE_SERIES, "121361");
 	DBConnection.openDB(DbType.SELECT_ALL, "");
     }
 }
