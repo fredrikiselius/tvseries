@@ -17,7 +17,6 @@ public class DBConnection
 			      " overview	TEXT," +
 			      " status	TEXT," +
 			      " runtime	TEXT)";
-	System.out.println(CREATE_TABLE);
 	Connection connect = null;
 	Statement stmt = null;
 	try {
@@ -41,7 +40,9 @@ public class DBConnection
 			String network = rs.getString("network");
 			String airday = rs.getString("airday");
 			String airtime = rs.getString("airtime");
-			System.out.println(theTvDbId + " " + name+ " "+ network+" "+airday+" "+airtime);
+			String overview = rs.getString("overview");
+			System.out.println(theTvDbId + " " + name+ " "+ network+" "+airday+" "+airtime+"\n" +
+					   overview);
 		    }
 		    rs.close();
 		    break;

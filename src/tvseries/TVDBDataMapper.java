@@ -25,7 +25,7 @@ public class TVDBDataMapper {
 
 	    Connection db = DriverManager.getConnection("jdbc:sqlite:tvseries.db");
 	    String statement = "UPDATE series " +
-			       "SET network=?, airday=?, airtime=? " +
+			       "SET network=?, airday=?, airtime=?, overview=? " +
 			       "WHERE thetvdb_id=121361";
 	    PreparedStatement dbStatement = db.prepareStatement(statement);
 
@@ -39,6 +39,7 @@ public class TVDBDataMapper {
 		    dbStatement.setString(1, eElement.getElementsByTagName("Network").item(0).getTextContent());
 		    dbStatement.setString(2, eElement.getElementsByTagName("Airs_DayOfWeek").item(0).getTextContent());
 		    dbStatement.setString(3, eElement.getElementsByTagName("Airs_Time").item(0).getTextContent());
+		    dbStatement.setString(4, eElement.getElementsByTagName("Overview").item(0).getTextContent());
 
 
 		}
