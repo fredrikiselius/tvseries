@@ -13,11 +13,11 @@ public class UnZip {
     private static final String INPUT_ZIP_FILE = "/home/freis685/tvseries/seriesdata/en.zip";
     private static final String OUTPUT_FOLDER = "/home/freis685/tvseries/seriesdata";
 
-    public void unZipIt(String zipFile, String outputFolder) {
+    public static void unZipIt(String zipFile) {
     	byte[] buffer = new byte[1024];
 
     	try {
-    	    File folder = new File(OUTPUT_FOLDER);
+    	    File folder = new File(UnZip.OUTPUT_FOLDER);
 	    if (!folder.exists()) {
 		folder.mkdir();
 	    }
@@ -27,7 +27,7 @@ public class UnZip {
 
 	    while (ze != null) {
 		String fileName = ze.getName();
-		File newFile = new File(outputFolder + File.separator + fileName);
+		File newFile = new File(OUTPUT_FOLDER + File.separator + fileName);
 
 		System.out.println("file unzip : " + newFile.getAbsoluteFile());
 

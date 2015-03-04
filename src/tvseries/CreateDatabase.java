@@ -29,5 +29,6 @@ public class CreateDatabase {
 								" episode INTEGER NOT NULL," +
 								" season INTEGER NOT NULL," +
 								" overview TEXT NOT NULL)");
+
     }
 }

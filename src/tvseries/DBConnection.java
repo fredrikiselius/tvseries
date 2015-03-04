@@ -4,7 +4,7 @@ import java.sql.*;
 
 public class DBConnection
 {
-    private static String database;
+    private String database;
     public static Connection connection;
     public static Statement statement;
     private boolean isConnected;
@@ -30,7 +30,7 @@ public class DBConnection
 	}
     }
 
-    public boolean close() {
+    public static boolean close() {
 	try {
 	    connection.close();
 	    return true;
@@ -39,6 +39,22 @@ public class DBConnection
 	    return false;
 	}
 
+    }
+
+    public static Connection getConnection() {
+	return connection;
+    }
+
+    public static Statement getStatement() {
+	return statement;
+    }
+
+    public static void setConnection(final Connection connection) {
+	DBConnection.connection = connection;
+    }
+
+    public static void setStatement(final Statement statement) {
+	DBConnection.statement = statement;
     }
 }
 

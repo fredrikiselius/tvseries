@@ -67,13 +67,4 @@ public class DownloadZip
 	}
 	httpConnection.disconnect();
     }
-
-
-    public static void main(String[] args) throws IOException {
-	String url = "http://thetvdb.com/api/6A988698B3E59C3C/series/121361/all/en.zip";
-	downloadFile(url);
-
-	UnZip unzip = new UnZip();
-	unzip.unZipIt(DOWNLOAD_FOLDER + "/en.zip", DOWNLOAD_FOLDER);
-    }
 }
