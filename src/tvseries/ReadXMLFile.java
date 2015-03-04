@@ -84,7 +84,7 @@ public class ReadXMLFile {
                                          res[0]);
 
         String show = input.replaceAll("\\'", "");
-        DBConnection.openDB(DbType.INSERT, "(" + nameAndId.get(input) + ", '" + show + "');");
+        //DBConnection.openDB(DbType.INSERT, "(" + nameAndId.get(input) + ", '" + show + "');");
 
 
         /*String something = JOptionPane.showInputDialog("Pick one");

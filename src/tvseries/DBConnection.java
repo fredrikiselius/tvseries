@@ -4,73 +4,41 @@ import java.sql.*;
 
 public class DBConnection
 {
-    public static void openDB(DbType type, String values) {
-	String INSERT_BASE = "INSERT INTO series (thetvdb_id, show_name) VALUES ";
-	String SELECT_ALL = "SELECT * FROM SERIES;";
-	String DELETE_BASE = "DELETE from SERIES where THETVDBID=";
-	String CREATE_TABLE = "CREATE TABLE series " +
-			      "(thetvdb_id INTEGER PRIMARY KEY     NOT NULL," +
-			      " show_name	TEXT	NOT NULL," +
-			      " network	TEXT," +
-			      " airday	TEXT," +
-			      " airtime	TEXT," +
-			      " overview	TEXT," +
-			      " status	TEXT," +
-			      " runtime	TEXT)";
-	Connection connect = null;
-	Statement stmt = null;
+    private static String database;
+    public static Connection connection;
+    public static Statement statement;
+    private boolean isConnected;
+
+    public DBConnection(String database) {
+	this.database = database;
 	try {
-	    Class.forName("org.sqlite.JDBC");
-	    connect = DriverManager.getConnection("jdbc:sqlite:tvseries.db");
-	    System.out.println("Opened database successfully");
-	    stmt = connect.createStatement();
-
-	    switch (type) {
-		case CREATE_TABLE:
-		    stmt.executeUpdate(CREATE_TABLE);
-		case INSERT:
-		    // values ex: (257655, 'Arrow');
-		    stmt.executeUpdate(INSERT_BASE + values);
-		    break;
-		case SELECT_ALL:
-		    ResultSet rs = stmt.executeQuery(SELECT_ALL);
-		    while (rs.next()) {
-			int theTvDbId = rs.getInt("thetvdb_id");
-			String name = rs.getString("show_name");
-			String network = rs.getString("network");
-			String airday = rs.getString("airday");
-			String airtime = rs.getString("airtime");
-			String overview = rs.getString("overview");
-			System.out.println(theTvDbId + " " + name+ " "+ network+" "+airday+" "+airtime+"\n" +
-					   overview);
-		    }
-		    rs.close();
-		    break;
-		case DELETE_SERIES:
-		    stmt.executeUpdate(DELETE_BASE + values + ";");
-		    System.out.println("Removed series with ID: " + values);
-		    break;
-	    }
-	    stmt.close();
-	    connect.close();
-
-
-	} catch (SQLException s) {
-	    System.out.println(s);
+	    createConnection();
 	} catch (Exception e) {
-	    System.err.println(e.getClass().getName() + ": " + e.getMessage());
-	    System.exit(0);
 
 	}
     }
 
+    private static void createConnection() {
+	try {
+	    Class.forName("org.sqlite.JDBC");
+	    connection = DriverManager.getConnection("jdbc:sqlite:tvseries.db"); // Add options for database name
+	    statement = connection.createStatement();
+	} catch (SQLException e) {
+	    System.out.println(e);
+	} catch (ClassNotFoundException e) {
+	    System.out.println(e);
+	}
+    }
 
+    public boolean close() {
+	try {
+	    connection.close();
+	    return true;
+	} catch (SQLException e) {
+	    System.out.println(e);
+	    return false;
+	}
 
-    public static void main(String[] args) {
-	//DBConnection.openDB(DbType.INSERT, "(123123, 'something');");
-	//DBConnection.openDB(DbType.CREATE_TABLE, "");
-	//DBConnection.openDB(DbType.DELETE_SERIES, "121361");
-	DBConnection.openDB(DbType.SELECT_ALL, "");
     }
 }
 
