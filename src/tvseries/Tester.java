@@ -1,16 +1,15 @@
 package tvseries;
 
-import javax.swing.*;
-import java.io.File;
+
 import java.io.IOException;
-import java.net.URL;
 import java.sql.SQLException;
-import java.util.ArrayList;
+
 
 
 public class Tester
 {
     public static void main(String[] args) throws SQLException, IOException {
+	PropHandler propHandler = new PropHandler();
 	SeriesFrame sFrame = new SeriesFrame();
 	CreateDatabase createDatabase = new CreateDatabase("tvseries");
 

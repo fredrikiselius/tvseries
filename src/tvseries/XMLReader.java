@@ -18,8 +18,8 @@ import java.util.Map;
 
 public class XMLReader
 {
-    private static String xmlSource;
-    private static String sourceType;
+    private String xmlSource;
+    private String sourceType;
     public static NodeList nodeList = null;
     public Map<String, String> result = new HashMap<String, String>();
 

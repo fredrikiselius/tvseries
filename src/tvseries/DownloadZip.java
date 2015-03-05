@@ -14,9 +14,10 @@ public class DownloadZip
 
 
     private static final int BUFFER_SIZE = 4096;
-    public static final String DOWNLOAD_FOLDER = "/home/freis685/tvseries/seriesdata";
+    public static final String DOWNLOAD_FOLDER = "showdata/";
 
     public static void downloadFile(String fileURL) throws IOException {
+	System.out.println("downloading file from: " + fileURL);
 	URL url = new URL(fileURL);
 	File folder = new File(DOWNLOAD_FOLDER);
 	if (!folder.exists()) {
@@ -31,8 +32,6 @@ public class DownloadZip
 	    String contentType = httpConnection.getContentType();
 	    int contentLength = httpConnection.getContentLength();
 
-	    System.out.println(disposition + "\n" + contentType);
-
 	    if (disposition != null) {
 		int index = disposition.indexOf("filename=");
 		if (index > 0) {
@@ -41,11 +40,6 @@ public class DownloadZip
 	    } else {
 		fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1, fileURL.length());
 	    }
-
-	    System.out.println("Content-Type = " + contentType);
-	    System.out.println("Content-Disposition = " + disposition);
-	    System.out.println("Content-Length = " + contentLength);
-	    System.out.println("fileName = " + fileName);
 
 	    InputStream inputStream = httpConnection.getInputStream();
 	    String saveFilePath = DOWNLOAD_FOLDER + File.separator + fileName;
@@ -61,9 +55,7 @@ public class DownloadZip
 	    outputStream.close();
 	    inputStream.close();
 
-	    System.out.println("File downloaded");
-	} else {
-	    System.out.println("No file to download. Server replied HTTP code: " + responseCode);
+
 	}
 	httpConnection.disconnect();
     }

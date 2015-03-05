@@ -10,26 +10,23 @@ import java.util.zip.ZipInputStream;
 
 public class UnZip {
     List<String> fileList;
-    private static final String INPUT_ZIP_FILE = "/home/freis685/tvseries/seriesdata/en.zip";
-    private static final String OUTPUT_FOLDER = "/home/freis685/tvseries/seriesdata";
+    private static final String INPUT_ZIP_FILE = "showdata/en.zip";
+    private static final String OUTPUT_FOLDER = "showdata";
 
-    public static void unZipIt(String zipFile) {
+    public static void unZipIt() {
     	byte[] buffer = new byte[1024];
-
     	try {
-    	    File folder = new File(UnZip.OUTPUT_FOLDER);
+    	    File folder = new File(OUTPUT_FOLDER);
 	    if (!folder.exists()) {
 		folder.mkdir();
 	    }
 
-	    ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
+	    ZipInputStream zis = new ZipInputStream(new FileInputStream(INPUT_ZIP_FILE));
 	    ZipEntry ze = zis.getNextEntry();
 
 	    while (ze != null) {
 		String fileName = ze.getName();
 		File newFile = new File(OUTPUT_FOLDER + File.separator + fileName);
-
-		System.out.println("file unzip : " + newFile.getAbsoluteFile());
 
 		new File(newFile.getParent()).mkdirs();
 
@@ -45,8 +42,6 @@ public class UnZip {
 	    }
 	    zis.closeEntry();
 	    zis.close();
-
-	    System.out.println("Done");
 
     	} catch (IOException e) {
 	    e.printStackTrace();

@@ -5,56 +5,58 @@ import java.sql.*;
 public class DBConnection
 {
     private String database;
-    public static Connection connection;
-    public static Statement statement;
-    private boolean isConnected;
+    private Connection connection;
+    private Statement statement;
+
 
     public DBConnection(String database) {
 	this.database = database;
-	try {
-	    createConnection();
-	} catch (Exception e) {
-
-	}
+	createConnection();
     }
 
-    private static void createConnection() {
+    private void createConnection() {
 	try {
 	    Class.forName("org.sqlite.JDBC");
-	    connection = DriverManager.getConnection("jdbc:sqlite:tvseries.db"); // Add options for database name
+	    connection = DriverManager.getConnection("jdbc:sqlite:" + database + ".db"); // Add options for database name
 	    statement = connection.createStatement();
+	    // testing TODO remove
+	    System.out.println("Connection to database established");
 	} catch (SQLException e) {
-	    System.out.println(e);
+	    e.getStackTrace();
 	} catch (ClassNotFoundException e) {
-	    System.out.println(e);
+	    e.getStackTrace();
 	}
     }
 
-    public static boolean close() {
+    public boolean close() {
 	try {
+	    statement.close();
 	    connection.close();
+	    // TODO log
+	    System.out.println("Closing database connection");
 	    return true;
 	} catch (SQLException e) {
-	    System.out.println(e);
+	    System.out.println("DBConnection: Could not close connection.\n");
+	    e.getStackTrace();
 	    return false;
 	}
 
     }
 
-    public static Connection getConnection() {
+    public Connection getConnection() {
 	return connection;
     }
 
-    public static Statement getStatement() {
+    public void setConnection(final Connection connection) {
+	this.connection = connection;
+    }
+
+    public Statement getStatement() {
 	return statement;
     }
 
-    public static void setConnection(final Connection connection) {
-	DBConnection.connection = connection;
-    }
-
-    public static void setStatement(final Statement statement) {
-	DBConnection.statement = statement;
+    public void setStatement(final Statement statement) {
+	this.statement = statement;
     }
 }
 
