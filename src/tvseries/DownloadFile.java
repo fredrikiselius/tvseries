@@ -9,17 +9,31 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 // test class to download a zip
-public class DownloadZip
+public class DownloadFile
 {
 
 
     private static final int BUFFER_SIZE = 4096;
-    public static final String DOWNLOAD_FOLDER = "showdata/";
+    public static final String DOWNLOAD_FOLDER_DATA = "showdata/";
+    public static final String DOWNLOAD_FOLDER_IMG = "img/";
+    private String newName = null;
 
-    public static void downloadFile(String fileURL) throws IOException {
+    public static void fetchPoster(String posterName, String tvDbId) throws IOException {
+	String posterUrl = "http://thetvdb.com/banners/_cache/" + posterName;
+	downloadFile(posterUrl, DOWNLOAD_FOLDER_IMG, tvDbId);
+
+    }
+
+    public static void fetchZip(String tvDbId) throws IOException {
+	downloadFile(URLHandler.ZipUrl(tvDbId), DOWNLOAD_FOLDER_DATA, null);
+	UnZip.unZipIt();
+
+    }
+
+    public static void downloadFile(String fileURL, String dlFolder, String newName) throws IOException {
 	System.out.println("downloading file from: " + fileURL);
 	URL url = new URL(fileURL);
-	File folder = new File(DOWNLOAD_FOLDER);
+	File folder = new File(dlFolder);
 	if (!folder.exists()) {
 	    folder.mkdir();
 	}
@@ -42,7 +56,12 @@ public class DownloadZip
 	    }
 
 	    InputStream inputStream = httpConnection.getInputStream();
-	    String saveFilePath = DOWNLOAD_FOLDER + File.separator + fileName;
+
+	    if (newName != null) {
+		fileName = newName + ".jpg";
+	    }
+
+	    String saveFilePath = dlFolder + File.separator + fileName;
 
 	    FileOutputStream outputStream = new FileOutputStream(saveFilePath);
 

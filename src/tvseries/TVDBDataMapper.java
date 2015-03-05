@@ -73,6 +73,8 @@ public class TVDBDataMapper
 		    dbStatement.setString(4, eElement.getElementsByTagName("Status").item(0).getTextContent());
 		    dbStatement.setString(5, eElement.getElementsByTagName("Runtime").item(0).getTextContent());
 		    dbStatement.setString(6, eElement.getElementsByTagName("Overview").item(0).getTextContent());
+		    System.out.println(eElement.getElementsByTagName("poster").item(0).getTextContent());
+		    DownloadFile.fetchPoster(eElement.getElementsByTagName("poster").item(0).getTextContent(), tvDbId);
 
 
 		}
@@ -98,7 +100,7 @@ public class TVDBDataMapper
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
 	    String query = "SELECT tvdb_id, show_name, network, airday, airtime, overview, status, runtime " +
-	    			   "FROM series WHERE tvdb_id ="+tvDbId;
+	    			   "FROM series WHERE tvdb_id ="+tvDbId+ " ORDER BY show_name ASC";
 	    ResultSet resultSet = dbc.getStatement().executeQuery(query);
 
 	    while (resultSet.next()) {
@@ -140,7 +142,7 @@ public class TVDBDataMapper
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
 	    ArrayList<String> arrayList = new ArrayList<String>();
-	    String query = "SELECT tvdb_id FROM series";
+	    String query = "SELECT tvdb_id FROM series ORDER BY show_name ASC";
 	    ResultSet resultSet = dbc.getStatement().executeQuery(query);
 	    while (resultSet.next()) {
 		arrayList.add(resultSet.getString("tvdb_id"));
