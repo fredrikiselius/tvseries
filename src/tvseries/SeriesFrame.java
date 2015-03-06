@@ -28,6 +28,8 @@ public class SeriesFrame extends JFrame
      * TODO setColor function
      */
 
+    //hej :)
+
     final static int PREFERRED_FRAME_WIDTH = 800;
     final static int PREFERRED_FRAM_HEIGHT = 600;
 

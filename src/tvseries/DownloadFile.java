@@ -12,6 +12,7 @@ import java.net.URL;
 public class DownloadFile
 {
 
+    //hej :)
 
     private static final int BUFFER_SIZE = 4096;
     public static final String DOWNLOAD_FOLDER_DATA = "showdata/";

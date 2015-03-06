@@ -22,6 +22,9 @@ public class TVDBDataMapper
      * @param showName
      * @param tvDbId
      */
+
+    //hej:)
+
     public static void initialData(String showName, String tvDbId) {
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
