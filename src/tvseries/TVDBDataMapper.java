@@ -22,10 +22,10 @@ public class TVDBDataMapper
      * @param showName
      * @param tvDbId
      */
-    public static void initialData(String showName, String tvDbId) throws SQLException {
+    public static void initialData(String showName, String tvDbId) {
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
-	    String statement = String.format("INSERT INTO series (tvdb_id, show_name) VALUES (%s, \'%s\');", tvDbId, showName);
+	    String statement = String.format("INSERT INTO series (tvdb_id, show_name) VALUES (%s, \'%s\');", tvDbId, showName.replaceAll("'", "\'\'"));
 	    System.out.println(statement);
 	    dbc.getStatement().executeUpdate(statement);
 	    dbc.close();
@@ -34,11 +34,7 @@ public class TVDBDataMapper
 	    // TODO LOG
 	    System.out.println(String.format("Inserted tvdb_id: %s and show_name: %s", tvDbId, showName));
 	} catch (SQLException e) {
-	    if (e.getErrorCode() == 0) {
-		System.out.println("ERROR: That show is already in the database");
-		System.out.println(e);
-
-	    }
+		e.printStackTrace();
 	}
 
 

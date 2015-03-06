@@ -20,7 +20,6 @@ public class DBConnection
 	    connection = DriverManager.getConnection("jdbc:sqlite:" + database + ".db"); // Add options for database name
 	    statement = connection.createStatement();
 	    // testing TODO remove
-	    System.out.println("Connection to database established");
 	} catch (SQLException e) {
 	    e.getStackTrace();
 	} catch (ClassNotFoundException e) {
@@ -33,7 +32,6 @@ public class DBConnection
 	    statement.close();
 	    connection.close();
 	    // TODO log
-	    System.out.println("Closing database connection");
 	    return true;
 	} catch (SQLException e) {
 	    System.out.println("DBConnection: Could not close connection.\n");

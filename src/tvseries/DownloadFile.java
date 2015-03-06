@@ -40,6 +40,7 @@ public class DownloadFile
 	HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
 	int responseCode = httpConnection.getResponseCode();
 
+
 	if (responseCode == HttpURLConnection.HTTP_OK) {
 	    String fileName = "";
 	    String disposition = httpConnection.getHeaderField("Content-Disposition");

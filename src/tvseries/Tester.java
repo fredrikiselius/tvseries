@@ -9,9 +9,10 @@ import java.sql.SQLException;
 public class Tester
 {
     public static void main(String[] args) throws SQLException, IOException {
+	CreateDatabase createDatabase = new CreateDatabase("tvseries");
 	PropHandler propHandler = new PropHandler();
 	SeriesFrame sFrame = new SeriesFrame();
-	CreateDatabase createDatabase = new CreateDatabase("tvseries");
+
 
 	/* fetches all ids from db
 	ArrayList<String> idList = TVDBDataMapper.selectAllIds();
