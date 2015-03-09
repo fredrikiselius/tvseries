@@ -18,23 +18,23 @@ public class TVDBDataMapper
     static String dbName = PropHandler.getDatabaseName();
 
     /**
-     *
      * The initial insert of a series into the database. Only inserts the show name and the show id.
+     *
      * @param showName
      * @param tvDbId
      */
 
     //hej:)
-
     public static void initialData(String showName, String tvDbId) {
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
-	    String statement = String.format("INSERT INTO series (tvdb_id, show_name) VALUES (%s, \'%s\');", tvDbId, showName.replaceAll("'", "\'\'"));
+	    String statement = String.format("INSERT INTO series (tvdb_id, show_name) VALUES (%s, \'%s\');", tvDbId,
+					     showName.replaceAll("'", "\'\'"));
 	    dbc.getStatement().executeUpdate(statement);
 	    System.out.println("LOG: (TVDBDataMapper) Added " + showName + "(" + tvDbId + ")");
 	    dbc.close();
 	} catch (SQLException e) {
-		e.printStackTrace();
+	    e.printStackTrace();
 	}
     }
 
@@ -44,13 +44,21 @@ public class TVDBDataMapper
 	    DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
 	    Document doc = docBuilder.parse(new File("showdata/en.xml"));
 	    doc.getDocumentElement().normalize();
+
 	    NodeList nList = doc.getElementsByTagName("Series");
+	    NodeList episodeList = doc.getElementsByTagName("Episode");
+
+	    System.out.println("Episodes: " + episodeList.getLength());
 
 	    Connection db = DriverManager.getConnection("jdbc:sqlite:tvseries.db");
-	    String statement = "UPDATE series " +
-			       "SET network=?, airday=?, airtime=?, status=?, runtime=?, overview=? " +
-			       "WHERE tvdb_id=" + tvDbId;
-	    PreparedStatement dbStatement = db.prepareStatement(statement);
+	    String statementSeries = "UPDATE series " +
+				     "SET network=?, airday=?, airtime=?, status=?, runtime=?, overview=? " +
+				     "WHERE tvdb_id=" + tvDbId;
+	    String statementsEpisodes = "INSERT INTO episodes " +
+					"(show_id, tvdb_id, episode_name, episode, season, overview) " +
+					"VALUES (" + tvDbId + ", ?, ?, ?, ?, ?);";
+
+	    PreparedStatement dbStatement = db.prepareStatement(statementSeries);
 
 	    for (int temp = 0; temp < nList.getLength(); temp++) {
 		Node nNode = nList.item(temp);
@@ -73,6 +81,29 @@ public class TVDBDataMapper
 	    }
 	    dbStatement.executeUpdate();
 	    dbStatement.close();
+
+	    PreparedStatement epStatement = db.prepareStatement(statementsEpisodes);
+
+
+	    for (int temp = 0; temp < episodeList.getLength(); temp++) {
+		Node epNode = episodeList.item(temp);
+
+		if (epNode.getNodeType() == Node.ELEMENT_NODE) {
+		    Element epElement = (Element) epNode;
+
+		    epStatement.setString(1, epElement.getElementsByTagName("id").item(0).getTextContent());
+		    epStatement.setString(2, epElement.getElementsByTagName("EpisodeName").item(0).getTextContent());
+		    epStatement.setString(3, epElement.getElementsByTagName("EpisodeNumber").item(0).getTextContent());
+		    epStatement.setString(4, epElement.getElementsByTagName("SeasonNumber").item(0).getTextContent());
+		    epStatement.setString(5, epElement.getElementsByTagName("Overview").item(0).getTextContent());
+		    epStatement.executeUpdate();
+		}
+
+	    }
+
+
+	    epStatement.close();
+
 	    db.close();
 	} catch (SQLException e) {
 	    e.getStackTrace();
@@ -85,7 +116,9 @@ public class TVDBDataMapper
 
     /**
      * Selects all data on a show based on tvdb id and creates a Series object.
+     *
      * @param tvDbId
+     *
      * @return
      */
     public static synchronized Series findByTvDbId(String tvDbId) {
@@ -93,7 +126,7 @@ public class TVDBDataMapper
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
 	    String query = "SELECT tvdb_id, show_name, network, airday, airtime, overview, status, runtime " +
-	    			   "FROM series WHERE tvdb_id ="+tvDbId+ " ORDER BY show_name ASC";
+			   "FROM series WHERE tvdb_id =" + tvDbId + " ORDER BY show_name ASC";
 	    resultSet = dbc.getStatement().executeQuery(query);
 
 	    while (resultSet.next()) {
@@ -137,6 +170,7 @@ public class TVDBDataMapper
 
     /**
      * Selects all the tvdb ids from the database and returns them in an ArrayList
+     *
      * @return
      */
     public static synchronized List<String> selectAllIds() {
@@ -161,7 +195,7 @@ public class TVDBDataMapper
 		    resultSet.close();
 		} catch (SQLException e) {
 		    e.printStackTrace();
-	    }
+		}
 	    }
 	}
     }

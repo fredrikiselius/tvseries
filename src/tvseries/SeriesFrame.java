@@ -245,7 +245,7 @@ public class SeriesFrame extends JFrame
 	}
 
 
-	seriesPanel.setBackground(Color.decode("#222222"));
+	seriesPanel.setBackground(setColor("black"));
 	seriesPanel.setBorder(darkBorder);
 	picHolder.setBorder(darkBorder);
 	serName.setForeground(Color.decode("#33CC33"));
@@ -268,6 +268,15 @@ public class SeriesFrame extends JFrame
 
 	showPanels.add(seriesPanel);
 	return seriesPanel;
+    }
+
+    private Color setColor(String input){
+	switch(input.toLowerCase()){
+	    case "black":
+		return Color.decode("#222222");
+	    default:
+		return Color.WHITE;
+	}
     }
 
     private void updateMySeries() {
