@@ -7,6 +7,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.MouseInputAdapter;
+import javax.swing.text.Document;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -42,7 +43,8 @@ public class SeriesFrame extends JFrame
     final static int POSTER_HEIGHT = 265;
 
 
-    private Map<String, String> searchResults = new HashMap<String, String>(); // Contains search results, emptied after a series is added
+    private Map<String, String> searchResults = new HashMap<String, String>();
+	    // Contains search results, emptied after a series is added
     private List<Series> loadedSeries = new ArrayList<Series>(); // Series loaded from the database TODO arraylist?
     private List<JPanel> showPanels = new ArrayList<JPanel>();
     //private Vector<JPanel> seriesPanels = new Vector<JPanel>(); // Contains the series panels shown under myseries
@@ -55,6 +57,7 @@ public class SeriesFrame extends JFrame
     // GUI Components
     private JPanel contentPane = new JPanel(); // Holder for all other components
     private JPanel mySeriesHolder = new JPanel(); // Holder for all posters in mySeries
+    private JScrollPane mySeries;
 
 
     public SeriesFrame() {
@@ -73,14 +76,14 @@ public class SeriesFrame extends JFrame
 	contentPane = new JPanel();
 	contentPane.setLayout(new MigLayout(", fill", "[200px][grow]", "[grow]"));
 
-	JScrollPane mySeries = new JScrollPane(createMySeries());
+	mySeries = new JScrollPane(createMySeries());
 	mySeries.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 	mySeries.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 	mySeries.setBorder(BorderFactory.createEmptyBorder());
 
 
 	contentPane.add(createLeftMenu(), "west, w 200!");
-	contentPane.add(mySeries, "north, w "+((POSTER_PANEL_WIDTH)*NUMBER_OF_POSTERS_ROW+POSTER_PANEL_WIDTH_FIX)+
+	contentPane.add(mySeries, "north, w " + ((POSTER_PANEL_WIDTH) * NUMBER_OF_POSTERS_ROW + POSTER_PANEL_WIDTH_FIX) +
 				  "!, pushy, growy, wrap");
 
 
@@ -110,7 +113,6 @@ public class SeriesFrame extends JFrame
 	resultScroll.setBackground(Color.decode("#191919"));
 	resultScroll.setForeground(Color.decode("#999999"));
 	resultScroll.getViewport().setBackground(Color.BLACK);
-
 
 
 	addBtn.setBorder(darkBorder);
@@ -147,25 +149,48 @@ public class SeriesFrame extends JFrame
 		resultScroll.setVisible(false);
 		addBtn.setVisible(false);
 
-		String name = resultList.getSelectedValue();
-		String id = searchResults.get(name);
-		try {
-		    TVDBDataMapper.initialData(name.replaceAll("'", ""), id);
-		    DownloadFile.fetchZip(id);
-		    TVDBDataMapper.Update(id);
-		} catch (SQLException sqlex) {
-		    sqlex.printStackTrace();
-		} catch (IOException ioex) {
-		    ioex.printStackTrace();
-		}
+		new SwingWorker<Void, Void>()
+		{
+
+		    @Override public Void doInBackground() {
+			searchField.setEditable(false);
+
+			String name = resultList.getSelectedValue();
+			String id = searchResults.get(name);
+			System.out.println("hi");
+			try
+
+			{
+			    System.out.println("gogogo");
+			    TVDBDataMapper.initialData(name.replaceAll("'", ""), id);
+			    DownloadFile.fetchZip(id);
+			    TVDBDataMapper.Update(id);
+			} catch (SQLException sqlex)
+
+			{
+			    sqlex.printStackTrace();
+			} catch (IOException ioex)
+
+			{
+			    ioex.printStackTrace();
+			}
+			return null;
+		    }
+
+		    @Override public void done() {
+			System.out.println("Done");
+			updateMySeries();
+
+
+			resultList = null;
+			searchResults.clear();
+			searchField.setEditable(true);
+		    }
+		}.execute();
 
 
 		// Update all posters in mySeries
-		updateMySeries();
 
-
-		resultList = null;
-		searchResults.clear();
 
 	    }
 	});
@@ -177,16 +202,15 @@ public class SeriesFrame extends JFrame
     private void updateResultScroll(String searchString) {
 
 	System.out.println("LOG: Searching THETVDB for: " + searchString);
-	    XMLReader xmlReader = new XMLReader(searchString.replaceAll(" ", "%20"), "url");
-	    searchResults = xmlReader.result;
-	    String[] shows = new String[searchResults.keySet().size()];
-	    int iterIndex = 0;
-	    for (String showName : searchResults.keySet()) {
-		shows[iterIndex] = showName;
-		iterIndex++;
-	    }
-	    resultList = new JList<String>(shows);
-
+	XMLReader xmlReader = new XMLReader(searchString.replaceAll(" ", "%20"), "url");
+	searchResults = xmlReader.result;
+	String[] shows = new String[searchResults.keySet().size()];
+	int iterIndex = 0;
+	for (String showName : searchResults.keySet()) {
+	    shows[iterIndex] = showName;
+	    iterIndex++;
+	}
+	resultList = new JList<String>(shows);
 
 
     }
@@ -200,10 +224,12 @@ public class SeriesFrame extends JFrame
 
     private void addPosterPanels() {
 	for (int i = 0; i < loadedSeries.size(); i++) {
-		mySeriesHolder.add(createSeriesPanel(loadedSeries.get(i)), "top, w "+POSTER_PANEL_WIDTH+"!");
+	    mySeriesHolder.add(createSeriesPanel(loadedSeries.get(i)), "top, w " + POSTER_PANEL_WIDTH + "!");
 	}
 	mySeriesHolder.repaint();
 	mySeriesHolder.revalidate();
+	contentPane.revalidate();
+	contentPane.repaint();
     }
 
     private JPanel createSeriesPanel(Series show) {
@@ -217,7 +243,15 @@ public class SeriesFrame extends JFrame
 	JLabel picHolder = new JLabel();
 	JLabel serName = new JLabel(show.getShowName());
 	JLabel serNetwork = new JLabel(show.getNetwork());
+	JLabel airday = new JLabel("Airdays: " + show.getAirday());
+	JLabel airtime = new JLabel("Airtime: " + show.getAirtime());
+	JLabel runtime = new JLabel("Runtime: " + show.getRuntime() + " min");
+	JLabel status = new JLabel("Status: " + show.getStatus());
+	JTextPane overview = new JTextPane();
+	overview.setEditable(false);
+	overview.setText(show.getOverview());
 	JLabel removeSer = new JLabel("X");
+
 
 	// Loading the series poster if there is one
 	Image img = null;
@@ -254,7 +288,7 @@ public class SeriesFrame extends JFrame
 
 
 	seriesPanel.add(picHolder, "wrap");
-	seriesPanel.add(serName, "width ::"+ POSTER_WIDTH +", wrap");
+	seriesPanel.add(serName, "width ::" + POSTER_WIDTH + ", wrap");
 	seriesPanel.add(serNetwork, "left, pushx, growx, split 2");
 	seriesPanel.add(removeSer, "right, wrap");
 	removeSer.addMouseListener(new MouseInputAdapter()
@@ -266,12 +300,61 @@ public class SeriesFrame extends JFrame
 	    }
 	});
 
+	picHolder.addMouseListener(new MouseInputAdapter()
+	{
+	    @Override public void mousePressed(final MouseEvent e) {
+		super.mousePressed(e);
+		System.out.println("image click");
+
+		JPanel seriesHolder = new JPanel(new MigLayout("fill, gap 0, insets 0, top", "", "[][]"));
+		JPanel infoHolder = new JPanel(new MigLayout("wrap"));
+		JButton backBtn = new JButton("<< Back");
+
+		infoHolder.add(serName);
+		infoHolder.add(serNetwork);
+		infoHolder.add(airday);
+		infoHolder.add(airtime);
+		infoHolder.add(runtime);
+		infoHolder.add(status);
+
+
+
+
+		seriesHolder.add(picHolder, "split 3"); // TODO use another picture without action
+		seriesHolder.add(infoHolder, "h " + POSTER_HEIGHT + "!");
+		seriesHolder.add(overview, "w 400!, wrap, top");
+		seriesHolder.add(backBtn);
+
+		backBtn.addActionListener(new ActionListener()
+		{
+		    @Override public void actionPerformed(final ActionEvent e) {
+			contentPane.remove(seriesHolder);
+			contentPane.add(mySeries,
+					"north, w " + ((POSTER_PANEL_WIDTH) * NUMBER_OF_POSTERS_ROW + POSTER_PANEL_WIDTH_FIX) +
+					"!, push, grow, wrap");
+			mySeries.revalidate();
+			mySeries.repaint();
+			updateMySeries();
+			contentPane.revalidate();
+			contentPane.repaint();
+		    }
+		});
+
+
+		contentPane.remove(mySeries);
+		contentPane.add(seriesHolder, "gapleft 10pt, gaptop 10pt, top");
+		contentPane.revalidate();
+		contentPane.repaint();
+
+	    }
+	});
+
 	showPanels.add(seriesPanel);
 	return seriesPanel;
     }
 
-    private Color setColor(String input){
-	switch(input.toLowerCase()){
+    private Color setColor(String input) {
+	switch (input.toLowerCase()) {
 	    case "black":
 		return Color.decode("#222222");
 	    default:
@@ -291,12 +374,18 @@ public class SeriesFrame extends JFrame
     private void fetchSeries() {
 	System.out.println("LOG: Fetching ids from database:");
 	List<String> idList = TVDBDataMapper.selectAllIds();
+	List<Episode> episodes = TVDBDataMapper.findByShowId("79168");
 
 	if (!idList.isEmpty()) {
 	    for (String id : idList) {
 		loadedSeries.add(TVDBDataMapper.findByTvDbId(id));
 	    }
-	    System.out.println("LOG: loaded "+idList.size()+" series");
+
+
+
+
+
+	    System.out.println("LOG: loaded " + idList.size() + " series");
 	} else {
 	    System.out.println("LOG: The database is empty"); //TODO LOG
 	}

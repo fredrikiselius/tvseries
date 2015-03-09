@@ -11,7 +11,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class TVDBDataMapper
 {
@@ -126,7 +129,8 @@ public class TVDBDataMapper
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
 	    String query = "SELECT tvdb_id, show_name, network, airday, airtime, overview, status, runtime " +
-			   "FROM series WHERE tvdb_id =" + tvDbId + " ORDER BY show_name ASC";
+			   "FROM series WHERE tvdb_id=" + tvDbId + " ORDER BY show_name ASC";
+	    System.out.println(query);
 	    resultSet = dbc.getStatement().executeQuery(query);
 
 	    while (resultSet.next()) {
@@ -168,6 +172,56 @@ public class TVDBDataMapper
     }
 
 
+    public static synchronized List<Episode> findByShowId(String showId) {
+	List<Episode> episodes = new ArrayList<Episode>();
+    	ResultSet rs = null;
+    	try {
+    	    DBConnection dbc = new DBConnection("tvseries");
+    	    String query = "SELECT tvdb_id, episode_name, episode, season, overview " +
+    			   "FROM episodes WHERE show_id=" + showId + " ORDER BY season,episode ASC|ASC";
+
+	    System.out.println(query);
+	    rs = dbc.getStatement().executeQuery(query);
+	    System.out.println("hererererere");
+
+
+    	    while (rs.next()) {
+		System.out.println("loop");
+    		String tvDbId = rs.getString("tvdb_id");
+    		String name = rs.getString("episode_name");
+    		String overview = rs.getString("overview");
+    		String season = rs.getString("season");
+    		String episode = rs.getString("episode");
+
+    		Episode ep = new Episode();
+		ep.setTvDbId(tvDbId);
+    		ep.setName(name);
+    		ep.setOverview(overview);
+		ep.setSeNumb(season);
+		ep.setEpNumb(episode);
+
+		System.out.println(ep);
+    		episodes.add(ep);
+    	    }
+    	    dbc.close();
+	    System.out.println("aafsfd" + episodes);
+	    return episodes;
+
+    	} catch (SQLException e) {
+    	    e.getStackTrace();
+    	    return null;
+    	} finally {
+    	    if (rs != null) {
+    		try {
+		    rs.close();
+    		} catch (SQLException e) {
+    		    e.printStackTrace();
+    		}
+    	    }
+    	}
+        }
+
+
     /**
      * Selects all the tvdb ids from the database and returns them in an ArrayList
      *
@@ -203,9 +257,11 @@ public class TVDBDataMapper
     public static synchronized void delete(String tvDbId) {
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
-	    String statement = String.format("DELETE FROM series where tvdb_id=%s", tvDbId);
+	    String sStatement = String.format("DELETE FROM series where tvdb_id=%s", tvDbId);
+	    String eStatement = String.format("DELETE FROM episodes where show_id=%s", tvDbId);
 
-	    dbc.getStatement().executeUpdate(statement);
+	    dbc.getStatement().executeUpdate(sStatement);
+	    dbc.getStatement().executeUpdate(eStatement);
 	    dbc.close();
 	    System.out.println("LOG: (TVDBDataMapper) Removed show with id: " + tvDbId);
 
@@ -214,4 +270,15 @@ public class TVDBDataMapper
 	}
 
     }
+
+    public static void main(String[] args) {
+	List<Episode> episodes = findByShowId("79168");
+	findByShowId("79168");
+	findByTvDbId("79168");
+	/*for (Episode episode : episodes) {
+	    System.out.println(episode);
+	}*/
+    }
+
 }
+
