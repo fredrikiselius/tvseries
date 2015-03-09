@@ -1,21 +1,18 @@
 package tvseries;
 
 
-import javafx.scene.input.MouseEvent;
 import net.miginfocom.swing.MigLayout;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.MouseInputAdapter;
-import javax.swing.event.MouseInputListener;
 
 import java.awt.*;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -30,75 +27,74 @@ public class SeriesFrame extends JFrame
 
     //hej :)
 
-    final static int PREFERRED_FRAME_WIDTH = 800;
-    final static int PREFERRED_FRAM_HEIGHT = 600;
+    final static int PREFERRED_FRAME_WIDTH = 1280;
+    final static int PREFERRED_FRAM_HEIGHT = 720;
+    final static int MIN_FRAME_WIDTH = 800;
+    final static int MIN_FRAME_HEIGHT = 600;
 
-    final static int IMAGE_WIDTH = 180;
-    final static int IMAGE_HEIGHT = 265;
+    final static int POSTER_PANEL_WIDTH = 200; // Size for the panel containing the series poster
+    final static int POSTER_PANEL_HEIGHT = 320; // and name in myseries
+
+    final static int NUMBER_OF_POSTERS_ROW = 5; // Number of posters that should be in a row in mySeries
+    final static int POSTER_PANEL_WIDTH_FIX = 17; // Used to get the right width for the JScrollPane mySeries
+
+    final static int POSTER_WIDTH = 180;
+    final static int POSTER_HEIGHT = 265;
 
 
-    final static int WRAP_FIX = 1; // Fixes the layout in createMySeries
-
-    final static int FRAME_WIDTH = 800;
-    final static int FRAME_HEIGHT = 600;
-    final static int MYSERIES_WIDTH = 150;
-
-    private Map<String, String> searchResults = new HashMap<String, String>();
-    private Vector<Series> test2Series = new Vector<Series>(); // The one that should be used TODO arraylist?
-    private Vector<JPanel> seriesPanels = new Vector<JPanel>();
+    private Map<String, String> searchResults = new HashMap<String, String>(); // Contains search results, emptied after a series is added
+    private List<Series> loadedSeries = new ArrayList<Series>(); // Series loaded from the database TODO arraylist?
+    private List<JPanel> showPanels = new ArrayList<JPanel>();
+    //private Vector<JPanel> seriesPanels = new Vector<JPanel>(); // Contains the series panels shown under myseries
 
     // Custom borders and colors
     private Border darkBorder = BorderFactory.createLineBorder(Color.decode("#444444"), 1);
-    private int numberSeries;
     JList<String> resultList = null;
 
-    // GUI Components
 
+    // GUI Components
     private JPanel contentPane = new JPanel(); // Holder for all other components
     private JPanel mySeriesHolder = new JPanel(); // Holder for all posters in mySeries
 
 
     public SeriesFrame() {
 	super("Omega");
-	initializeUI();
-	this.setVisible(true);
+	initGUI();
     }
 
-    private void initializeUI() {
+    private void initGUI() {
 	fetchSeries();
 
 	setExtendedState(Frame.MAXIMIZED_BOTH);
-	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 	setPreferredSize(new Dimension(PREFERRED_FRAME_WIDTH, PREFERRED_FRAM_HEIGHT));
-	setMinimumSize(new Dimension(PREFERRED_FRAME_WIDTH, PREFERRED_FRAM_HEIGHT));
+	setMinimumSize(new Dimension(MIN_FRAME_WIDTH, MIN_FRAME_HEIGHT));
 
 	contentPane = new JPanel();
-	contentPane.setLayout(new MigLayout("debug, fill", "[200px][grow]", "[grow]"));
+	contentPane.setLayout(new MigLayout(", fill", "[200px][grow]", "[grow]"));
 
 	JScrollPane mySeries = new JScrollPane(createMySeries());
 	mySeries.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-	mySeries.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+	mySeries.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 	mySeries.setBorder(BorderFactory.createEmptyBorder());
 
 
-	contentPane.add(createLeftMenu(), "west, width 200:");
-	contentPane.add(new JPanel(), "east, pushy, growy, width 650:");
-	contentPane.add(mySeries, "north, width 1050:, wrap");
+	contentPane.add(createLeftMenu(), "west, w 200!");
+	contentPane.add(mySeries, "north, w "+((POSTER_PANEL_WIDTH)*NUMBER_OF_POSTERS_ROW+POSTER_PANEL_WIDTH_FIX)+
+				  "!, pushy, growy, wrap");
 
 
 	setContentPane(contentPane);
-	pack();
-	setLocationByPlatform(true);
 	setVisible(true);
+	pack();
     }
 
     private JPanel createLeftMenu() {
-	JPanel menuPane = new JPanel(new MigLayout("", "[200px]", "[][::200px][]"));
+	JPanel menuPane = new JPanel(new MigLayout("", "[]", "[][::200px][]"));
 	final JButton addBtn = new JButton("Add");
 	final JTextField searchField = new JTextField();
 	final JScrollPane resultScroll = new JScrollPane(resultList);
 	resultScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-	JScrollBar scrollBar = resultScroll.getVerticalScrollBar();
 
 	resultScroll.setVisible(false);
 	addBtn.setVisible(false);
@@ -130,16 +126,16 @@ public class SeriesFrame extends JFrame
 	searchField.addActionListener(new ActionListener()
 	{
 	    @Override public void actionPerformed(final ActionEvent e) {
-		updateResultScroll(searchField.getText());
-		resultScroll.setViewportView(resultList);
-
-
-		resultList.setOpaque(true);
-		resultScroll.revalidate();
-		resultScroll.setVisible(true);
-		addBtn.setVisible(true);
-		searchField.setText("");
-
+		String searchString = searchField.getText();
+		if (!searchString.isEmpty()) {
+		    updateResultScroll(searchString);
+		    resultScroll.setViewportView(resultList);
+		    resultList.setOpaque(true);
+		    resultScroll.revalidate();
+		    resultScroll.setVisible(true);
+		    addBtn.setVisible(true);
+		    searchField.setText("");
+		}
 	    }
 	});
 
@@ -150,9 +146,9 @@ public class SeriesFrame extends JFrame
 		// Hides the resultpane and button
 		resultScroll.setVisible(false);
 		addBtn.setVisible(false);
+
 		String name = resultList.getSelectedValue();
 		String id = searchResults.get(name);
-		System.out.println("Added " + name + searchResults.get(name));
 		try {
 		    TVDBDataMapper.initialData(name.replaceAll("'", ""), id);
 		    DownloadFile.fetchZip(id);
@@ -179,7 +175,8 @@ public class SeriesFrame extends JFrame
     }
 
     private void updateResultScroll(String searchString) {
-	if (searchString != null) {
+
+	System.out.println("LOG: Searching THETVDB for: " + searchString);
 	    XMLReader xmlReader = new XMLReader(searchString.replaceAll(" ", "%20"), "url");
 	    searchResults = xmlReader.result;
 	    String[] shows = new String[searchResults.keySet().size()];
@@ -188,43 +185,39 @@ public class SeriesFrame extends JFrame
 		shows[iterIndex] = showName;
 		iterIndex++;
 	    }
-
 	    resultList = new JList<String>(shows);
 
-	}
+
+
     }
 
     private JPanel createMySeries() {
 	mySeriesHolder = new JPanel(); // Holder for all the posters
-	mySeriesHolder.setLayout(new MigLayout("", "", ""));
+	mySeriesHolder.setLayout(new MigLayout("insets 0, gap 0, wrap " + NUMBER_OF_POSTERS_ROW, "", ""));
 	addPosterPanels();
 	return mySeriesHolder;
     }
 
     private void addPosterPanels() {
-	System.out.println(test2Series.size());
-	for (int i = 0; i < test2Series.size(); i++) {
-	    if (((WRAP_FIX + i) % 5) == 0) { // Make sure we get rows of five
-		mySeriesHolder.add(createSeriesPanel(test2Series.get(i)), "top, wrap");
-	    } else {
-		mySeriesHolder.add(createSeriesPanel(test2Series.get(i)), "top");
-
-	    }
+	for (int i = 0; i < loadedSeries.size(); i++) {
+		mySeriesHolder.add(createSeriesPanel(loadedSeries.get(i)), "top, w "+POSTER_PANEL_WIDTH+"!");
 	}
 	mySeriesHolder.repaint();
 	mySeriesHolder.revalidate();
-
     }
 
     private JPanel createSeriesPanel(Series show) {
-
 	final String id = show.getTvDbId();
 	final JPanel seriesPanel = new JPanel(new MigLayout(""));
+
+	seriesPanel.setPreferredSize(new Dimension(POSTER_PANEL_WIDTH, POSTER_PANEL_HEIGHT));
+	seriesPanel.setMinimumSize(seriesPanel.getPreferredSize());
+	seriesPanel.setMaximumSize(seriesPanel.getPreferredSize());
+
 	JLabel picHolder = new JLabel();
 	JLabel serName = new JLabel(show.getShowName());
 	JLabel serNetwork = new JLabel(show.getNetwork());
 	JLabel removeSer = new JLabel("X");
-
 
 	// Loading the series poster if there is one
 	Image img = null;
@@ -236,7 +229,7 @@ public class SeriesFrame extends JFrame
 		ioe.printStackTrace();
 	    } finally {
 		if (img != null) {
-		    picHolder.setIcon(new ImageIcon(img.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_DEFAULT)));
+		    picHolder.setIcon(new ImageIcon(img.getScaledInstance(POSTER_WIDTH, POSTER_HEIGHT, Image.SCALE_DEFAULT)));
 		}
 	    }
 	} else {
@@ -246,7 +239,7 @@ public class SeriesFrame extends JFrame
 		ioe.printStackTrace();
 	    } finally {
 		if (img != null) {
-		    picHolder.setIcon(new ImageIcon(img.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_DEFAULT)));
+		    picHolder.setIcon(new ImageIcon(img.getScaledInstance(POSTER_WIDTH, POSTER_HEIGHT, Image.SCALE_DEFAULT)));
 		}
 	    }
 	}
@@ -261,46 +254,42 @@ public class SeriesFrame extends JFrame
 
 
 	seriesPanel.add(picHolder, "wrap");
-	seriesPanel.add(serName, "wrap");
+	seriesPanel.add(serName, "width ::"+ POSTER_WIDTH +", wrap");
 	seriesPanel.add(serNetwork, "left, pushx, growx, split 2");
 	seriesPanel.add(removeSer, "right, wrap");
 	removeSer.addMouseListener(new MouseInputAdapter()
 	{
-	    @Override public void mousePressed(final java.awt.event.MouseEvent e) {
+	    @Override public void mousePressed(final MouseEvent e) {
 		System.out.println("removing " + id);
 		TVDBDataMapper.delete(id);
 		updateMySeries();
 	    }
 	});
 
-	seriesPanels.addElement(seriesPanel);
-
+	showPanels.add(seriesPanel);
 	return seriesPanel;
     }
 
     private void updateMySeries() {
-	test2Series.removeAllElements();
+	loadedSeries.clear();
 	fetchSeries();
-	for (int seriesPanelIndex = 0; seriesPanelIndex < seriesPanels.size(); seriesPanelIndex++) {
-	    mySeriesHolder.remove(seriesPanels.get(seriesPanelIndex));
+	for (int seriesPanelIndex = 0; seriesPanelIndex < showPanels.size(); seriesPanelIndex++) {
+	    mySeriesHolder.remove(showPanels.get(seriesPanelIndex));
 	}
 	addPosterPanels();
     }
 
     private void fetchSeries() {
-	System.out.println("Fetching ids from database:");
-	List<String> idList = null;
-	idList = TVDBDataMapper.selectAllIds();
+	System.out.println("LOG: Fetching ids from database:");
+	List<String> idList = TVDBDataMapper.selectAllIds();
 
-	if (idList != null) {
-	    numberSeries = idList.size();
+	if (!idList.isEmpty()) {
 	    for (String id : idList) {
-		test2Series.addElement(TVDBDataMapper.findByTvDbId(id));
+		loadedSeries.add(TVDBDataMapper.findByTvDbId(id));
 	    }
-
-	    for (int i = 0; i < test2Series.size(); i++) {
-		System.out.println(test2Series.get(i));
-	    }
+	    System.out.println("LOG: loaded "+idList.size()+" series");
+	} else {
+	    System.out.println("LOG: The database is empty"); //TODO LOG
 	}
     }
 

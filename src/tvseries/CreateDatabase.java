@@ -16,6 +16,7 @@ public class CreateDatabase
     }
 
     public void createTables() throws SQLException, IOException {
+	System.out.println("LOG: (CreateDatabase) Creating tables if necessary");
 	String seriesTable = ("CREATE TABLE IF NOT EXISTS series " +
 			      "(tvdb_id INTEGER NOT NULL PRIMARY KEY UNIQUE," +
 			      " show_name TEXT NOT NULL," +
@@ -36,7 +37,6 @@ public class CreateDatabase
 			       " overview TEXT NOT NULL)");
 
 	// TODO log
-	System.out.println("Creating tables if necessary");
 	dbConnection.getStatement().executeUpdate(seriesTable);
 	dbConnection.getStatement().executeUpdate(episodeTable);
 

@@ -50,17 +50,17 @@ public class XMLReader
 		nodeList = doc.getElementsByTagName("Series");
 	    }
 	} catch (ParserConfigurationException e) {
-	    System.out.println(e);
+	    e.printStackTrace();
 	} catch (IOException e) {
-	    System.out.println(e);
+	    e.printStackTrace();
 	} catch (SAXException e) {
-	    System.out.println(e);
+	    e.printStackTrace();
 	}
     }
 
     private void fetchData() {
 	createNodeList();
-	if (nodeList != null) {
+	if (nodeList.getLength() != 0) {
 	    for (int i = 0; i < nodeList.getLength(); i++) {
 		Node node = nodeList.item(i);
 		if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -68,11 +68,14 @@ public class XMLReader
 
 		    String name = element.getElementsByTagName("SeriesName").item(0).getTextContent();
 		    String id = element.getElementsByTagName("seriesid").item(0).getTextContent();
-		    System.out.println(name + " " + id);
+
 		    result.put(name, id);
 		}
 
 	    }
+	    System.out.println("LOG: Found "+result.keySet().size()+" matches");
+	} else {
+	    System.out.println("LOG: (XMLReader) search gave no results");
 	}
     }
 }

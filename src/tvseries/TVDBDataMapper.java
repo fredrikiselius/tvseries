@@ -11,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class TVDBDataMapper
 {
@@ -29,20 +30,12 @@ public class TVDBDataMapper
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
 	    String statement = String.format("INSERT INTO series (tvdb_id, show_name) VALUES (%s, \'%s\');", tvDbId, showName.replaceAll("'", "\'\'"));
-	    System.out.println(statement);
 	    dbc.getStatement().executeUpdate(statement);
+	    System.out.println("LOG: (TVDBDataMapper) Added " + showName + "(" + tvDbId + ")");
 	    dbc.close();
-
-
-	    // TODO LOG
-	    System.out.println(String.format("Inserted tvdb_id: %s and show_name: %s", tvDbId, showName));
 	} catch (SQLException e) {
 		e.printStackTrace();
 	}
-
-
-	/*DBConnection.connection.createStatement().executeUpdate("INSERT INTO series (show_name, tvdb_id) " +
-								"VALUES (\'" + name + "\'," + tvDbId + ");");*/
     }
 
     public static void Update(String tvDbId) throws SQLException {
@@ -96,11 +89,12 @@ public class TVDBDataMapper
      * @return
      */
     public static synchronized Series findByTvDbId(String tvDbId) {
+	ResultSet resultSet = null;
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
 	    String query = "SELECT tvdb_id, show_name, network, airday, airtime, overview, status, runtime " +
 	    			   "FROM series WHERE tvdb_id ="+tvDbId+ " ORDER BY show_name ASC";
-	    ResultSet resultSet = dbc.getStatement().executeQuery(query);
+	    resultSet = dbc.getStatement().executeQuery(query);
 
 	    while (resultSet.next()) {
 		String id = resultSet.getString("tvdb_id");
@@ -129,6 +123,14 @@ public class TVDBDataMapper
 	} catch (SQLException e) {
 	    e.getStackTrace();
 	    return null;
+	} finally {
+	    if (resultSet != null) {
+		try {
+		    resultSet.close();
+		} catch (SQLException e) {
+		    e.printStackTrace();
+		}
+	    }
 	}
     }
 
@@ -137,12 +139,14 @@ public class TVDBDataMapper
      * Selects all the tvdb ids from the database and returns them in an ArrayList
      * @return
      */
-    public static synchronized ArrayList<String> selectAllIds() {
+    public static synchronized List<String> selectAllIds() {
+	ResultSet resultSet = null;
+	System.out.println(resultSet);
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
-	    ArrayList<String> arrayList = new ArrayList<String>();
+	    List<String> arrayList = new ArrayList<String>();
 	    String query = "SELECT tvdb_id FROM series ORDER BY show_name ASC";
-	    ResultSet resultSet = dbc.getStatement().executeQuery(query);
+	    resultSet = dbc.getStatement().executeQuery(query);
 	    while (resultSet.next()) {
 		arrayList.add(resultSet.getString("tvdb_id"));
 	    }
@@ -151,6 +155,14 @@ public class TVDBDataMapper
 	    return arrayList;
 	} catch (SQLException e) {
 	    return null;
+	} finally {
+	    if (resultSet != null) {
+		try {
+		    resultSet.close();
+		} catch (SQLException e) {
+		    e.printStackTrace();
+	    }
+	    }
 	}
     }
 
@@ -161,6 +173,7 @@ public class TVDBDataMapper
 
 	    dbc.getStatement().executeUpdate(statement);
 	    dbc.close();
+	    System.out.println("LOG: (TVDBDataMapper) Removed show with id: " + tvDbId);
 
 	} catch (SQLException e) {
 	    e.getStackTrace();
