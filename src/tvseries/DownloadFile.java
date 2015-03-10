@@ -32,7 +32,7 @@ public class DownloadFile
     }
 
     public static void downloadFile(String fileURL, String dlFolder, String newName) throws IOException {
-	System.out.println("downloading file from: " + fileURL);
+	System.out.println("LOG: (DownloadFile) Downloading file from: " + fileURL);
 	URL url = new URL(fileURL);
 	File folder = new File(dlFolder);
 	if (!folder.exists()) {

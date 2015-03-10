@@ -51,7 +51,7 @@ public class TVDBDataMapper
 	    NodeList nList = doc.getElementsByTagName("Series");
 	    NodeList episodeList = doc.getElementsByTagName("Episode");
 
-	    System.out.println("Episodes: " + episodeList.getLength());
+	    System.out.println("LOG: Number of episodes found: " + episodeList.getLength());
 
 	    Connection db = DriverManager.getConnection("jdbc:sqlite:tvseries.db");
 	    String statementSeries = "UPDATE series " +
@@ -77,7 +77,11 @@ public class TVDBDataMapper
 		    dbStatement.setString(5, eElement.getElementsByTagName("Runtime").item(0).getTextContent());
 		    dbStatement.setString(6, eElement.getElementsByTagName("Overview").item(0).getTextContent());
 		    System.out.println(eElement.getElementsByTagName("poster").item(0).getTextContent());
-		    DownloadFile.fetchPoster(eElement.getElementsByTagName("poster").item(0).getTextContent(), tvDbId);
+
+		    // Only download the poster if it doesnt exist
+		    if (!(new File("img/" + tvDbId + ".jpg").exists())) {
+			DownloadFile.fetchPoster(eElement.getElementsByTagName("poster").item(0).getTextContent(), tvDbId);
+		    }
 
 
 		}
@@ -85,6 +89,13 @@ public class TVDBDataMapper
 	    dbStatement.executeUpdate();
 	    dbStatement.close();
 
+	    // Send a BEGIN statement to start the transaction
+	    PreparedStatement begin = db.prepareStatement("BEGIN");
+	    begin.executeUpdate();
+	    begin.close();
+
+
+	    // Create the INSERT statement for the episodes
 	    PreparedStatement epStatement = db.prepareStatement(statementsEpisodes);
 
 
@@ -104,8 +115,12 @@ public class TVDBDataMapper
 
 	    }
 
-
 	    epStatement.close();
+
+	    // Send a COMMIT statement to the database and thus ending the transaction
+	    PreparedStatement commit = db.prepareStatement("COMMIT");
+	    commit.executeUpdate();
+	    commit.close();
 
 	    db.close();
 	} catch (SQLException e) {
@@ -130,7 +145,7 @@ public class TVDBDataMapper
 	    DBConnection dbc = new DBConnection(dbName);
 	    String query = "SELECT tvdb_id, show_name, network, airday, airtime, overview, status, runtime " +
 			   "FROM series WHERE tvdb_id=" + tvDbId + " ORDER BY show_name ASC";
-	    System.out.println(query);
+
 	    resultSet = dbc.getStatement().executeQuery(query);
 
 	    while (resultSet.next()) {
@@ -180,7 +195,8 @@ public class TVDBDataMapper
     	    String query = "SELECT tvdb_id, episode_name, episode, season, overview " +
     			   "FROM episodes WHERE show_id=" + showId + " ORDER BY season,episode ASC|ASC";
 
-	    System.out.println(query);
+	    //String query = "SELECT * FROM episodes";
+
 	    rs = dbc.getStatement().executeQuery(query);
 	    System.out.println("hererererere");
 

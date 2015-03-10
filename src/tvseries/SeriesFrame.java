@@ -58,6 +58,7 @@ public class SeriesFrame extends JFrame
     private JPanel contentPane = new JPanel(); // Holder for all other components
     private JPanel mySeriesHolder = new JPanel(); // Holder for all posters in mySeries
     private JScrollPane mySeries;
+    private JLabel statusText = new JLabel("Idle");;
 
 
     public SeriesFrame() {
@@ -74,14 +75,16 @@ public class SeriesFrame extends JFrame
 	setMinimumSize(new Dimension(MIN_FRAME_WIDTH, MIN_FRAME_HEIGHT));
 
 	contentPane = new JPanel();
-	contentPane.setLayout(new MigLayout(", fill", "[200px][grow]", "[grow]"));
+	contentPane.setLayout(new MigLayout("fill", "[200px][grow]", "[grow]"));
 
 	mySeries = new JScrollPane(createMySeries());
 	mySeries.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-	mySeries.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+	mySeries.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 	mySeries.setBorder(BorderFactory.createEmptyBorder());
 
 
+
+	contentPane.add(createStatusBar(), "south, h 20!, wrap");
 	contentPane.add(createLeftMenu(), "west, w 200!");
 	contentPane.add(mySeries, "north, w " + ((POSTER_PANEL_WIDTH) * NUMBER_OF_POSTERS_ROW + POSTER_PANEL_WIDTH_FIX) +
 				  "!, pushy, growy, wrap");
@@ -90,6 +93,17 @@ public class SeriesFrame extends JFrame
 	setContentPane(contentPane);
 	setVisible(true);
 	pack();
+    }
+
+    private JPanel createStatusBar(){
+	JPanel statusBar = new JPanel(new MigLayout("left, center"));
+
+	statusBar.add(statusText, "left");
+	statusBar.setBorder(darkBorder);
+	statusBar.setBackground(Color.decode("#222222"));
+	statusText.setForeground(Color.decode("#999999"));
+
+	return statusBar;
     }
 
     private JPanel createLeftMenu() {
@@ -102,7 +116,7 @@ public class SeriesFrame extends JFrame
 	resultScroll.setVisible(false);
 	addBtn.setVisible(false);
 
-
+	menuPane.setBorder(darkBorder);
 	menuPane.setBackground(Color.decode("#222222"));
 
 	searchField.setBorder(darkBorder);
@@ -129,7 +143,9 @@ public class SeriesFrame extends JFrame
 	{
 	    @Override public void actionPerformed(final ActionEvent e) {
 		String searchString = searchField.getText();
+
 		if (!searchString.isEmpty()) {
+		    statusText.setText("Searching for: " + searchString);
 		    updateResultScroll(searchString);
 		    resultScroll.setViewportView(resultList);
 		    resultList.setOpaque(true);
@@ -138,6 +154,8 @@ public class SeriesFrame extends JFrame
 		    addBtn.setVisible(true);
 		    searchField.setText("");
 		}
+
+
 	    }
 	});
 
@@ -157,11 +175,9 @@ public class SeriesFrame extends JFrame
 
 			String name = resultList.getSelectedValue();
 			String id = searchResults.get(name);
-			System.out.println("hi");
 			try
 
 			{
-			    System.out.println("gogogo");
 			    TVDBDataMapper.initialData(name.replaceAll("'", ""), id);
 			    DownloadFile.fetchZip(id);
 			    TVDBDataMapper.Update(id);
@@ -373,6 +389,7 @@ public class SeriesFrame extends JFrame
 
     private void fetchSeries() {
 	System.out.println("LOG: Fetching ids from database:");
+
 	List<String> idList = TVDBDataMapper.selectAllIds();
 	List<Episode> episodes = TVDBDataMapper.findByShowId("79168");
 
