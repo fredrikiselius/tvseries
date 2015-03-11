@@ -192,17 +192,14 @@ public class TVDBDataMapper
     	ResultSet rs = null;
     	try {
     	    DBConnection dbc = new DBConnection("tvseries");
-    	    String query = "SELECT tvdb_id, episode_name, episode, season, overview " +
-    			   "FROM episodes WHERE show_id=" + showId + " ORDER BY season,episode ASC|ASC";
+    	    String query = "SELECT tvdb_id, episode_name, episode, season, overview FROM episodes WHERE show_id="+showId+" ORDER BY season,episode ASC";
 
 	    //String query = "SELECT * FROM episodes";
 
 	    rs = dbc.getStatement().executeQuery(query);
-	    System.out.println("hererererere");
 
 
     	    while (rs.next()) {
-		System.out.println("loop");
     		String tvDbId = rs.getString("tvdb_id");
     		String name = rs.getString("episode_name");
     		String overview = rs.getString("overview");
@@ -216,11 +213,9 @@ public class TVDBDataMapper
 		ep.setSeNumb(season);
 		ep.setEpNumb(episode);
 
-		System.out.println(ep);
     		episodes.add(ep);
     	    }
     	    dbc.close();
-	    System.out.println("aafsfd" + episodes);
 	    return episodes;
 
     	} catch (SQLException e) {
@@ -276,8 +271,10 @@ public class TVDBDataMapper
 	    String sStatement = String.format("DELETE FROM series where tvdb_id=%s", tvDbId);
 	    String eStatement = String.format("DELETE FROM episodes where show_id=%s", tvDbId);
 
+	    dbc.getStatement().executeUpdate("BEGIN");
 	    dbc.getStatement().executeUpdate(sStatement);
 	    dbc.getStatement().executeUpdate(eStatement);
+	    dbc.getStatement().executeUpdate("COMMIT");
 	    dbc.close();
 	    System.out.println("LOG: (TVDBDataMapper) Removed show with id: " + tvDbId);
 
@@ -288,12 +285,11 @@ public class TVDBDataMapper
     }
 
     public static void main(String[] args) {
-	List<Episode> episodes = findByShowId("79168");
-	findByShowId("79168");
-	findByTvDbId("79168");
-	/*for (Episode episode : episodes) {
-	    System.out.println(episode);
-	}*/
+	List<Episode> episodes = findByShowId("257655");
+
+	    for (Episode episode : episodes) {
+		System.out.println(episode.getSeNumb() + " " + episode.getEpNumb() + " " + episode.getName());
+	    }
     }
 
 }

@@ -334,12 +334,72 @@ public class SeriesFrame extends JFrame
 		infoHolder.add(status);
 
 
+		JPanel episodeListPanel = new JPanel(new MigLayout("wrap"));
+		List<Episode> episodes = TVDBDataMapper.findByShowId(show.getTvDbId());
+		List<String> seasons = new ArrayList<String>();
+
+		for (Episode episode : episodes) {
+		    if (!seasons.contains(episode.getSeNumb())) {
+			seasons.add(episode.getSeNumb());
+		    }
+		}
+
+		List<JPanel> episodePanels = new ArrayList<JPanel>();
+		//JPanel episodeList = new JPanel();
+		//episodeList.setVisible(true);
+		for (String season : seasons) {
+		    episodePanels.add(new JPanel(new MigLayout("debug, fill, wrap")));
+		    JLabel seasonLabel = new JLabel("Season " + season + " +");
+		    episodeListPanel.add(seasonLabel);
+		    episodeListPanel.add(episodePanels.get(Integer.parseInt(season)), "");
+
+
+				      seasonLabel.addMouseListener(new MouseInputAdapter()
+				      {
+					  @Override public void mousePressed(final MouseEvent e) {
+					      super.mousePressed(e);
+					      if (seasonLabel.getText().endsWith("+")) {
+						  for (Episode episode : episodes) {
+
+						      if (episode.getSeNumb().equals(season)) {
+							  episodePanels.get(Integer.parseInt(season))
+								  .add(new JLabel(episode.getName()));
+
+						      }
+						  }
+						  seasonLabel.setText("Season " + season + " -");
+						  episodePanels.get(Integer.parseInt(season)).revalidate();
+						  episodePanels.get(Integer.parseInt(season)).repaint();
+					      } else if (seasonLabel.getText().endsWith("-")) {
+						  System.out.println("shrink");
+						  int components = episodePanels.get(Integer.parseInt(season)).getComponentCount();
+						  for (int c = 0; c < components; c++) {
+						      System.out.println(c);
+						      //episodePanels.get(Integer.parseInt(season)).remove(episodePanels.get(Integer.parseInt(season)).getComponent(c));
+						  }
+						  seasonLabel.setText("Season " + season + " +");
+						  episodePanels.get(Integer.parseInt(season)).revalidate();
+						  episodePanels.get(Integer.parseInt(season)).repaint();
+					      }
+					  }
+				      });
+
+
+
+
+		}
+
+
+
+
+
 
 
 		seriesHolder.add(picHolder, "split 3"); // TODO use another picture without action
 		seriesHolder.add(infoHolder, "h " + POSTER_HEIGHT + "!");
 		seriesHolder.add(overview, "w 400!, wrap, top");
-		seriesHolder.add(backBtn);
+		seriesHolder.add(backBtn, "wrap");
+		seriesHolder.add(episodeListPanel);
 
 		backBtn.addActionListener(new ActionListener()
 		{
