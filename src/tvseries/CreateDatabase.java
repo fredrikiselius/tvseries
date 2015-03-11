@@ -23,17 +23,19 @@ public class CreateDatabase
 			      " network TEXT," +
 			      " airday TEXT," +
 			      " airtime TEXT," +
+			      " firstaired TEXT," +
 			      " overview TEXT," +
 			      " status TEXT," +
-			      " runtime TEXT)");
+			      " runtime TEXT," +
+			      " lastupdated INTEGER)");
 
 	String episodeTable = ("CREATE TABLE IF NOT EXISTS episodes " +
-			       "(id INTEGER NOT NULL PRIMARY KEY UNIQUE," +
+			       "(tvdb_id INTEGER NOT NULL PRIMARY KEY UNIQUE," +
 			       " show_id INTEGER NOT NULL," +
-			       " tvdb_id INTEGER NOT NULL," +
 			       " episode_name TEXT NOT NULL," +
-			       " episode INTEGER NOT NULL," +
-			       " season INTEGER NOT NULL," +
+			       " episodenumber INTEGER NOT NULL," +
+			       " seasonnumber INTEGER NOT NULL," +
+			       " absolutenumber INTEGER NOT NULL," +
 			       " overview TEXT NOT NULL)");
 
 	// TODO log

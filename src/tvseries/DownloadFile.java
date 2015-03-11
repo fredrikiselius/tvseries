@@ -26,8 +26,8 @@ public class DownloadFile
     }
 
     public static void fetchZip(String tvDbId) throws IOException {
-	downloadFile(URLHandler.ZipUrl(tvDbId), DOWNLOAD_FOLDER_DATA, null);
-	UnZip.unZipIt();
+	downloadFile(URLHandler.ZipUrl(tvDbId), DOWNLOAD_FOLDER_DATA + tvDbId, null);
+	UnZip.unZipIt(tvDbId);
 
     }
 

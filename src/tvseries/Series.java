@@ -81,4 +81,9 @@ public class Series {
     public void setRuntime(final String runtime) {
         this.runtime = runtime;
     }
+
+    public String[] getEverything() {
+        String[] allInfo = {tvDbId, showName, network, airday, airtime, overview, status, runtime};
+        return allInfo;
+    }
 }

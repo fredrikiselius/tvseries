@@ -41,8 +41,63 @@ public class TVDBDataMapper
 	}
     }
 
+    public static void updateShow(String tvDbId) {
+	ShowDataParser sdp = new ShowDataParser(tvDbId);
+	DBConnection dbc = new DBConnection(dbName);
+	sdp.parseShow();
+
+	String seriesStatement = String.format(("UPDATE series " +
+				 "SET network='%s', airday='%s', airtime='%s', firstaired='%s', " +
+				 "overview='%s', status='%s', runtime='%s', lastupdated=%s " +
+				 "WHERE tvdb_id=%s"), sdp.getNetwork(), sdp.getAirday(), sdp.getAirtime(),
+					       sdp.getFirstAired(), sdp.getOverview(), sdp.getStatus(),
+					       sdp.getRuntime(), sdp.getLastUpdated(), tvDbId);
+
+	try {
+	    dbc.getStatement().executeUpdate(seriesStatement);
+	    dbc.close();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+
+    }
+
+    public static void updateEpisodes(String tvDbId) {
+	ShowDataParser sdp = new ShowDataParser(tvDbId);
+	DBConnection dbc = new DBConnection(dbName);
+	sdp.parseShow();
+
+	String statement = "INSERT INTO episodes " +
+			   "(show_id, tvdb_id, episode_name, episodenumber, seasonnumber, " +
+			   "absolutenumber, overview) " +
+			   "VALUES (" + tvDbId + ", %s, '%s', '%s', '%s', '%s', '%s');";
+
+	//"id", "EpisodeName", "EpisodeNumber", "Overview", "SeasonNumber","absolute_number"
+
+	try {
+	    dbc.getStatement().executeUpdate("BEGIN");
+	    for (Map<String, String> episode : sdp.getAllEpisodes()) {
+
+		    System.out.println("LOG: Adding episode");
+		    String completeStatement = String.format(statement, episode.get("id"), episode.get("EpisodeName"), episode.get("EpisodeNumber"),
+							     episode.get("SeasonNumber"), episode.get("absolute_number"),
+							     episode.get("Overview"));
+
+		    dbc.getStatement().executeUpdate(completeStatement);
+
+	    }
+	    dbc.getStatement().executeUpdate("COMMIT");
+	    System.out.println("LOG: Added " + sdp.getNumberOfEpisodes() + "episodes");
+	    dbc.close();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+    }
+
+    @Deprecated
     public static void Update(String tvDbId) throws SQLException {
 	try {
+	    System.out.println("LOG: Updating");
 	    DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
 	    DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
 	    Document doc = docBuilder.parse(new File("showdata/en.xml"));
@@ -55,7 +110,7 @@ public class TVDBDataMapper
 
 	    Connection db = DriverManager.getConnection("jdbc:sqlite:tvseries.db");
 	    String statementSeries = "UPDATE series " +
-				     "SET network=?, airday=?, airtime=?, status=?, runtime=?, overview=? " +
+				     "SET network=?, airday=?, airtime=?, status=?, runtime=?, overview=?, lastupdated=? " +
 				     "WHERE tvdb_id=" + tvDbId;
 	    String statementsEpisodes = "INSERT INTO episodes " +
 					"(show_id, tvdb_id, episode_name, episode, season, overview) " +
@@ -65,6 +120,7 @@ public class TVDBDataMapper
 
 	    for (int temp = 0; temp < nList.getLength(); temp++) {
 		Node nNode = nList.item(temp);
+		System.out.println("loopdeloop");
 
 		if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 
@@ -76,6 +132,7 @@ public class TVDBDataMapper
 		    dbStatement.setString(4, eElement.getElementsByTagName("Status").item(0).getTextContent());
 		    dbStatement.setString(5, eElement.getElementsByTagName("Runtime").item(0).getTextContent());
 		    dbStatement.setString(6, eElement.getElementsByTagName("Overview").item(0).getTextContent());
+		    dbStatement.setString(7, eElement.getElementsByTagName("lastupdated").item(0).getTextContent());
 		    System.out.println(eElement.getElementsByTagName("poster").item(0).getTextContent());
 
 		    // Only download the poster if it doesnt exist
@@ -192,7 +249,8 @@ public class TVDBDataMapper
     	ResultSet rs = null;
     	try {
     	    DBConnection dbc = new DBConnection("tvseries");
-    	    String query = "SELECT tvdb_id, episode_name, episode, season, overview FROM episodes WHERE show_id="+showId+" ORDER BY season,episode ASC";
+    	    String query = "SELECT tvdb_id, episode_name, episodenumber, seasonnumber, overview " +
+			   "FROM episodes WHERE show_id="+showId+" ORDER BY seasonnumber,episodenumber ASC";
 
 	    //String query = "SELECT * FROM episodes";
 
@@ -203,8 +261,8 @@ public class TVDBDataMapper
     		String tvDbId = rs.getString("tvdb_id");
     		String name = rs.getString("episode_name");
     		String overview = rs.getString("overview");
-    		String season = rs.getString("season");
-    		String episode = rs.getString("episode");
+    		String season = rs.getString("seasonnumber");
+    		String episode = rs.getString("episodenumber");
 
     		Episode ep = new Episode();
 		ep.setTvDbId(tvDbId);
@@ -214,8 +272,10 @@ public class TVDBDataMapper
 		ep.setEpNumb(episode);
 
     		episodes.add(ep);
-    	    }
+		System.out.println(season);
+	    }
     	    dbc.close();
+
 	    return episodes;
 
     	} catch (SQLException e) {
