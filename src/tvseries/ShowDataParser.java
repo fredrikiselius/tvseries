@@ -45,7 +45,7 @@ public class ShowDataParser
     }
 
     // Looks for the poster and fanart with the highest rating
-    private void parseBanners() {
+    public void parseBanners() {
 	System.out.println("LOG: (ShowDataParser) Parsing: " + folderPath + "banners.xml");
 	try {
 	    DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();

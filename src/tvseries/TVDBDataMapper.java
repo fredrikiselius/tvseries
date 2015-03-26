@@ -9,6 +9,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +46,9 @@ public class TVDBDataMapper
 	ShowDataParser sdp = new ShowDataParser(tvDbId);
 	DBConnection dbc = new DBConnection(dbName);
 	sdp.parseShow();
+	sdp.parseBanners();
+
+
 
 	String seriesStatement = String.format(("UPDATE series " +
 				 "SET network='%s', airday='%s', airtime='%s', firstaired='%s', " +
@@ -56,10 +60,12 @@ public class TVDBDataMapper
 	try {
 	    dbc.getStatement().executeUpdate(seriesStatement);
 	    dbc.close();
+	    DownloadFile.fetchPoster(sdp.getPoster(), tvDbId);
 	} catch (SQLException e) {
 	    e.printStackTrace();
+	} catch (IOException e) {
+	    e.printStackTrace();
 	}
-
     }
 
     public static void updateEpisodes(String tvDbId) {

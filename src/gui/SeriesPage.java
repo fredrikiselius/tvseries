@@ -8,10 +8,10 @@ import javax.swing.*;
 /**
  *
  */
-public class FullSeriesPanel extends JPanel {
+public class SeriesPage extends JPanel {
     private Series series;
 
-    public FullSeriesPanel(Series series) {
+    public SeriesPage(Series series) {
 	this.series = series;
 	this.setLayout(new MigLayout("fill, gap 0, insets 0, top", "", "[][]"));
     }

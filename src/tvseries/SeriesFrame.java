@@ -1,6 +1,7 @@
 package tvseries;
 
 
+import gui.MultipleSeriesView;
 import net.miginfocom.swing.MigLayout;
 
 import javax.imageio.ImageIO;
@@ -68,7 +69,7 @@ public class SeriesFrame extends JFrame
     }
 
     private void initGUI() {
-	fetchSeries();
+	//fetchSeries();
 
 	setExtendedState(Frame.MAXIMIZED_BOTH);
 	setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -76,9 +77,9 @@ public class SeriesFrame extends JFrame
 	setMinimumSize(new Dimension(MIN_FRAME_WIDTH, MIN_FRAME_HEIGHT));
 
 	contentPane = new JPanel();
-	contentPane.setLayout(new MigLayout("fill", "[200px][grow]", "[grow]"));
+	contentPane.setLayout(new MigLayout("debug, fill", "[200px][grow]", "[grow]"));
 
-	mySeries = new JScrollPane(createMySeries());
+	mySeries = new JScrollPane(new MultipleSeriesView());
 	mySeries.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 	mySeries.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 	mySeries.setBorder(BorderFactory.createEmptyBorder());
@@ -95,6 +96,11 @@ public class SeriesFrame extends JFrame
 	pack();
     }
 
+    /**
+     * creates the bar at the bottom of the window
+     * TODO remove?
+     * @return
+     */
     private JPanel createStatusBar() {
 	JPanel statusBar = new JPanel(new MigLayout("left, center"));
 
@@ -106,6 +112,10 @@ public class SeriesFrame extends JFrame
 	return statusBar;
     }
 
+    /**
+     * Creates the left bar containing menu items and a search window
+     * @return
+     */
     private JPanel createLeftMenu() {
 	JPanel menuPane = new JPanel(new MigLayout("", "[]", "[][::200px][]"));
 	final JButton addBtn = new JButton("Add");
@@ -192,7 +202,7 @@ public class SeriesFrame extends JFrame
 
 		    @Override public void done() {
 			System.out.println("Done");
-			updateMySeries();
+			//updateMySeries();
 
 
 			resultList = null;
@@ -228,9 +238,14 @@ public class SeriesFrame extends JFrame
 
     }
 
+    /**
+     * Creates a panel, mySeriesHolder, which in turn contains seriesPanels created in createsSeriesPanel
+     * @return
+     */
+    /*
     private JPanel createMySeries() {
 	mySeriesHolder = new JPanel(); // Holder for all the posters
-	mySeriesHolder.setLayout(new MigLayout("insets 0, gap 0, wrap " + NUMBER_OF_POSTERS_ROW, "", ""));
+	mySeriesHolder.setLayout(new MigLayout("debug, insets 0, gap 0, wrap " + NUMBER_OF_POSTERS_ROW, "", ""));
 	addPosterPanels();
 	return mySeriesHolder;
     }
@@ -242,8 +257,6 @@ public class SeriesFrame extends JFrame
 	}
 	mySeriesHolder.repaint();
 	mySeriesHolder.revalidate();
-	contentPane.revalidate();
-	contentPane.repaint();
     }
 
     // Creates the frames seen when a new series is added
@@ -299,107 +312,6 @@ public class SeriesFrame extends JFrame
 		super.mousePressed(e);
 		System.out.println("LOG: Opening " + show.getShowName());
 		JPanel seriesPage = createSeriesPage(show);
-
-		/*JPanel seriesHolder = new JPanel(new MigLayout("fill, gap 0, insets 0, top", "", "[][]"));
-		JPanel infoHolder = new JPanel(new MigLayout("wrap"));
-		JButton backBtn = new JButton("<< Back");
-
-		infoHolder.add(serName);
-		infoHolder.add(serNetwork);
-		infoHolder.add(airday);
-		infoHolder.add(airtime);
-		infoHolder.add(runtime);
-		infoHolder.add(status);
-
-
-		JPanel episodeListPanel = new JPanel(new MigLayout("wrap"));
-		List<Episode> episodes = TVDBDataMapper.findByShowId(show.getTvDbId());
-		List<String> seasons = new ArrayList<String>();
-
-		for (Episode episode : episodes) {
-		    if (!seasons.contains(episode.getSeNumb())) {
-			seasons.add(episode.getSeNumb());
-		    }
-		}
-
-		List<JPanel> episodePanels = new ArrayList<JPanel>();
-		//JPanel episodeList = new JPanel();
-		//episodeList.setVisible(true);
-		for (String season : seasons) {
-		    episodePanels.add(new JPanel(new MigLayout("debug, fill, wrap")));
-		    JLabel seasonLabel = new JLabel("Season " + season + " +");
-		    episodeListPanel.add(seasonLabel);
-		    episodeListPanel.add(episodePanels.get(Integer.parseInt(season)), "");
-		    System.out.println(episodePanels.get(Integer.parseInt(season)));
-
-
-		    seasonLabel.addMouseListener(new MouseInputAdapter()
-		    {
-			@Override public void mousePressed(final MouseEvent e) {
-			    super.mousePressed(e);
-			    if (seasonLabel.getText().endsWith("+")) {
-				System.out.println("+");
-				for (Episode episode : episodes) {
-
-				    if (episode.getSeNumb().equals(season)) {
-					episodePanels.get(Integer.parseInt(season)).add(new JLabel(episode.getName()));
-
-				    }
-				}
-				seasonLabel.setText("Season " + season + " -");
-				episodePanels.get(Integer.parseInt(season)).revalidate();
-				episodePanels.get(Integer.parseInt(season)).repaint();
-			    } else if (seasonLabel.getText().endsWith("-")) {
-				System.out.println("-");
-				System.out.println("shrink");
-				int components = episodePanels.get(Integer.parseInt(season)).getComponentCount();
-				List<JLabel> labelsToRemove = new ArrayList<JLabel>();
-				for (int c = 0; c < components; c++) {
-				    labelsToRemove.add((JLabel) episodePanels.get(Integer.parseInt(season)).getComponent(c));
-				}
-				for (JLabel label : labelsToRemove) {
-				    episodePanels.get(Integer.parseInt(season)).remove(label);
-				}
-				seasonLabel.setText("Season " + season + " +");
-				episodePanels.get(Integer.parseInt(season)).revalidate();
-				episodePanels.get(Integer.parseInt(season)).repaint();
-			    }
-			}
-		    });
-
-
-		}
-
-
-		seriesHolder.add(picHolder, "split 3"); // TODO use another picture without action
-		seriesHolder.add(infoHolder, "h " + POSTER_HEIGHT + "!");
-		seriesHolder.add(overview, "w 400!, wrap, top");
-		seriesHolder.add(backBtn, "wrap");
-		seriesHolder.add(episodeListPanel);
-
-		backBtn.addActionListener(new ActionListener()
-		{
-		    @Override public void actionPerformed(final ActionEvent e) {
-			contentPane.remove(seriesHolder);
-			contentPane.add(mySeries,
-					"north, w " + ((POSTER_PANEL_WIDTH) * NUMBER_OF_POSTERS_ROW + POSTER_PANEL_WIDTH_FIX) +
-					"!, push, grow, wrap");
-			mySeries.revalidate();
-			mySeries.repaint();
-			updateMySeries();
-			contentPane.revalidate();
-			contentPane.repaint();
-		    }
-		});
-
-
-		contentPane.remove(mySeries);
-		contentPane.add(seriesHolder, "gapleft 10pt, gaptop 10pt, top");
-		contentPane.revalidate();
-		contentPane.repaint();
-
-	    }
-	});*/
 		contentPane.remove(mySeries);
 		contentPane.add(seriesPage, "gapleft 10pt, gaptop 10pt, top");
 		contentPane.revalidate();
@@ -410,9 +322,15 @@ public class SeriesFrame extends JFrame
 	showPanels.add(seriesPanel);
 	return seriesPanel;
     }
+    */
 
 
-    // Creates a JLabel and adds a poster based on the tvDbId
+    /** Creates a JLabel and adds a poster based on the tvDbId
+     * if no poster is found then a default picture is added
+     *
+     * @param tvDbId
+     * @return JLabel posterHolder
+     */
     private JLabel setPosterPicture(String tvDbId) {
 	JLabel posterHolder = new JLabel();
 	posterHolder.setBorder(darkBorder);
@@ -441,7 +359,11 @@ public class SeriesFrame extends JFrame
 	return posterHolder;
     }
 
-
+    /**
+     * Appears when a poster is clicked
+     * @param series
+     * @return
+     */
     private JPanel createSeriesPage(Series series) {
 	String[] seriesInfo = series.getEverything();
 
@@ -470,7 +392,7 @@ public class SeriesFrame extends JFrame
 				       "!, push, grow, wrap");
 		mySeries.revalidate();
 		mySeries.repaint();
-		updateMySeries();
+		//updateMySeries();
 		contentPane.revalidate();
 		contentPane.repaint();
 	    }
@@ -490,6 +412,7 @@ public class SeriesFrame extends JFrame
 
 	// Get number of seasons
 	for ( Episode episode : episodes) {
+	    System.out.println("AAAAAAAAAAAAAAAAAAAAAAA" + episode.getSeNumb());
 	    if (Integer.parseInt(episode.getSeNumb()) > numberOfSeasons) {
 		numberOfSeasons = Integer.parseInt(episode.getEpNumb());
 	    }
@@ -506,6 +429,25 @@ public class SeriesFrame extends JFrame
 		episodeLists.add(new JPanel(new MigLayout("wrap")));
 		episodeHolder.add(seasonNumber);
 		episodeHolder.add(episodeLists.get(season));
+
+		final String seasonNumberString = Integer.toString(season);
+		final int seasonNumberInt = season;
+		seasonNumber.addMouseListener(new MouseInputAdapter()
+		{
+		    @Override public void mousePressed(final MouseEvent e) {
+			super.mousePressed(e);
+			System.out.println(seasonNumber.getText());
+			if (seasonNumber.getText().endsWith("+")) {
+			    for (Episode episode : episodes) {
+				if (episode.getSeNumb().equals(seasonNumberString)) {
+					episodeLists.get(seasonNumberInt).add(new JLabel(episode.getName()));
+				}
+			    }
+			} else if (seasonNumber.getText().endsWith("-")) {
+
+			}
+		    }
+		});
 	    }
 	}
 
@@ -522,7 +464,7 @@ public class SeriesFrame extends JFrame
 	}
     }
 
-    private void updateMySeries() {
+    /*private void updateMySeries() {
 	loadedSeries.clear();
 	fetchSeries();
 	for (int seriesPanelIndex = 0; seriesPanelIndex < showPanels.size(); seriesPanelIndex++) {
@@ -530,6 +472,7 @@ public class SeriesFrame extends JFrame
 	}
 	addPosterPanels();
     }
+
 
     private void fetchSeries() {
 	System.out.println("LOG: Fetching ids from database:");
@@ -548,6 +491,7 @@ public class SeriesFrame extends JFrame
 	    System.out.println("LOG: The database is empty"); //TODO LOG
 	}
     }
+    */
 
 }
 
