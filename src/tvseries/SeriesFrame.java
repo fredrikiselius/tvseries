@@ -2,13 +2,14 @@ package tvseries;
 
 
 import gui.MultipleSeriesView;
+import gui.SingleSeriesView;
+import gui.ViewListener;
 import net.miginfocom.swing.MigLayout;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.MouseInputAdapter;
-import javax.swing.text.Document;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -17,11 +18,10 @@ import java.awt.event.MouseEvent;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
 
-public class SeriesFrame extends JFrame
+public class SeriesFrame extends JFrame implements ViewListener
 {
     /*
      * TODO setColor function
@@ -60,7 +60,9 @@ public class SeriesFrame extends JFrame
     private JPanel mySeriesHolder = new JPanel(); // Holder for all posters in mySeries
     private JScrollPane mySeries;
     private JLabel statusText = new JLabel("Idle");
-    ;
+
+    private MultipleSeriesView msv;
+    private SingleSeriesView ssv;
 
 
     public SeriesFrame() {
@@ -77,9 +79,12 @@ public class SeriesFrame extends JFrame
 	setMinimumSize(new Dimension(MIN_FRAME_WIDTH, MIN_FRAME_HEIGHT));
 
 	contentPane = new JPanel();
-	contentPane.setLayout(new MigLayout("debug, fill", "[200px][grow]", "[grow]"));
+	contentPane.setLayout(new MigLayout("fill", "[200px][grow]", "[grow]"));
 
-	mySeries = new JScrollPane(new MultipleSeriesView());
+	msv = new MultipleSeriesView();
+	msv.addViewListener(this);
+
+	mySeries = new JScrollPane(msv);
 	mySeries.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 	mySeries.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 	mySeries.setBorder(BorderFactory.createEmptyBorder());
@@ -195,6 +200,8 @@ public class SeriesFrame extends JFrame
 			    TVDBDataMapper.initialData(name.replaceAll("'", ""), id);
 			    TVDBDataMapper.updateShow(id);
 			TVDBDataMapper.updateEpisodes(id);
+			msv.reloadShowPanels();
+			pack();
 
 
 			return null;
@@ -239,173 +246,6 @@ public class SeriesFrame extends JFrame
     }
 
     /**
-     * Creates a panel, mySeriesHolder, which in turn contains seriesPanels created in createsSeriesPanel
-     * @return
-     */
-    /*
-    private JPanel createMySeries() {
-	mySeriesHolder = new JPanel(); // Holder for all the posters
-	mySeriesHolder.setLayout(new MigLayout("debug, insets 0, gap 0, wrap " + NUMBER_OF_POSTERS_ROW, "", ""));
-	addPosterPanels();
-	return mySeriesHolder;
-    }
-
-    private void addPosterPanels() {
-	for (int i = 0; i < loadedSeries.size(); i++) {
-	    mySeriesHolder.add(createSeriesPanel(loadedSeries.get(i)),
-			       "top, w " + POSTER_PANEL_WIDTH + "!, h " + POSTER_PANEL_HEIGHT + "!");
-	}
-	mySeriesHolder.repaint();
-	mySeriesHolder.revalidate();
-    }
-
-    // Creates the frames seen when a new series is added
-    // Contains a poster, the show name and the network name
-    private JPanel createSeriesPanel(Series show) {
-	final String id = show.getTvDbId();
-	final JPanel seriesPanel = new JPanel(new MigLayout(""));
-
-
-	JLabel picHolder = setPosterPicture(show.getTvDbId());
-	JLabel serName = new JLabel(show.getShowName());
-	JLabel serNetwork = new JLabel(show.getNetwork());
-	JLabel airday = new JLabel("Airdays: " + show.getAirday());
-	JLabel airtime = new JLabel("Airtime: " + show.getAirtime());
-	JLabel runtime = new JLabel("Runtime: " + show.getRuntime() + " min");
-	JLabel status = new JLabel("Status: " + show.getStatus());
-
-	JTextPane overview = new JTextPane();
-	overview.setEditable(false);
-	overview.setText(show.getOverview());
-	JLabel removeSer = new JLabel("X");
-
-
-	seriesPanel.setBackground(setColor("black"));
-	seriesPanel.setBorder(darkBorder);
-
-	serName.setForeground(Color.decode("#33CC33"));
-	serNetwork.setForeground(Color.decode("#33CC33"));
-	removeSer.setForeground(Color.decode("#FF3300"));
-
-
-	seriesPanel.add(picHolder, "wrap");
-	seriesPanel.add(serName, "width ::" + POSTER_WIDTH + ", wrap");
-	seriesPanel.add(serNetwork, "left, pushx, growx, split 2");
-	seriesPanel.add(removeSer, "right, wrap");
-
-
-	// Adds the functionality to remove on click
-	removeSer.addMouseListener(new MouseInputAdapter()
-	{
-	    @Override public void mousePressed(final MouseEvent e) {
-		super.mousePressed(e);
-		System.out.println("LOG: Removing " + id);
-		TVDBDataMapper.delete(id);
-		updateMySeries();
-	    }
-	});
-
-	// Opens a new JPanel with information about the clicked series
-	picHolder.addMouseListener(new MouseInputAdapter()
-	{
-	    @Override public void mousePressed(final MouseEvent e) {
-		super.mousePressed(e);
-		System.out.println("LOG: Opening " + show.getShowName());
-		JPanel seriesPage = createSeriesPage(show);
-		contentPane.remove(mySeries);
-		contentPane.add(seriesPage, "gapleft 10pt, gaptop 10pt, top");
-		contentPane.revalidate();
-		contentPane.repaint();
-
-	    }
-	});
-	showPanels.add(seriesPanel);
-	return seriesPanel;
-    }
-    */
-
-
-    /** Creates a JLabel and adds a poster based on the tvDbId
-     * if no poster is found then a default picture is added
-     *
-     * @param tvDbId
-     * @return JLabel posterHolder
-     */
-    private JLabel setPosterPicture(String tvDbId) {
-	JLabel posterHolder = new JLabel();
-	posterHolder.setBorder(darkBorder);
-
-	File tvDbPoster = new File("img/" + tvDbId + ".jpg");
-	File noPoster = new File("img/no.jpg");
-
-	// Use a 'non-avalible' poster if one cannot be found on thetvdb
-	File poster;
-	if (tvDbPoster.exists()) {
-	    poster = tvDbPoster;
-	} else {
-	    poster = noPoster;
-	}
-
-	Image img = null;
-	try {
-	    img = ImageIO.read(poster);
-	} catch (IOException ioe) {
-	    ioe.printStackTrace();
-	} finally {
-	    if (img != null) {
-		posterHolder.setIcon(new ImageIcon(img.getScaledInstance(POSTER_WIDTH, POSTER_HEIGHT, Image.SCALE_DEFAULT)));
-	    }
-	}
-	return posterHolder;
-    }
-
-    /**
-     * Appears when a poster is clicked
-     * @param series
-     * @return
-     */
-    private JPanel createSeriesPage(Series series) {
-	String[] seriesInfo = series.getEverything();
-
-	JPanel pageHolder = new JPanel(new MigLayout("fill, gap 0, insets 0, top", "", "[][]"));
-	JPanel basicInfoHolder = new JPanel(new MigLayout("wrap"));
-	JButton backButton = new JButton("<< Back");
-
-	// Adds labels with all the show information
-	// Begins on 1 to skip the id
-	for (int infoIndex = 1; infoIndex < seriesInfo.length; infoIndex++) {
-	    basicInfoHolder.add(new JLabel(seriesInfo[infoIndex]));
-	}
-
-	pageHolder.add(setPosterPicture(seriesInfo[0]), "split 2");
-	pageHolder.add(basicInfoHolder, "wrap");
-	pageHolder.add(backButton, "wrap");
-	pageHolder.add(createEpisodeList(series.getTvDbId()));
-
-
-	backButton.addActionListener(new ActionListener()
-	{
-	    @Override public void actionPerformed(final ActionEvent e) {
-		contentPane.remove(pageHolder);
-		contentPane
-			.add(mySeries, "north, w " + ((POSTER_PANEL_WIDTH) * NUMBER_OF_POSTERS_ROW + POSTER_PANEL_WIDTH_FIX) +
-				       "!, push, grow, wrap");
-		mySeries.revalidate();
-		mySeries.repaint();
-		//updateMySeries();
-		contentPane.revalidate();
-		contentPane.repaint();
-	    }
-	});
-
-	contentPane.remove(mySeries);
-	contentPane.add(pageHolder, "gapleft 10pt, gaptop 10pt, top");
-	contentPane.revalidate();
-	contentPane.repaint();
-
-	return pageHolder;
-    }
-
     private JPanel createEpisodeList(String tvDbId) {
 	List<Episode> episodes = TVDBDataMapper.findByShowId(tvDbId);
 	int numberOfSeasons = -1;
@@ -453,6 +293,7 @@ public class SeriesFrame extends JFrame
 
 	return episodeHolder;
     }
+     **/
 
 
     private Color setColor(String input) {
@@ -492,6 +333,27 @@ public class SeriesFrame extends JFrame
 	}
     }
     */
+
+    public void setSingleSeriesView(SingleSeriesView ssv) {
+	this.ssv = ssv;
+	this.ssv.addViewListener(this);
+	this.remove(mySeries);
+	this.add(ssv, "gap 0, top, growx, pushx");
+	this.revalidate();
+	this.repaint();
+    }
+
+    public void multipleViewChanged(SingleSeriesView ssv) {
+	setSingleSeriesView(ssv);
+    }
+
+    public void singleViewChanged() {
+	this.remove(ssv);
+	this.add(mySeries, "north, w " + ((POSTER_PANEL_WIDTH) * NUMBER_OF_POSTERS_ROW + POSTER_PANEL_WIDTH_FIX) +
+					  "!, pushy, growy, wrap");
+	this.revalidate();
+	this.repaint();
+    }
 
 }
 

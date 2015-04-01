@@ -1,30 +1,30 @@
 package tvseries;
 
 public class Episode {
-    private String showId;
-    private String tvDbId;
+    private int showId;
+    private int tvDbId;
     private String name;
-    private String epNumb;
-    private String seNumb;
+    private int epNumb;
+    private int seNumb;
     private String overview;
 
     public Episode() {
 
     }
 
-    public String getShowId() {
+    public int getShowId() {
 	return showId;
     }
 
-    public void setShowId(final String showId) {
+    public void setShowId(final int showId) {
 	this.showId = showId;
     }
 
-    public String getTvDbId() {
+    public int getTvDbId() {
 	return tvDbId;
     }
 
-    public void setTvDbId(final String tvDbId) {
+    public void setTvDbId(final int tvDbId) {
 	this.tvDbId = tvDbId;
     }
 
@@ -36,19 +36,19 @@ public class Episode {
 	this.name = name;
     }
 
-    public String getEpNumb() {
+    public int getEpNumb() {
 	return epNumb;
     }
 
-    public void setEpNumb(final String epNumb) {
+    public void setEpNumb(final int epNumb) {
 	this.epNumb = epNumb;
     }
 
-    public String getSeNumb() {
+    public int getSeNumb() {
 	return seNumb;
     }
 
-    public void setSeNumb(final String seNumb) {
+    public void setSeNumb(final int seNumb) {
 	this.seNumb = seNumb;
     }
 

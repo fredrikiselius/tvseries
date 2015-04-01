@@ -61,6 +61,7 @@ public class TVDBDataMapper
 	    dbc.getStatement().executeUpdate(seriesStatement);
 	    dbc.close();
 	    DownloadFile.fetchPoster(sdp.getPoster(), tvDbId);
+	    DownloadFile.fetchFanart(sdp.getFanart(), tvDbId);
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	} catch (IOException e) {
@@ -264,11 +265,11 @@ public class TVDBDataMapper
 
 
     	    while (rs.next()) {
-    		String tvDbId = rs.getString("tvdb_id");
+    		int tvDbId = rs.getInt("tvdb_id");
     		String name = rs.getString("episode_name");
     		String overview = rs.getString("overview");
-    		String season = rs.getString("seasonnumber");
-    		String episode = rs.getString("episodenumber");
+    		int season = rs.getInt("seasonnumber");
+    		int episode = rs.getInt("episodenumber");
 
     		Episode ep = new Episode();
 		ep.setTvDbId(tvDbId);

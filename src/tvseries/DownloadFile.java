@@ -16,13 +16,39 @@ public class DownloadFile
 
     private static final int BUFFER_SIZE = 4096;
     public static final String DOWNLOAD_FOLDER_DATA = "showdata/";
-    public static final String DOWNLOAD_FOLDER_IMG = "img/";
+    public static final String DOWNLOAD_FOLDER_IMG = "showdata/";
     private String newName = null;
+
+    public static void deleteShowDir(String tvDbId) {
+	deleteDirectory(new File("showdata/"+tvDbId+"/"));
+    }
+
+    private static void deleteDirectory(File directory) {
+        if(directory.exists()){
+            File[] files = directory.listFiles();
+            if(null!=files){
+                for(int i=0; i<files.length; i++) {
+                    if(files[i].isDirectory()) {
+                        deleteDirectory(files[i]);
+                    }
+                    else {
+                        files[i].delete();
+                    }
+                }
+            }
+        }
+        directory.delete();
+    }
 
     public static void fetchPoster(String posterName, String tvDbId) throws IOException {
 	String posterUrl = "http://thetvdb.com/banners/_cache/" + posterName;
-	downloadFile(posterUrl, DOWNLOAD_FOLDER_IMG, tvDbId);
+	downloadFile(posterUrl, DOWNLOAD_FOLDER_IMG+tvDbId+"/", "poster");
 
+    }
+
+    public static void fetchFanart(String posterName, String tvDbId) throws IOException {
+	String posterUrl = "http://thetvdb.com/banners/" + posterName;
+	downloadFile(posterUrl, DOWNLOAD_FOLDER_IMG+tvDbId+"/", "fanart");
     }
 
     public static void fetchZip(String tvDbId) throws IOException {
