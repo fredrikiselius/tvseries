@@ -5,6 +5,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * The Series class contains all the information about a specific show.
+ * Only the tvDbId should be added in the constructor.
+ */
 public class Series {
     private String tvDbId;
     private String showName;
@@ -21,21 +25,22 @@ public class Series {
     }
 
     /**
-     * Decides which episode that will air next
+     * Decides which episode that will air next.
+     * If the latest aired episode was aired prior to todays date,
+     * then nextEpisode is set to the shows status.
      */
     private void calculateNextEp() {
         Date currentDate = new Date();
         List<Episode> episodes = TVDBDataMapper.findByShowId(this.tvDbId);
-        DateFormat df = new SimpleDateFormat("MM-dd");
+        DateFormat df = new SimpleDateFormat("dd MMMM");
 
+        // Make sure the database returns any episodes
         if (episodes != null) {
-            System.out.println("pooooo");
-
-
             for (Episode episode : episodes) {
-                if (currentDate.compareTo(episode.getFirstAired()) < 0) {
-                    nextEpisode = df.format(episode.getFirstAired());
-                    System.out.println(nextEpisode);
+                Date firstAired = episode.getFirstAired();
+                // Make sure that there is first aired date
+                if (firstAired != null && currentDate.compareTo(firstAired) < 0) {
+                    nextEpisode = "Next: " + df.format(firstAired);
                     return;
                 }
             }

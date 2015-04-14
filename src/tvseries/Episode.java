@@ -1,5 +1,6 @@
 package tvseries;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -12,9 +13,10 @@ public class Episode {
     private int seNumb;
     private String overview;
     private Date firstAired;
+    private boolean watched;
 
     public Episode() {
-
+        this.watched = false;
     }
 
     public int getShowId() {
@@ -70,11 +72,25 @@ public class Episode {
     }
 
     public void setFirstAired(String firstAired) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            this.firstAired = sdf.parse(firstAired);
-        } catch (ParseException e) {
-            e.printStackTrace();
+        if (!firstAired.isEmpty()) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                this.firstAired = sdf.parse(firstAired);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    /**
+     * Marks the episode as watched.
+     * It also calls upon the addWatched method to make an entry in the database.
+     */
+    public void markAsWatched() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+        Date currentDate = new Date();
+        this.watched = true;
+
+        TVDBDataMapper.addWatched(this.tvDbId, dateFormat.format(currentDate));
     }
 }

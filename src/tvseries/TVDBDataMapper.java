@@ -102,6 +102,24 @@ public class TVDBDataMapper
 	}
     }
 
+    /**
+     *
+     * @param episodeId the TvDb id of the episode
+     * @param currentDate String consisting of the current date on the format: yyyy-MM-dd hh:mm
+     */
+    public static void addWatched(int episodeId, String currentDate) {
+	DBConnection dbc = new DBConnection(dbName);
+	String statement = String.format("INSERT INTO history (episode_id, watch_date) " +
+					"VALUES (%s, '%s');", episodeId, currentDate);
+
+	try {
+	    dbc.getStatement().executeUpdate(statement);
+	    dbc.close();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+    }
+
     @Deprecated
     public static void Update(String tvDbId) throws SQLException {
 	try {
