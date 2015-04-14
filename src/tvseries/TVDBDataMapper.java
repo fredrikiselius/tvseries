@@ -75,19 +75,20 @@ public class TVDBDataMapper
 	sdp.parseShow();
 
 	String statement = "INSERT INTO episodes " +
-			   "(show_id, tvdb_id, episode_name, episodenumber, seasonnumber, " +
+			   "(show_id, tvdb_id, episode_name, first_aired, episodenumber, seasonnumber, " +
 			   "absolutenumber, overview) " +
-			   "VALUES (" + tvDbId + ", %s, '%s', '%s', '%s', '%s', '%s');";
+			   "VALUES (" + tvDbId + ", %s, '%s', '%s', '%s', '%s', '%s', '%s');";
 
 	//"id", "EpisodeName", "EpisodeNumber", "Overview", "SeasonNumber","absolute_number"
 
 	try {
 	    dbc.getStatement().executeUpdate("BEGIN");
 	    for (Map<String, String> episode : sdp.getAllEpisodes()) {
+		System.out.println(episode.get("id"));
 
 		    System.out.println("LOG: Adding episode");
-		    String completeStatement = String.format(statement, episode.get("id"), episode.get("EpisodeName"), episode.get("EpisodeNumber"),
-							     episode.get("SeasonNumber"), episode.get("absolute_number"),
+		    String completeStatement = String.format(statement, episode.get("id"), episode.get("EpisodeName"), episode.get("FirstAired"),
+							     episode.get("EpisodeNumber"), episode.get("SeasonNumber"), episode.get("absolute_number"),
 							     episode.get("Overview"));
 
 		    dbc.getStatement().executeUpdate(completeStatement);
@@ -256,7 +257,7 @@ public class TVDBDataMapper
     	ResultSet rs = null;
     	try {
     	    DBConnection dbc = new DBConnection("tvseries");
-    	    String query = "SELECT tvdb_id, episode_name, episodenumber, seasonnumber, overview " +
+    	    String query = "SELECT tvdb_id, episode_name, first_aired, episodenumber, seasonnumber, overview " +
 			   "FROM episodes WHERE show_id="+showId+" ORDER BY seasonnumber,episodenumber ASC";
 
 	    //String query = "SELECT * FROM episodes";
@@ -267,6 +268,7 @@ public class TVDBDataMapper
     	    while (rs.next()) {
     		int tvDbId = rs.getInt("tvdb_id");
     		String name = rs.getString("episode_name");
+		String firstAired = rs.getString("first_aired");
     		String overview = rs.getString("overview");
     		int season = rs.getInt("seasonnumber");
     		int episode = rs.getInt("episodenumber");
@@ -274,12 +276,12 @@ public class TVDBDataMapper
     		Episode ep = new Episode();
 		ep.setTvDbId(tvDbId);
     		ep.setName(name);
+		ep.setFirstAired(firstAired);
     		ep.setOverview(overview);
 		ep.setSeNumb(season);
 		ep.setEpNumb(episode);
 
     		episodes.add(ep);
-		System.out.println(season);
 	    }
     	    dbc.close();
 

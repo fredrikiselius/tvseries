@@ -1,5 +1,10 @@
 package tvseries;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
 public class Series {
     private String tvDbId;
     private String showName;
@@ -9,9 +14,41 @@ public class Series {
     private String overview;
     private String status;
     private String runtime;
+    private String nextEpisode;
 
     public Series(String tvDbId) {
         this.tvDbId = tvDbId;
+    }
+
+    /**
+     * Decides which episode that will air next
+     */
+    private void calculateNextEp() {
+        Date currentDate = new Date();
+        List<Episode> episodes = TVDBDataMapper.findByShowId(this.tvDbId);
+        DateFormat df = new SimpleDateFormat("MM-dd");
+
+        if (episodes != null) {
+            System.out.println("pooooo");
+
+
+            for (Episode episode : episodes) {
+                if (currentDate.compareTo(episode.getFirstAired()) < 0) {
+                    nextEpisode = df.format(episode.getFirstAired());
+                    System.out.println(nextEpisode);
+                    return;
+                }
+            }
+        }
+        nextEpisode = status;
+    }
+
+    public String getNextEpisode() {
+        calculateNextEp();
+        if (nextEpisode != null) {
+            return nextEpisode;
+        }
+        return "TBA";
     }
 
     @Override public String toString() {

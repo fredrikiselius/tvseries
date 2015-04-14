@@ -59,7 +59,7 @@ public class MultipleSeriesView extends JPanel
 
 	JLabel poster = new JLabel(PictureLoader.loadPoster(s.getTvDbId()));
 	JLabel name = new JLabel(s.getShowName());
-	JLabel network = new JLabel(s.getNetwork());
+	JLabel network = new JLabel(s.getNextEpisode().toString());
 	JLabel removeSeries = new JLabel("X");
 
 	poster.setBorder(darkBorder);

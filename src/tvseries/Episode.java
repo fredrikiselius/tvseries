@@ -1,5 +1,9 @@
 package tvseries;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Episode {
     private int showId;
     private int tvDbId;
@@ -7,6 +11,7 @@ public class Episode {
     private int epNumb;
     private int seNumb;
     private String overview;
+    private Date firstAired;
 
     public Episode() {
 
@@ -58,5 +63,18 @@ public class Episode {
 
     public void setOverview(final String overview) {
 	this.overview = overview;
+    }
+
+    public Date getFirstAired() {
+        return firstAired;
+    }
+
+    public void setFirstAired(String firstAired) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            this.firstAired = sdf.parse(firstAired);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -20,7 +20,7 @@ public class ShowDataParser
     private String folderPath;
     private String[] artPaths;
     private List<String> showInfo = new ArrayList<String>();
-    private List<Map<String, String>> episodeInfo = new ArrayList<Map<String, String>>();
+    private List<Map<String, String>> episodeInfo = new ArrayList<Map<String, String>>(); // Contains all the episodes and their info
 
     private final static String PATH = "showdata/%s/";
     private final static String[] WANTED_SERIES_INFO = new String[]{
@@ -28,7 +28,7 @@ public class ShowDataParser
 	    "Overview", "Runtime", "Status", "lastupdated"
     };
     private final static String[] WANTED_EPISODE_INFO = new String[]{
-	    "id", "EpisodeName", "EpisodeNumber", "SeasonNumber", "absolute_number",
+	    "id", "EpisodeName", "FirstAired", "EpisodeNumber", "SeasonNumber", "absolute_number",
 	    "Overview",
 
     };
@@ -107,23 +107,25 @@ public class ShowDataParser
 	    NodeList episodeList = doc.getElementsByTagName("Episode");
 
 
+	    // Parses the show information
 	    Element showElement = (Element) showList.item(0);
 	    showInfo = new ArrayList<String>();
 	    for (String info : WANTED_SERIES_INFO) {
 		showInfo.add(showElement.getElementsByTagName(info).item(0).getTextContent());
 	    }
 
+	    // Parses the information for each episode
 	    for (int episodeIndex = 0; episodeIndex < episodeList.getLength(); episodeIndex++) {
 		Node episodeNode = episodeList.item(episodeIndex);
 		if (episodeNode.getNodeType() == Node.ELEMENT_NODE) {
 		    Element episodeElement = (Element) episodeNode;
-		    String[] completeEpisode = new String[WANTED_EPISODE_INFO.length];
+		    //String[] completeEpisode = new String[WANTED_EPISODE_INFO.length];
 		    Map<String, String> epTest = new HashMap<>();
-		    int indexer = 0;
+		    //int indexer = 0;
 		    for (String info : WANTED_EPISODE_INFO) {
 			epTest.put(info, episodeElement.getElementsByTagName(info).item(0).getTextContent().replaceAll("'", "''"));
-			completeEpisode[indexer] = (episodeElement.getElementsByTagName(info).item(0).getTextContent());
-			indexer++;
+			//completeEpisode[indexer] = (episodeElement.getElementsByTagName(info).item(0).getTextContent());
+			//indexer++;
 		    }
 		    episodeInfo.add(epTest);
 		}

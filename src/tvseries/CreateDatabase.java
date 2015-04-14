@@ -33,6 +33,7 @@ public class CreateDatabase
 			       "(tvdb_id INTEGER NOT NULL PRIMARY KEY UNIQUE," +
 			       " show_id INTEGER NOT NULL," +
 			       " episode_name TEXT NOT NULL," +
+			       " first_aired TEXT NOT NULL," +
 			       " episodenumber INTEGER NOT NULL," +
 			       " seasonnumber INTEGER NOT NULL," +
 			       " absolutenumber INTEGER NOT NULL," +
