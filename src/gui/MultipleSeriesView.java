@@ -25,7 +25,7 @@ public class MultipleSeriesView extends JPanel
 
     private final static int NUMBER_OF_POSTERS_ROW = 5;
     final static int POSTER_WIDTH = 180;
-    final static int POSTER_HEIGHT = 265;
+    final static int POSTER_HEIGHT = 265; //TODO remove?
     final static int POSTER_PANEL_WIDTH = 200; // Size for the panel containing the show poster
     final static int POSTER_PANEL_HEIGHT = 320; // and name in myseries
 
@@ -72,7 +72,7 @@ public class MultipleSeriesView extends JPanel
 	seriesPanel.setBackground(Color.decode("#222222"));
 	seriesPanel.setBorder(darkBorder);
 
-	name.setForeground(Color.decode("#33CC33"));
+	name.setForeground(Color.WHITE);
 	network.setForeground(Color.decode("#33CC33"));
 	removeSeries.setForeground(Color.decode("#FF3300"));
 

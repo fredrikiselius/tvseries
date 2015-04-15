@@ -29,9 +29,9 @@ public class SingleSeriesView extends JPanel
 	this.episodes = TVDBDataMapper.findByShowId(s.getTvDbId());
 
 	this.setLayout(new MigLayout("debug, fill, gap 0, insets 0, top", "", ""));
-	createFanartContainer();
-	this.add(new JLabel(PictureLoader.loadPoster(s.getTvDbId())), "split 2");
-	addBasicInfo();
+	JPanel headerContent = new SingleSeriesPanel(s);
+	this.add(headerContent,
+		 "wrap, w " + headerContent.getPreferredSize().width + "!, h " + headerContent.getPreferredSize().height + "!");
 	JButton backButton = new JButton("<< Back");
 	this.add(backButton, "wrap");
 	createEpisodeList(s.getTvDbId());
@@ -63,8 +63,7 @@ public class SingleSeriesView extends JPanel
 	fanartContainer.add(fanart, "growx, pushx");
 	//this.add(fanartContainer, "h 200!, wrap, growx, pushx");
 
-	JPanel swosh = new SingleSeriesPanel(s);
-	this.add(swosh, "wrap, w " + swosh.getPreferredSize().width + "!");
+
     }
 
     private void addBasicInfo() {
@@ -77,7 +76,7 @@ public class SingleSeriesView extends JPanel
 	basicInfoHolder.add(new JLabel(info), "TOP");
 
 	// Add overview
-	JTextArea jta =  new JTextArea(this.s.getOverview());
+	JTextArea jta = new JTextArea(this.s.getOverview());
 	jta.setEditable(false);
 	jta.setLineWrap(true);
 	basicInfoHolder.add(jta, "w 400!, TOP");
@@ -94,8 +93,16 @@ public class SingleSeriesView extends JPanel
 		numberOfSeasons = episode.getEpNumb();
 	    }
 	}
-	System.out
-		.println("LOG: Found " + numberOfSeasons + " season(s) with a total of " + episodes.size() + " episodes");
+
+	String[] seasons = new String[numberOfSeasons + 1];
+	for (int i = 0; i <= numberOfSeasons ; i++) {
+	    seasons[i] = "Season " + i;
+	}
+
+	JComboBox seasonList = new JComboBox(seasons);
+	seasonList.setSelectedIndex(1);
+	this.add(seasonList, "top, gap 8, wrap");
+	System.out.println("LOG: Found " + numberOfSeasons + " season(s) with a total of " + episodes.size() + " episodes");
 
 	JPanel episodeContainer =
 		new JPanel(new MigLayout("wrap")); // The container for all seasons and episodes of the entire series
@@ -136,7 +143,7 @@ public class SingleSeriesView extends JPanel
 		});
 	    }
 	}
-	this.add(episodeContainer);
+	this.add(episodeContainer, "top");
     }
 
 

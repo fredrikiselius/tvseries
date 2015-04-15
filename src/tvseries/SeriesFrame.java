@@ -27,8 +27,6 @@ public class SeriesFrame extends JFrame implements ViewListener
      * TODO setColor function
      */
 
-    //hej :)
-
     final static int PREFERRED_FRAME_WIDTH = 1280;
     final static int PREFERRED_FRAM_HEIGHT = 720;
     final static int MIN_FRAME_WIDTH = 800;
@@ -36,6 +34,8 @@ public class SeriesFrame extends JFrame implements ViewListener
 
     final static int POSTER_PANEL_WIDTH = 200; // Size for the panel containing the series poster
     final static int POSTER_PANEL_HEIGHT = 320; // and name in myseries
+
+    private final static int MENU_WIDTH = 200;
 
     final static int NUMBER_OF_POSTERS_ROW = 5; // Number of posters that should be in a row in mySeries
     final static int POSTER_PANEL_WIDTH_FIX = 17; // Used to get the right width for the JScrollPane mySeries
@@ -79,7 +79,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 	setMinimumSize(new Dimension(MIN_FRAME_WIDTH, MIN_FRAME_HEIGHT));
 
 	contentPane = new JPanel();
-	contentPane.setLayout(new MigLayout("fill", "[200px][grow]", "[grow]"));
+	contentPane.setLayout(new MigLayout("fill", "[" + MENU_WIDTH + "px][grow]", "[grow]"));
 
 	msv = new MultipleSeriesView();
 	msv.addViewListener(this);
@@ -91,7 +91,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 
 
 	contentPane.add(createStatusBar(), "south, h 20!, wrap");
-	contentPane.add(createLeftMenu(), "west, w 200!");
+	contentPane.add(createLeftMenu(), "west, w " + MENU_WIDTH + "!");
 	contentPane.add(mySeries, "north, w " + ((POSTER_PANEL_WIDTH) * NUMBER_OF_POSTERS_ROW + POSTER_PANEL_WIDTH_FIX) +
 				  "!, pushy, growy, wrap");
 
@@ -122,7 +122,7 @@ public class SeriesFrame extends JFrame implements ViewListener
      * @return
      */
     private JPanel createLeftMenu() {
-	JPanel menuPane = new JPanel(new MigLayout("", "[]", "[][::200px][]"));
+	JPanel menuPane = new JPanel(new MigLayout("", "[]", "[][::" + MENU_WIDTH + "px][]"));
 	final JButton addBtn = new JButton("Add");
 	final JTextField searchField = new JTextField();
 	final JScrollPane resultScroll = new JScrollPane(resultList);

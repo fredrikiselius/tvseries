@@ -40,7 +40,7 @@ public class Series {
                 Date firstAired = episode.getFirstAired();
                 // Make sure that there is first aired date
                 if (firstAired != null && currentDate.compareTo(firstAired) < 0) {
-                    nextEpisode = "Next: " + df.format(firstAired);
+                    nextEpisode = "Next ep: " + df.format(firstAired);
                     return;
                 }
             }
