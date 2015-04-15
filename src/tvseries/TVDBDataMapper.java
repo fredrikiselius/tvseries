@@ -107,13 +107,17 @@ public class TVDBDataMapper
      * @param episodeId the TvDb id of the episode
      * @param currentDate String consisting of the current date on the format: yyyy-MM-dd hh:mm
      */
-    public static void addWatched(int episodeId, String currentDate) {
+    public static void addWatched(int episodeId, int watchCount, String currentDate) {
 	DBConnection dbc = new DBConnection(dbName);
-	String statement = String.format("INSERT INTO history (episode_id, watch_date) " +
+	String historyStatement = String.format("INSERT INTO history (episode_id, watch_date) " +
 					"VALUES (%s, '%s');", episodeId, currentDate);
+	String episodeStatement = String.format("UPDATE episodes SET watched=%d WHERE tvdb_id=%s", watchCount, episodeId);
 
 	try {
-	    dbc.getStatement().executeUpdate(statement);
+	    dbc.getStatement().executeUpdate("BEGIN");
+	    dbc.getStatement().executeUpdate(historyStatement);
+	    dbc.getStatement().executeUpdate(episodeStatement);
+	    dbc.getStatement().executeUpdate("COMMIT");
 	    dbc.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
@@ -275,7 +279,7 @@ public class TVDBDataMapper
     	ResultSet rs = null;
     	try {
     	    DBConnection dbc = new DBConnection("tvseries");
-    	    String query = "SELECT tvdb_id, episode_name, first_aired, episodenumber, seasonnumber, overview " +
+    	    String query = "SELECT tvdb_id, episode_name, first_aired, episodenumber, seasonnumber, overview, watched " +
 			   "FROM episodes WHERE show_id="+showId+" ORDER BY seasonnumber,episodenumber ASC";
 
 	    //String query = "SELECT * FROM episodes";
@@ -290,6 +294,7 @@ public class TVDBDataMapper
     		String overview = rs.getString("overview");
     		int season = rs.getInt("seasonnumber");
     		int episode = rs.getInt("episodenumber");
+		int watched = rs.getInt("watched");
 
     		Episode ep = new Episode();
 		ep.setTvDbId(tvDbId);
@@ -298,6 +303,10 @@ public class TVDBDataMapper
     		ep.setOverview(overview);
 		ep.setSeNumb(season);
 		ep.setEpNumb(episode);
+		ep.setWatchCount(watched);
+		if (watched > 0) {
+		    ep.setWatchedStatus(true);
+		}
 
     		episodes.add(ep);
 	    }

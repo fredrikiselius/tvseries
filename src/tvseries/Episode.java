@@ -13,10 +13,11 @@ public class Episode {
     private int seNumb;
     private String overview;
     private Date firstAired;
-    private boolean watched;
+    private boolean watchedStatus;
+    private int watchCount;
 
     public Episode() {
-        this.watched = false;
+        this.watchedStatus = false;
     }
 
     public int getShowId() {
@@ -89,8 +90,25 @@ public class Episode {
     public void markAsWatched() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
         Date currentDate = new Date();
-        this.watched = true;
+        this.watchedStatus = true;
+        this.watchCount++;
 
-        TVDBDataMapper.addWatched(this.tvDbId, dateFormat.format(currentDate));
+        TVDBDataMapper.addWatched(this.tvDbId, this.watchCount, dateFormat.format(currentDate));
+    }
+
+    public boolean getWatchedStatus() {
+        return watchedStatus;
+    }
+
+    public void setWatchedStatus(final boolean watchedStatus) {
+        this.watchedStatus = watchedStatus;
+    }
+
+    public int getWatchCount() {
+        return watchCount;
+    }
+
+    public void setWatchCount(final int watchCount) {
+        this.watchCount = watchCount;
     }
 }

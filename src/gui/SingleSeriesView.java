@@ -20,6 +20,8 @@ public class SingleSeriesView extends JPanel
     private List<ViewListener> viewListeners;
     private List<Episode> episodes;
     private Series s;
+    private JPanel episodePanel = new JPanel(new MigLayout());
+
 
     private Border darkBorder = BorderFactory.createLineBorder(Color.decode("#444444"), 1);
 
@@ -31,9 +33,10 @@ public class SingleSeriesView extends JPanel
 	this.setLayout(new MigLayout("debug, fill, gap 0, insets 0, top", "", ""));
 	JPanel headerContent = new SingleSeriesPanel(s);
 	this.add(headerContent,
-		 "wrap, w " + headerContent.getPreferredSize().width + "!, h " + headerContent.getPreferredSize().height + "!");
+		 "wrap, w " + headerContent.getPreferredSize().width + "!, h " +
+		 headerContent.getPreferredSize().height + "!");
 	JButton backButton = new JButton("<< Back");
-	this.add(backButton, "wrap");
+	this.add(backButton, "split 3, gapleft 8");
 	createEpisodeList(s.getTvDbId());
 
 	backButton.addActionListener(new ActionListener()
@@ -85,30 +88,65 @@ public class SingleSeriesView extends JPanel
     }
 
     private void createEpisodeList(String tvDbId) {
+
 	int numberOfSeasons = -1;
 
 	// Get number of seasons
 	for (Episode episode : episodes) {
 	    if (episode.getSeNumb() > numberOfSeasons) {
 		numberOfSeasons = episode.getEpNumb();
+
+		//create a panel to contain all the episodes
 	    }
 	}
 
+
+
+	// create "lables" for the seasons combobox
 	String[] seasons = new String[numberOfSeasons + 1];
 	for (int i = 0; i <= numberOfSeasons ; i++) {
 	    seasons[i] = "Season " + i;
 	}
 
+	// combobox to be able to chose which season to display
 	JComboBox seasonList = new JComboBox(seasons);
 	seasonList.setSelectedIndex(1);
-	this.add(seasonList, "top, gap 8, wrap");
+	seasonList.addActionListener(new ActionListener()
+	{
+	    @Override public void actionPerformed(final ActionEvent e) {
+		episodePanel.removeAll();
+		String selectedSeason = (String) seasonList.getSelectedItem();
+		int season = Integer.parseInt(selectedSeason.replace("Season ", ""));
+		System.out.println("Selected season: " + selectedSeason);
+		createEpisodePanel(season);
+	    }
+	});
+	this.add(seasonList, "top, gap 8, split 2");
+
+	// mark all episodes as watched button
+	JButton markAll = new JButton("Watched");
+	this.add(markAll, "wrap");
+	markAll.addActionListener(new ActionListener()
+	{
+	    @Override public void actionPerformed(final ActionEvent e) {
+		String selectedSeason = (String) seasonList.getSelectedItem();
+		int season = Integer.parseInt(selectedSeason.replace("Season ", ""));
+		markSeasonWatched(season);
+	    }
+	});
+
+
+	this.add(episodePanel);
+	createEpisodePanel(1);
+
+
 	System.out.println("LOG: Found " + numberOfSeasons + " season(s) with a total of " + episodes.size() + " episodes");
 
 	JPanel episodeContainer =
 		new JPanel(new MigLayout("wrap")); // The container for all seasons and episodes of the entire series
 	List<JPanel> seasonPanels = new ArrayList<JPanel>(); // Will contain one panel for each season
 
-	// Make sure at least one season is found
+	/*// Make sure at least one season is found
 	if (numberOfSeasons >= 0) {
 	    for (int season = 0; season <= numberOfSeasons; season++) {
 		JLabel seasonNumber = new JLabel("Season " + season + "+");
@@ -143,8 +181,46 @@ public class SingleSeriesView extends JPanel
 		});
 	    }
 	}
-	this.add(episodeContainer, "top");
+	this.add(episodeContainer, "top");*/
     }
 
+    private void markSeasonWatched(int season) {
+	for (Episode episode : episodes) {
+	    if (episode.getSeNumb() == season) {
+		episode.markAsWatched();
+	    }
+	}
 
+	episodePanel.repaint();
+	episodePanel.revalidate();
+    }
+
+    private void createEpisodePanel(int seasonNumber) {
+	for (Episode episode : episodes) {
+	    if (episode.getSeNumb() == seasonNumber) {
+		String watched;
+		episodePanel.add(new JLabel(episode.getEpNumb() + ""));
+		episodePanel.add(new JLabel(episode.getName()), "gapleft 10");
+		if (episode.getWatchedStatus()) {
+		    watched = "watched";
+		} else {
+		    watched = "unwatched";
+		}
+		JLabel watchLabel = new JLabel(watched);
+		episodePanel.add(watchLabel, "gapleft 10");
+		episodePanel.add(new JLabel(episode.getWatchCount() + ""), "wrap");
+
+		watchLabel.addMouseListener(new MouseInputAdapter()
+		{
+		    @Override public void mousePressed(final MouseEvent e) {
+			super.mousePressed(e);
+			episode.markAsWatched();
+			watchLabel.setText("watched");
+		    }
+		});
+	    }
+	}
+	episodePanel.repaint();
+	episodePanel.revalidate();
+    }
 }

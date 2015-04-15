@@ -44,7 +44,8 @@ public class CreateDatabase
 			       " episodenumber INTEGER NOT NULL," +
 			       " seasonnumber INTEGER NOT NULL," +
 			       " absolutenumber INTEGER NOT NULL," +
-			       " overview TEXT NOT NULL)");
+			       " overview TEXT NOT NULL," +
+			       " watched INTEGER DEFAULT 0)");
 
 	String historyTable = "CREATE TABLE IF NOT EXISTS history " +
 			      "(episode_id INTEGER NOT NULL, " +
