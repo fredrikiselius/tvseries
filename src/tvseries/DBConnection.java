@@ -29,34 +29,18 @@ public class DBConnection
 	}
     }
 
-    public boolean close() {
+    public void close() {
 	try {
 	    statement.close();
 	    connection.close();
-	    // TODO log
-	    return true;
 	} catch (SQLException e) {
 	    System.out.println("DBConnection: Could not close connection.\n");
 	    e.getStackTrace();
-	    return false;
 	}
-
-    }
-
-    public Connection getConnection() {
-	return connection;
-    }
-
-    public void setConnection(final Connection connection) {
-	this.connection = connection;
     }
 
     public Statement getStatement() {
 	return statement;
-    }
-
-    public void setStatement(final Statement statement) {
-	this.statement = statement;
     }
 }
 

@@ -22,10 +22,10 @@ public class SingleSeriesPanel extends JPanel
     private static final int TEXT_Y_OFFSET = FANART_HEIGHT + 20;
     private static final int TEXT_X_OFFSET = 10;
     private static final int OVERVIEW_HEIGHT = 100;
+    public static final int SPACING = 20;
 
     private BufferedImage fanart;
     private Series series;
-    private JTextArea jta;
     private int width;
     private int height;
 
@@ -44,7 +44,7 @@ public class SingleSeriesPanel extends JPanel
 	setLayout(new MigLayout());
 	addOverview();
 
-	this.height = (FANART_HEIGHT + 40 + 10 + OVERVIEW_HEIGHT);
+	this.height = (FANART_HEIGHT + SPACING*2 + 10 + OVERVIEW_HEIGHT);
 	this.setPreferredSize(new Dimension(width, height));
     }
 
@@ -52,18 +52,18 @@ public class SingleSeriesPanel extends JPanel
 
 	JScrollPane overviewScroller = new JScrollPane();
 
-	jta = new JTextArea();
-	jta.setText(series.getOverview());
+	JTextArea jTextArea = new JTextArea();
+	jTextArea.setText(series.getOverview());
 
-	jta.setEditable(false);
-	jta.setLineWrap(true);
-	jta.setWrapStyleWord(true);
+	jTextArea.setEditable(false);
+	jTextArea.setLineWrap(true);
+	jTextArea.setWrapStyleWord(true);
 
-	overviewScroller.setViewportView(jta);
+	overviewScroller.setViewportView(jTextArea);
 	overviewScroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-	jta.setCaretPosition(0); // to make sure to display the top of the scrollpane first
-	this.add(overviewScroller, "w 550!, h " + OVERVIEW_HEIGHT + "! , gaptop " + (FANART_HEIGHT + (20 * 2)) + ", gapleft 8");
+	jTextArea.setCaretPosition(0); // to make sure to display the top of the scrollpane first
+	this.add(overviewScroller, "w 550!, h " + OVERVIEW_HEIGHT + "! , gaptop " + (FANART_HEIGHT + (SPACING * 2)) + ", gapleft 8");
 
     }
 

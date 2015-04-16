@@ -17,18 +17,16 @@ import java.util.List;
 
 public class SingleSeriesView extends JPanel
 {
+    //
     private List<ViewListener> viewListeners;
     private List<Episode> episodes;
-    private Series s;
     private JPanel episodePanel = new JPanel(new MigLayout());
-
-
-    private Border darkBorder = BorderFactory.createLineBorder(Color.decode("#444444"), 1);
+    private int selectedSeason;
 
     public SingleSeriesView(Series s) {
-	this.s = s;
 	this.viewListeners = new ArrayList<>();
 	this.episodes = TVDBDataMapper.findByShowId(s.getTvDbId());
+	this.selectedSeason = 1;
 
 	this.setLayout(new MigLayout("debug, fill, gap 0, insets 0, top", "", ""));
 	JPanel headerContent = new SingleSeriesPanel(s);
@@ -58,35 +56,6 @@ public class SingleSeriesView extends JPanel
 	}
     }
 
-    private void createFanartContainer() {
-	JPanel fanartContainer = new JPanel(new MigLayout("gap 0, insets 0,fillx, wrap 1", "[grow, fill]"));
-	fanartContainer.setBackground(Color.decode("#111111"));
-	fanartContainer.setBorder(darkBorder);
-	JLabel fanart = new JLabel(PictureLoader.loadFanart(s.getTvDbId()));
-	fanartContainer.add(fanart, "growx, pushx");
-	//this.add(fanartContainer, "h 200!, wrap, growx, pushx");
-
-
-    }
-
-    private void addBasicInfo() {
-	JPanel basicInfoHolder = new JPanel(new MigLayout("wrap"));
-
-	// Add basic info
-	// Format: show name, day at time, network, status
-	String info = this.s.getShowName() + "  -  " + this.s.getAirday() + " at " +
-		      this.s.getAirtime() + "  -  " + this.s.getNetwork() + "  -  " + this.s.getStatus();
-	basicInfoHolder.add(new JLabel(info), "TOP");
-
-	// Add overview
-	JTextArea jta = new JTextArea(this.s.getOverview());
-	jta.setEditable(false);
-	jta.setLineWrap(true);
-	basicInfoHolder.add(jta, "w 400!, TOP");
-
-	this.add(basicInfoHolder, "wrap");
-    }
-
     private void createEpisodeList(String tvDbId) {
 
 	int numberOfSeasons = -1;
@@ -110,15 +79,15 @@ public class SingleSeriesView extends JPanel
 
 	// combobox to be able to chose which season to display
 	JComboBox seasonList = new JComboBox(seasons);
-	seasonList.setSelectedIndex(1);
+	seasonList.setSelectedIndex(selectedSeason);
 	seasonList.addActionListener(new ActionListener()
 	{
 	    @Override public void actionPerformed(final ActionEvent e) {
 		episodePanel.removeAll();
-		String selectedSeason = (String) seasonList.getSelectedItem();
-		int season = Integer.parseInt(selectedSeason.replace("Season ", ""));
-		System.out.println("Selected season: " + selectedSeason);
-		createEpisodePanel(season);
+		String selectedSeasonString = (String) seasonList.getSelectedItem();
+		selectedSeason = Integer.parseInt(selectedSeasonString.replace("Season ", ""));
+		System.out.println("Selected season: " + selectedSeasonString);
+		createEpisodePanel(selectedSeason);
 	    }
 	});
 	this.add(seasonList, "top, gap 8, split 2");
@@ -142,57 +111,28 @@ public class SingleSeriesView extends JPanel
 
 	System.out.println("LOG: Found " + numberOfSeasons + " season(s) with a total of " + episodes.size() + " episodes");
 
-	JPanel episodeContainer =
-		new JPanel(new MigLayout("wrap")); // The container for all seasons and episodes of the entire series
-	List<JPanel> seasonPanels = new ArrayList<JPanel>(); // Will contain one panel for each season
-
-	/*// Make sure at least one season is found
-	if (numberOfSeasons >= 0) {
-	    for (int season = 0; season <= numberOfSeasons; season++) {
-		JLabel seasonNumber = new JLabel("Season " + season + "+");
-		seasonPanels.add(new JPanel(new MigLayout("wrap")));
-		episodeContainer.add(seasonNumber);
-		episodeContainer.add(seasonPanels.get(season));
-
-		final int currentSeason = season;
-		seasonNumber.addMouseListener(new MouseInputAdapter()
-		{
-		    @Override public void mousePressed(final MouseEvent e) {
-			super.mousePressed(e);
-			if (seasonNumber.getText().endsWith("+")) {
-			    seasonNumber.setText("Season " + currentSeason + "-");
-			    for (Episode episode : episodes) {
-				if (episode.getSeNumb() == currentSeason) {
-				    seasonPanels.get(currentSeason).add(new JLabel(episode.getName()));
-				}
-			    }
-			} else if (seasonNumber.getText().endsWith("-")) {
-			    seasonNumber.setText("Season " + currentSeason + "+");
-			    for (Episode episode : episodes) {
-				if (episode.getSeNumb() == currentSeason) {
-				    System.out.println("Removing " + episode.getName());
-				    seasonPanels.get(currentSeason).removeAll();
-				}
-			    }
-			}
-			revalidate();
-			repaint();
-		    }
-		});
-	    }
-	}
-	this.add(episodeContainer, "top");*/
     }
 
     private void markSeasonWatched(int season) {
+	List<Episode> episodesWithSeason = new ArrayList<>();
 	for (Episode episode : episodes) {
 	    if (episode.getSeNumb() == season) {
-		episode.markAsWatched();
+		episode.setWatchedStatus(true);
+		episode.setWatchCount(episode.getWatchCount() + 1); // increment watch status with one
+		episodesWithSeason.add(episode);
 	    }
 	}
 
-	episodePanel.repaint();
-	episodePanel.revalidate();
+	new SwingWorker<Void, Void>() {
+	    @Override public Void doInBackground() {
+		TVDBDataMapper.addMultipleWatched(episodesWithSeason);
+		return null;
+	    }
+	    @Override public void done() {
+		episodePanel.removeAll();
+		createEpisodePanel(selectedSeason);
+	    }
+	}.execute();
     }
 
     private void createEpisodePanel(int seasonNumber) {
@@ -201,21 +141,28 @@ public class SingleSeriesView extends JPanel
 		String watched;
 		episodePanel.add(new JLabel(episode.getEpNumb() + ""));
 		episodePanel.add(new JLabel(episode.getName()), "gapleft 10");
-		if (episode.getWatchedStatus()) {
-		    watched = "watched";
-		} else {
-		    watched = "unwatched";
-		}
-		JLabel watchLabel = new JLabel(watched);
-		episodePanel.add(watchLabel, "gapleft 10");
-		episodePanel.add(new JLabel(episode.getWatchCount() + ""), "wrap");
+		JLabel incrementWatchCount = new JLabel("+");
+		JLabel decreaseWatchCount = new JLabel("-");
+		JLabel watchCount = new JLabel(episode.getWatchCount() + "");
+		episodePanel.add(incrementWatchCount, "gapleft 10");
+		episodePanel.add(decreaseWatchCount, "gapleft 5");
+		episodePanel.add(watchCount, "wrap");
 
-		watchLabel.addMouseListener(new MouseInputAdapter()
+		incrementWatchCount.addMouseListener(new MouseInputAdapter()
 		{
 		    @Override public void mousePressed(final MouseEvent e) {
 			super.mousePressed(e);
 			episode.markAsWatched();
-			watchLabel.setText("watched");
+			watchCount.setText(episode.getWatchCount() + "");
+		    }
+		});
+
+		decreaseWatchCount.addMouseListener(new MouseInputAdapter()
+		{
+		    @Override public void mousePressed(final MouseEvent e) {
+			super.mousePressed(e);
+			episode.removeMostRecentWatched();
+			watchCount.setText(episode.getWatchCount() + "");
 		    }
 		});
 	    }

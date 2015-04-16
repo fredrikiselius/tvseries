@@ -13,8 +13,7 @@ public class PictureLoader
 {
     private final static int POSTER_WIDTH = 180;
     private final static int POSTER_HEIGHT = 265;
-    private final static int FANART_WIDTH = 600;
-    private final static int FANART_HEIGHT = 300;
+
 
     /**
      * @param tvDbId
@@ -26,34 +25,6 @@ public class PictureLoader
 	File noPoster = new File("img/no.jpg");
 	return loadPicture(tvDbPoster, noPoster, POSTER_WIDTH, POSTER_HEIGHT);
     }
-
-    public static ImageIcon loadFanart(String tvDbId) {
-	File tvDbFanart = new File("showdata/" + tvDbId + "/fanart.jpg");
-	File noFanart = new File("img/no.jpg");
-
-		// Use a 'non-avalible' picture if one cannot be found
-	File poster;
-	if (tvDbFanart.exists()) {
-	    poster = tvDbFanart;
-	} else {
-	    poster = noFanart;
-	}
-
-	Image img = null;
-	try {
-	    img = ImageIO.read(poster);
-	} catch (IOException ioe) {
-	    ioe.printStackTrace();
-	} finally {
-	    if (img != null) {
-		return new ImageIcon(img);
-	    }
-	}
-	return null;
-
-    }
-
-
 
     private static ImageIcon loadPicture(File picture, File noPicture, int width, int height) {
 

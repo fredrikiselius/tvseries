@@ -6,17 +6,13 @@ import gui.SingleSeriesView;
 import gui.ViewListener;
 import net.miginfocom.swing.MigLayout;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.event.MouseInputAdapter;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
@@ -40,24 +36,15 @@ public class SeriesFrame extends JFrame implements ViewListener
     final static int NUMBER_OF_POSTERS_ROW = 5; // Number of posters that should be in a row in mySeries
     final static int POSTER_PANEL_WIDTH_FIX = 17; // Used to get the right width for the JScrollPane mySeries
 
-    final static int POSTER_WIDTH = 180;
-    final static int POSTER_HEIGHT = 265;
-
 
     private Map<String, String> searchResults = new HashMap<String, String>();
-    // Contains search results, emptied after a series is added
-    private List<Series> loadedSeries = new ArrayList<Series>(); // Series loaded from the database TODO arraylist?
-    private List<JPanel> showPanels = new ArrayList<JPanel>();
-    //private Vector<JPanel> seriesPanels = new Vector<JPanel>(); // Contains the series panels shown under myseries
+
 
     // Custom borders and colors
     private Border darkBorder = BorderFactory.createLineBorder(Color.decode("#444444"), 1);
     JList<String> resultList = null;
 
 
-    // GUI Components
-    private JPanel contentPane = new JPanel(); // Holder for all other components
-    private JPanel mySeriesHolder = new JPanel(); // Holder for all posters in mySeries
     private JScrollPane mySeries;
     private JLabel statusText = new JLabel("Idle");
 
@@ -78,7 +65,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 	setPreferredSize(new Dimension(PREFERRED_FRAME_WIDTH, PREFERRED_FRAM_HEIGHT));
 	setMinimumSize(new Dimension(MIN_FRAME_WIDTH, MIN_FRAME_HEIGHT));
 
-	contentPane = new JPanel();
+	final JPanel contentPane = new JPanel();
 	contentPane.setLayout(new MigLayout("fill", "[" + MENU_WIDTH + "px][grow]", "[grow]"));
 
 	msv = new MultipleSeriesView();
@@ -182,9 +169,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 		resultScroll.setVisible(false);
 		addBtn.setVisible(false);
 
-		new SwingWorker<Void, Void>()
-		{
-
+		new SwingWorker<Void, Void>() {
 		    @Override public Void doInBackground() {
 			searchField.setEditable(false);
 
@@ -201,7 +186,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 			    TVDBDataMapper.updateShow(id);
 			TVDBDataMapper.updateEpisodes(id);
 			msv.reloadShowPanels();
-			pack();
+			//pack();
 
 
 			return null;
@@ -245,94 +230,6 @@ public class SeriesFrame extends JFrame implements ViewListener
 
     }
 
-    /**
-    private JPanel createEpisodeList(String tvDbId) {
-	List<Episode> episodes = TVDBDataMapper.findByShowId(tvDbId);
-	int numberOfSeasons = -1;
-
-	// Get number of seasons
-	for ( Episode episode : episodes) {
-	    System.out.println("AAAAAAAAAAAAAAAAAAAAAAA" + episode.getSeNumb());
-	    if (Integer.parseInt(episode.getSeNumb()) > numberOfSeasons) {
-		numberOfSeasons = Integer.parseInt(episode.getEpNumb());
-	    }
-	}
-	System.out.println("LOG: Found " + numberOfSeasons + " season(s) with a total of " + episodes.size() + " episodes");
-
-	JPanel episodeHolder = new JPanel(new MigLayout("wrap")); // The container for all episodes of the entire series
-	List<JPanel> episodeLists = new ArrayList<JPanel>(); // Will contain one panel for each season
-
-	// Make sure at least one season is found
-	if (numberOfSeasons >= 0) {
-	    for (int season = 0; season <= numberOfSeasons; season++) {
-		JLabel seasonNumber = new JLabel("Season " + season + "+");
-		episodeLists.add(new JPanel(new MigLayout("wrap")));
-		episodeHolder.add(seasonNumber);
-		episodeHolder.add(episodeLists.get(season));
-
-		final String seasonNumberString = Integer.toString(season);
-		final int seasonNumberInt = season;
-		seasonNumber.addMouseListener(new MouseInputAdapter()
-		{
-		    @Override public void mousePressed(final MouseEvent e) {
-			super.mousePressed(e);
-			System.out.println(seasonNumber.getText());
-			if (seasonNumber.getText().endsWith("+")) {
-			    for (Episode episode : episodes) {
-				if (episode.getSeNumb().equals(seasonNumberString)) {
-					episodeLists.get(seasonNumberInt).add(new JLabel(episode.getName()));
-				}
-			    }
-			} else if (seasonNumber.getText().endsWith("-")) {
-
-			}
-		    }
-		});
-	    }
-	}
-
-	return episodeHolder;
-    }
-     **/
-
-
-    private Color setColor(String input) {
-	switch (input.toLowerCase()) {
-	    case "black":
-		return Color.decode("#222222");
-	    default:
-		return Color.WHITE;
-	}
-    }
-
-    /*private void updateMySeries() {
-	loadedSeries.clear();
-	fetchSeries();
-	for (int seriesPanelIndex = 0; seriesPanelIndex < showPanels.size(); seriesPanelIndex++) {
-	    mySeriesHolder.remove(showPanels.get(seriesPanelIndex));
-	}
-	addPosterPanels();
-    }
-
-
-    private void fetchSeries() {
-	System.out.println("LOG: Fetching ids from database:");
-
-	List<String> idList = TVDBDataMapper.selectAllIds();
-	List<Episode> episodes = TVDBDataMapper.findByShowId("79168");
-
-	if (!idList.isEmpty()) {
-	    for (String id : idList) {
-		loadedSeries.add(TVDBDataMapper.findByTvDbId(id));
-	    }
-
-
-	    System.out.println("LOG: loaded " + idList.size() + " series");
-	} else {
-	    System.out.println("LOG: The database is empty"); //TODO LOG
-	}
-    }
-    */
 
     public void setSingleSeriesView(SingleSeriesView ssv) {
 	this.ssv = ssv;

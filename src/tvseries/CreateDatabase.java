@@ -11,7 +11,7 @@ public class CreateDatabase
 {
     private DBConnection dbConnection;
 
-    public CreateDatabase(String database) throws SQLException, IOException {
+    public CreateDatabase(String database) throws SQLException {
 	this.dbConnection = new DBConnection(database);
 	createTables();
 	dbConnection.close();
@@ -22,7 +22,7 @@ public class CreateDatabase
      * @throws SQLException
      * @throws IOException
      */
-    public void createTables() throws SQLException, IOException {
+    public void createTables() throws SQLException {
 	System.out.println("LOG: (CreateDatabase) Creating tables if necessary");
 	String seriesTable = ("CREATE TABLE IF NOT EXISTS series " +
 			      "(tvdb_id INTEGER NOT NULL PRIMARY KEY UNIQUE," +

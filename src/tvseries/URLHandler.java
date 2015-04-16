@@ -2,7 +2,7 @@ package tvseries;
 
 import java.net.URL;
 
-public class URLHandler
+public class URLHandler // TODO remove?
 {
     private static String showName;
     private static String showId;

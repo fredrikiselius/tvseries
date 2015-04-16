@@ -1,11 +1,13 @@
 package tvseries;
 
+import javax.swing.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Episode {
+public class Episode
+{
     private int showId;
     private int tvDbId;
     private String name;
@@ -17,15 +19,7 @@ public class Episode {
     private int watchCount;
 
     public Episode() {
-        this.watchedStatus = false;
-    }
-
-    public int getShowId() {
-	return showId;
-    }
-
-    public void setShowId(final int showId) {
-	this.showId = showId;
+	this.watchedStatus = false;
     }
 
     public int getTvDbId() {
@@ -69,46 +63,65 @@ public class Episode {
     }
 
     public Date getFirstAired() {
-        return firstAired;
+	return firstAired;
     }
 
     public void setFirstAired(String firstAired) {
-        if (!firstAired.isEmpty()) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            try {
-                this.firstAired = sdf.parse(firstAired);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
+	if (!firstAired.isEmpty()) {
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	    try {
+		this.firstAired = sdf.parse(firstAired);
+	    } catch (ParseException e) {
+		e.printStackTrace();
+	    }
+	}
     }
 
     /**
-     * Marks the episode as watched.
-     * It also calls upon the addWatched method to make an entry in the database.
+     * Marks the episode as watched. It also calls upon the addWatched method to make an entry in the database.
      */
     public void markAsWatched() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
-        Date currentDate = new Date();
-        this.watchedStatus = true;
-        this.watchCount++;
+	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	Date currentDate = new Date();
+	this.watchedStatus = true;
+	this.watchCount++;
 
-        TVDBDataMapper.addWatched(this.tvDbId, this.watchCount, dateFormat.format(currentDate));
+	new SwingWorker<Void, Void>()
+	{
+
+	    @Override protected Void doInBackground() throws Exception {
+		TVDBDataMapper.addWatched(tvDbId, watchCount, dateFormat.format(currentDate));
+		return null;
+	    }
+	}.execute();
     }
 
-    public boolean getWatchedStatus() {
-        return watchedStatus;
+    public void removeMostRecentWatched() {
+	if (watchCount > 0) {
+            watchCount--;
+        }
+
+	new SwingWorker<Void, Void>() {
+	    @Override protected Void doInBackground() throws Exception {
+		TVDBDataMapper.removeWatched(tvDbId, watchCount);
+		return null;
+	    }
+	}.execute();
+
     }
 
     public void setWatchedStatus(final boolean watchedStatus) {
-        this.watchedStatus = watchedStatus;
+	this.watchedStatus = watchedStatus;
     }
 
     public int getWatchCount() {
-        return watchCount;
+	return watchCount;
     }
 
     public void setWatchCount(final int watchCount) {
-        this.watchCount = watchCount;
+	if (watchCount >= 0) {
+	    this.watchCount = watchCount;
+	}
+
     }
 }

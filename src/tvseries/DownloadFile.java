@@ -9,15 +9,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 // test class to download a zip
-public class DownloadFile
-{
-
-    //hej :)
-
+public class DownloadFile {
     private static final int BUFFER_SIZE = 4096;
     public static final String DOWNLOAD_FOLDER_DATA = "showdata/";
     public static final String DOWNLOAD_FOLDER_IMG = "showdata/";
-    private String newName = null;
 
     public static void deleteShowDir(String tvDbId) {
 	deleteDirectory(new File("showdata/"+tvDbId+"/"));

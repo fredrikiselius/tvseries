@@ -11,11 +11,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class TVDBDataMapper
 {
@@ -49,13 +48,12 @@ public class TVDBDataMapper
 	sdp.parseBanners();
 
 
-
 	String seriesStatement = String.format(("UPDATE series " +
-				 "SET network='%s', airday='%s', airtime='%s', firstaired='%s', " +
-				 "overview='%s', status='%s', runtime='%s', lastupdated=%s " +
-				 "WHERE tvdb_id=%s"), sdp.getNetwork(), sdp.getAirday(), sdp.getAirtime(),
-					       sdp.getFirstAired(), sdp.getOverview(), sdp.getStatus(),
-					       sdp.getRuntime(), sdp.getLastUpdated(), tvDbId);
+						"SET network='%s', airday='%s', airtime='%s', firstaired='%s', " +
+						"overview='%s', status='%s', runtime='%s', lastupdated=%s " +
+						"WHERE tvdb_id=%s"), sdp.getNetwork(), sdp.getAirday(), sdp.getAirtime(),
+					       sdp.getFirstAired(), sdp.getOverview(), sdp.getStatus(), sdp.getRuntime(),
+					       sdp.getLastUpdated(), tvDbId);
 
 	try {
 	    dbc.getStatement().executeUpdate(seriesStatement);
@@ -86,12 +84,13 @@ public class TVDBDataMapper
 	    for (Map<String, String> episode : sdp.getAllEpisodes()) {
 		System.out.println(episode.get("id"));
 
-		    System.out.println("LOG: Adding episode");
-		    String completeStatement = String.format(statement, episode.get("id"), episode.get("EpisodeName"), episode.get("FirstAired"),
-							     episode.get("EpisodeNumber"), episode.get("SeasonNumber"), episode.get("absolute_number"),
-							     episode.get("Overview"));
+		System.out.println("LOG: Adding episode");
+		String completeStatement =
+			String.format(statement, episode.get("id"), episode.get("EpisodeName"), episode.get("FirstAired"),
+				      episode.get("EpisodeNumber"), episode.get("SeasonNumber"), episode.get("absolute_number"),
+				      episode.get("Overview"));
 
-		    dbc.getStatement().executeUpdate(completeStatement);
+		dbc.getStatement().executeUpdate(completeStatement);
 
 	    }
 	    dbc.getStatement().executeUpdate("COMMIT");
@@ -103,14 +102,31 @@ public class TVDBDataMapper
     }
 
     /**
-     *
-     * @param episodeId the TvDb id of the episode
+     * Decreases the watch count with 1 in the database and also remove the most recent entry in the history table.
+     * @param episodeID the tvdbid of the episode
+     * @param watchCount total watch count of the episode
+     */
+    public static void removeWatched(int episodeID, int watchCount) {
+	DBConnection dbc = new DBConnection(dbName);
+	String episodeStatement = String.format("UPDATE episodes SET watched=%d WHERE tvdb_id=%d", watchCount, episodeID);
+
+	try {
+	    dbc.getStatement().executeUpdate(episodeStatement);
+	    dbc.close();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+    }
+
+    /**
+     * This method is used to add a single episode as watched.
+     * @param episodeId   the TvDb id of the episode
      * @param currentDate String consisting of the current date on the format: yyyy-MM-dd hh:mm
      */
     public static void addWatched(int episodeId, int watchCount, String currentDate) {
 	DBConnection dbc = new DBConnection(dbName);
-	String historyStatement = String.format("INSERT INTO history (episode_id, watch_date) " +
-					"VALUES (%s, '%s');", episodeId, currentDate);
+	String historyStatement =
+		String.format("INSERT INTO history (episode_id, watch_date) " + "VALUES (%s, '%s');", episodeId, currentDate);
 	String episodeStatement = String.format("UPDATE episodes SET watched=%d WHERE tvdb_id=%s", watchCount, episodeId);
 
 	try {
@@ -124,100 +140,33 @@ public class TVDBDataMapper
 	}
     }
 
-    @Deprecated
-    public static void Update(String tvDbId) throws SQLException {
+    /**
+     * This method is used to mark multiple episodes as watched in the database.
+     * @param episodes List<Episode> containing all the episode to mark as watched
+     */
+    public static void addMultipleWatched(Iterable<Episode> episodes) {
+	DBConnection dbc = new DBConnection(dbName);
+	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	java.util.Date currentDate = new java.util.Date();
+
 	try {
-	    System.out.println("LOG: Updating");
-	    DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-	    DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-	    Document doc = docBuilder.parse(new File("showdata/en.xml"));
-	    doc.getDocumentElement().normalize();
-
-	    NodeList nList = doc.getElementsByTagName("Series");
-	    NodeList episodeList = doc.getElementsByTagName("Episode");
-
-	    System.out.println("LOG: Number of episodes found: " + episodeList.getLength());
-
-	    Connection db = DriverManager.getConnection("jdbc:sqlite:tvseries.db");
-	    String statementSeries = "UPDATE series " +
-				     "SET network=?, airday=?, airtime=?, status=?, runtime=?, overview=?, lastupdated=? " +
-				     "WHERE tvdb_id=" + tvDbId;
-	    String statementsEpisodes = "INSERT INTO episodes " +
-					"(show_id, tvdb_id, episode_name, episode, season, overview) " +
-					"VALUES (" + tvDbId + ", ?, ?, ?, ?, ?);";
-
-	    PreparedStatement dbStatement = db.prepareStatement(statementSeries);
-
-	    for (int temp = 0; temp < nList.getLength(); temp++) {
-		Node nNode = nList.item(temp);
-		System.out.println("loopdeloop");
-
-		if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-
-		    Element eElement = (Element) nNode;
-
-		    dbStatement.setString(1, eElement.getElementsByTagName("Network").item(0).getTextContent());
-		    dbStatement.setString(2, eElement.getElementsByTagName("Airs_DayOfWeek").item(0).getTextContent());
-		    dbStatement.setString(3, eElement.getElementsByTagName("Airs_Time").item(0).getTextContent());
-		    dbStatement.setString(4, eElement.getElementsByTagName("Status").item(0).getTextContent());
-		    dbStatement.setString(5, eElement.getElementsByTagName("Runtime").item(0).getTextContent());
-		    dbStatement.setString(6, eElement.getElementsByTagName("Overview").item(0).getTextContent());
-		    dbStatement.setString(7, eElement.getElementsByTagName("lastupdated").item(0).getTextContent());
-		    System.out.println(eElement.getElementsByTagName("poster").item(0).getTextContent());
-
-		    // Only download the poster if it doesnt exist
-		    if (!(new File("img/" + tvDbId + ".jpg").exists())) {
-			DownloadFile.fetchPoster(eElement.getElementsByTagName("poster").item(0).getTextContent(), tvDbId);
-		    }
-
-
-		}
+	    dbc.getStatement().executeUpdate("BEGIN");
+	    for (Episode episode : episodes) {
+		String historyStatement =
+			String.format("INSERT INTO history (episode_id, watch_date) " + "VALUES (%s, '%s');", episode.getTvDbId(),
+				      dateFormat.format(currentDate));
+		String episodeStatement =
+			String.format("UPDATE episodes SET watched=%d WHERE tvdb_id=%s", episode.getWatchCount(), episode.getTvDbId());
+		dbc.getStatement().executeUpdate(historyStatement);
+		dbc.getStatement().executeUpdate(episodeStatement);
 	    }
-	    dbStatement.executeUpdate();
-	    dbStatement.close();
-
-	    // Send a BEGIN statement to start the transaction
-	    PreparedStatement begin = db.prepareStatement("BEGIN");
-	    begin.executeUpdate();
-	    begin.close();
-
-
-	    // Create the INSERT statement for the episodes
-	    PreparedStatement epStatement = db.prepareStatement(statementsEpisodes);
-
-
-	    for (int temp = 0; temp < episodeList.getLength(); temp++) {
-		Node epNode = episodeList.item(temp);
-
-		if (epNode.getNodeType() == Node.ELEMENT_NODE) {
-		    Element epElement = (Element) epNode;
-
-		    epStatement.setString(1, epElement.getElementsByTagName("id").item(0).getTextContent());
-		    epStatement.setString(2, epElement.getElementsByTagName("EpisodeName").item(0).getTextContent());
-		    epStatement.setString(3, epElement.getElementsByTagName("EpisodeNumber").item(0).getTextContent());
-		    epStatement.setString(4, epElement.getElementsByTagName("SeasonNumber").item(0).getTextContent());
-		    epStatement.setString(5, epElement.getElementsByTagName("Overview").item(0).getTextContent());
-		    epStatement.executeUpdate();
-		}
-
-	    }
-
-	    epStatement.close();
-
-	    // Send a COMMIT statement to the database and thus ending the transaction
-	    PreparedStatement commit = db.prepareStatement("COMMIT");
-	    commit.executeUpdate();
-	    commit.close();
-
-	    db.close();
+	    dbc.getStatement().executeUpdate("COMMIT");
+	    dbc.close();
 	} catch (SQLException e) {
-	    e.getStackTrace();
-	} catch (ParserConfigurationException e) {
-	    e.printStackTrace();
-	} catch (Exception e) {
 	    e.printStackTrace();
 	}
     }
+
 
     /**
      * Selects all data on a show based on tvdb id and creates a Series object.
@@ -276,31 +225,31 @@ public class TVDBDataMapper
 
     public static synchronized List<Episode> findByShowId(String showId) {
 	List<Episode> episodes = new ArrayList<Episode>();
-    	ResultSet rs = null;
-    	try {
-    	    DBConnection dbc = new DBConnection("tvseries");
-    	    String query = "SELECT tvdb_id, episode_name, first_aired, episodenumber, seasonnumber, overview, watched " +
-			   "FROM episodes WHERE show_id="+showId+" ORDER BY seasonnumber,episodenumber ASC";
+	ResultSet rs = null;
+	try {
+	    DBConnection dbc = new DBConnection("tvseries");
+	    String query = "SELECT tvdb_id, episode_name, first_aired, episodenumber, seasonnumber, overview, watched " +
+			   "FROM episodes WHERE show_id=" + showId + " ORDER BY seasonnumber,episodenumber ASC";
 
 	    //String query = "SELECT * FROM episodes";
 
 	    rs = dbc.getStatement().executeQuery(query);
 
 
-    	    while (rs.next()) {
-    		int tvDbId = rs.getInt("tvdb_id");
-    		String name = rs.getString("episode_name");
+	    while (rs.next()) {
+		int tvDbId = rs.getInt("tvdb_id");
+		String name = rs.getString("episode_name");
 		String firstAired = rs.getString("first_aired");
-    		String overview = rs.getString("overview");
-    		int season = rs.getInt("seasonnumber");
-    		int episode = rs.getInt("episodenumber");
+		String overview = rs.getString("overview");
+		int season = rs.getInt("seasonnumber");
+		int episode = rs.getInt("episodenumber");
 		int watched = rs.getInt("watched");
 
-    		Episode ep = new Episode();
+		Episode ep = new Episode();
 		ep.setTvDbId(tvDbId);
-    		ep.setName(name);
+		ep.setName(name);
 		ep.setFirstAired(firstAired);
-    		ep.setOverview(overview);
+		ep.setOverview(overview);
 		ep.setSeNumb(season);
 		ep.setEpNumb(episode);
 		ep.setWatchCount(watched);
@@ -308,25 +257,25 @@ public class TVDBDataMapper
 		    ep.setWatchedStatus(true);
 		}
 
-    		episodes.add(ep);
+		episodes.add(ep);
 	    }
-    	    dbc.close();
+	    dbc.close();
 
 	    return episodes;
 
-    	} catch (SQLException e) {
-    	    e.getStackTrace();
-    	    return null;
-    	} finally {
-    	    if (rs != null) {
-    		try {
+	} catch (SQLException e) {
+	    e.getStackTrace();
+	    return null;
+	} finally {
+	    if (rs != null) {
+		try {
 		    rs.close();
-    		} catch (SQLException e) {
-    		    e.printStackTrace();
-    		}
-    	    }
-    	}
-        }
+		} catch (SQLException e) {
+		    e.printStackTrace();
+		}
+	    }
+	}
+    }
 
 
     /**
@@ -379,14 +328,5 @@ public class TVDBDataMapper
 	}
 
     }
-
-    public static void main(String[] args) {
-	List<Episode> episodes = findByShowId("257655");
-
-	    for (Episode episode : episodes) {
-		System.out.println(episode.getSeNumb() + " " + episode.getEpNumb() + " " + episode.getName());
-	    }
-    }
-
 }
 

@@ -16,7 +16,6 @@ import java.util.Map;
 
 public class ShowDataParser
 {
-    private String tvDbId;
     private String folderPath;
     private String[] artPaths;
     private List<String> showInfo = new ArrayList<String>();
@@ -37,7 +36,6 @@ public class ShowDataParser
 	String folderPath = String.format(PATH, tvDbId);
 	if ((new File(String.format(PATH, tvDbId))).exists()) {
 	    System.out.println("LOG: Folder found");
-	    this.tvDbId = tvDbId;
 	    this.folderPath = folderPath;
 	} else {
 	    throw new IllegalArgumentException("Could not find the folder");
@@ -139,9 +137,6 @@ public class ShowDataParser
 	}
     }
 
-    public String[] getArtPaths() {
-	return artPaths;
-    }
 
     public String getFanart() {
 	return artPaths[0];
@@ -157,10 +152,6 @@ public class ShowDataParser
 
     public int getNumberOfEpisodes() {
 	return episodeInfo.size();
-    }
-
-    public List<String> getShowData() {
-	return showInfo;
     }
 
     public String getAirday() {
@@ -193,24 +184,6 @@ public class ShowDataParser
 
     public String getLastUpdated() {
     	return showInfo.get(7);
-    }
-
-    /**
-     * Return format:
-     * Airs_DayOfWeek, Airs_Time, FirstAired, Network,
-     * Overview, Runtime, Status, lastupdated
-     * @return all show data as one string
-     */
-    public String getShowDataAsString() {
-	String allData = "";
-	for (int i = 0; i < showInfo.size(); i++) {
-	    if (i == showInfo.size()-1) {
-		allData += showInfo.get(i);
-	    } else {
-		allData += (showInfo.get(i) + ", ");
-	    }
-	}
-	return allData;
     }
 
 }

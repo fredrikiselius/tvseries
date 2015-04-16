@@ -30,7 +30,7 @@ public class Series {
      * then nextEpisode is set to the shows status.
      */
     private void calculateNextEp() {
-        Date currentDate = new Date();
+        Date currentDate = new Date(); // must be of Date type to be able to compare
         List<Episode> episodes = TVDBDataMapper.findByShowId(this.tvDbId);
         DateFormat df = new SimpleDateFormat("dd MMMM");
 
@@ -62,10 +62,6 @@ public class Series {
 
     public String getTvDbId() {
         return tvDbId;
-    }
-
-    public void setTvDbId(final String tvDbId) {
-        this.tvDbId = tvDbId;
     }
 
     public String getShowName() {
@@ -116,16 +112,7 @@ public class Series {
         this.status = status;
     }
 
-    public String getRuntime() {
-        return runtime;
-    }
-
     public void setRuntime(final String runtime) {
         this.runtime = runtime;
-    }
-
-    public String[] getEverything() {
-        String[] allInfo = {tvDbId, showName, network, airday, airtime, overview, status, runtime};
-        return allInfo;
     }
 }
