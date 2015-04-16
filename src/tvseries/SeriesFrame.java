@@ -15,7 +15,6 @@ import java.awt.event.ActionListener;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.List;
 
 public class SeriesFrame extends JFrame implements ViewListener
 {
@@ -193,7 +192,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 		    }
 
 		    @Override public void done() {
-			System.out.println("Done");
+			System.out.println("LOG: (SeriesFrame) Done saving changes.");
 			//updateMySeries();
 
 
@@ -216,7 +215,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 
     private void updateResultScroll(String searchString) {
 
-	System.out.println("LOG: Searching THETVDB for: " + searchString);
+	System.out.println("LOG: (SeriesFrame) Searching THETVDB for: " + searchString);
 	XMLReader xmlReader = new XMLReader(searchString.replaceAll(" ", "%20"), "url");
 	searchResults = xmlReader.result;
 	String[] shows = new String[searchResults.keySet().size()];

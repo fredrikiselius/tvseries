@@ -35,10 +35,10 @@ public class ShowDataParser
     public ShowDataParser(String tvDbId) {
 	String folderPath = String.format(PATH, tvDbId);
 	if ((new File(String.format(PATH, tvDbId))).exists()) {
-	    System.out.println("LOG: Folder found");
+	    System.out.println("LOG: (ShowDataParser) Found folder to save information in.");
 	    this.folderPath = folderPath;
 	} else {
-	    throw new IllegalArgumentException("Could not find the folder");
+	    throw new IllegalArgumentException("Could not find the folder.");
 	}
     }
 

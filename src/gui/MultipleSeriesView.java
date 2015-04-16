@@ -91,7 +91,7 @@ public class MultipleSeriesView extends JPanel
 	{
 	    @Override public void mousePressed(final MouseEvent e) {
 		super.mousePressed(e);
-		System.out.println("LOG: Opening " + s.getShowName());
+		System.out.println("LOG: (MultipleSeriesView) Opening " + s.getShowName() + ".");
 		ssv = new SingleSeriesView(s);
 		notifyViewListeners(ssv);
 
@@ -117,7 +117,7 @@ public class MultipleSeriesView extends JPanel
     }
 
     private void fetchSeries() {
-	System.out.println("LOG: Fetching ids from database:");
+	System.out.println("LOG: (MultipleSeriesView) Fetching ids from database...");
 
 	List<String> idList = TVDBDataMapper.selectAllIds();
 	if (!idList.isEmpty()) {
@@ -125,9 +125,9 @@ public class MultipleSeriesView extends JPanel
 		series.add(TVDBDataMapper.findByTvDbId(id));
 	    }
 
-	    System.out.println("LOG: loaded " + idList.size() + " series");
+	    System.out.println("LOG: (MultipleSeriesView) Loaded " + idList.size() + " series.");
 	} else {
-	    System.out.println("LOG: The database is empty"); //TODO LOG
+	    System.out.println("LOG: (MultipleSeriesView) The database is empty."); //TODO LOG
 	}
     }
 

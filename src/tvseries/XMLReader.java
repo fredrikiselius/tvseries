@@ -73,9 +73,9 @@ public class XMLReader
 		}
 
 	    }
-	    System.out.println("LOG: Found "+result.keySet().size()+" matches");
+	    System.out.println("LOG: (XMLReader) Found " + result.keySet().size() + " matches.");
 	} else {
-	    System.out.println("LOG: (XMLReader) search gave no results");
+	    System.out.println("LOG: (XMLReader) Search gave no results.");
 	}
     }
 }

@@ -23,7 +23,7 @@ public class CreateDatabase
      * @throws IOException
      */
     public void createTables() throws SQLException {
-	System.out.println("LOG: (CreateDatabase) Creating tables if necessary");
+	System.out.println("LOG: (CreateDatabase) Creating tables if necessary.");
 	String seriesTable = ("CREATE TABLE IF NOT EXISTS series " +
 			      "(tvdb_id INTEGER NOT NULL PRIMARY KEY UNIQUE," +
 			      " show_name TEXT NOT NULL," +

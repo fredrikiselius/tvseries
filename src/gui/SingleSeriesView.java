@@ -6,9 +6,9 @@ import tvseries.Series;
 import tvseries.TVDBDataMapper;
 
 import javax.swing.*;
-import javax.swing.border.Border;
+
 import javax.swing.event.MouseInputAdapter;
-import java.awt.Color;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -86,7 +86,7 @@ public class SingleSeriesView extends JPanel
 		episodePanel.removeAll();
 		String selectedSeasonString = (String) seasonList.getSelectedItem();
 		selectedSeason = Integer.parseInt(selectedSeasonString.replace("Season ", ""));
-		System.out.println("Selected season: " + selectedSeasonString);
+		System.out.println("LOG: (SingleSeriesView) Selected season: " + selectedSeasonString);
 		createEpisodePanel(selectedSeason);
 	    }
 	});
@@ -109,7 +109,7 @@ public class SingleSeriesView extends JPanel
 	createEpisodePanel(1);
 
 
-	System.out.println("LOG: Found " + numberOfSeasons + " season(s) with a total of " + episodes.size() + " episodes");
+	System.out.println("LOG: (SingleSeriesView) Found " + numberOfSeasons + " season(s) with a total of " + episodes.size() + " episodes.");
 
     }
 

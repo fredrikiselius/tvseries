@@ -8,7 +8,6 @@ public class DBConnection
     private Connection connection;
     private Statement statement;
 
-    //hej:)
 
 
     public DBConnection(String database) {

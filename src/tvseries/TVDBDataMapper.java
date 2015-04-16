@@ -1,17 +1,8 @@
 package tvseries;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.IOException;
 import java.sql.*;
-import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -27,14 +18,13 @@ public class TVDBDataMapper
      * @param tvDbId
      */
 
-    //hej:)
     public static void initialData(String showName, String tvDbId) {
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
 	    String statement = String.format("INSERT INTO series (tvdb_id, show_name) VALUES (%s, \'%s\');", tvDbId,
 					     showName.replaceAll("'", "\'\'"));
 	    dbc.getStatement().executeUpdate(statement);
-	    System.out.println("LOG: (TVDBDataMapper) Added " + showName + "(" + tvDbId + ")");
+	    System.out.println("LOG: (TVDBDataMapper) Added " + showName + " (ID:" + tvDbId + ")");
 	    dbc.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
@@ -82,9 +72,7 @@ public class TVDBDataMapper
 	try {
 	    dbc.getStatement().executeUpdate("BEGIN");
 	    for (Map<String, String> episode : sdp.getAllEpisodes()) {
-		System.out.println(episode.get("id"));
 
-		System.out.println("LOG: Adding episode");
 		String completeStatement =
 			String.format(statement, episode.get("id"), episode.get("EpisodeName"), episode.get("FirstAired"),
 				      episode.get("EpisodeNumber"), episode.get("SeasonNumber"), episode.get("absolute_number"),
@@ -94,7 +82,7 @@ public class TVDBDataMapper
 
 	    }
 	    dbc.getStatement().executeUpdate("COMMIT");
-	    System.out.println("LOG: Added " + sdp.getNumberOfEpisodes() + "episodes");
+	    System.out.println("LOG: (TVDBDataMapper) Added " + sdp.getNumberOfEpisodes() + " episodes.");
 	    dbc.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
@@ -285,7 +273,6 @@ public class TVDBDataMapper
      */
     public static synchronized List<String> selectAllIds() {
 	ResultSet resultSet = null;
-	System.out.println(resultSet);
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
 	    List<String> arrayList = new ArrayList<String>();
