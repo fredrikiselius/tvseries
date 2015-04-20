@@ -247,6 +247,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 	this.remove(ssv);
 	this.add(mySeries, "north, w " + ((POSTER_PANEL_WIDTH) * NUMBER_OF_POSTERS_ROW + POSTER_PANEL_WIDTH_FIX) +
 					  "!, pushy, growy, wrap");
+	msv.reloadShowPanels();
 	this.revalidate();
 	this.repaint();
     }

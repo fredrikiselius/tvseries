@@ -34,17 +34,30 @@ public class Series {
         List<Episode> episodes = TVDBDataMapper.findByShowId(this.tvDbId);
         DateFormat df = new SimpleDateFormat("dd MMMM");
 
+        Episode nextEp = null;
         // Make sure the database returns any episodes
         if (episodes != null) {
             for (Episode episode : episodes) {
-                Date firstAired = episode.getFirstAired();
+                if (episode.getWatchCount() == 0 && episode.getSeNumb() > 0) {
+           		nextEp = episode;
+           		break;
+           	    }
                 // Make sure that there is first aired date
-                if (firstAired != null && currentDate.compareTo(firstAired) < 0) {
-                    nextEpisode = "Next ep: " + df.format(firstAired);
-                    return;
-                }
+
             }
         }
+
+        if (nextEp != null) {
+            Date firstAired = nextEp.getFirstAired();
+            if (firstAired != null && currentDate.compareTo(firstAired) < 0) {
+                nextEpisode = "Next ep: " + df.format(firstAired);
+                return;
+            } else if (firstAired != null && currentDate.compareTo(firstAired) > 0) {
+                nextEpisode = "Next: " + nextEp.getSeNumb() + "x" + nextEp.getEpNumb();
+                return;
+            }
+        }
+
         nextEpisode = status;
     }
 

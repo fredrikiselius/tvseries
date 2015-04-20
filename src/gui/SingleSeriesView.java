@@ -1,5 +1,8 @@
 package gui;
 
+import java.awt.Color;
+
+import javafx.scene.text.Font;
 import net.miginfocom.swing.MigLayout;
 import tvseries.Episode;
 import tvseries.Series;
@@ -22,17 +25,26 @@ public class SingleSeriesView extends JPanel
     private List<Episode> episodes;
     private JPanel episodePanel = new JPanel(new MigLayout());
     private int selectedSeason;
+    private Episode nextEpisode;
 
     public SingleSeriesView(Series s) {
 	this.viewListeners = new ArrayList<>();
 	this.episodes = TVDBDataMapper.findByShowId(s.getTvDbId());
-	this.selectedSeason = 1;
+	for (Episode episode : episodes) {
+	    if (episode.getWatchCount() == 0 && episode.getSeNumb() != 0) {
+		this.nextEpisode = episode;
+		selectedSeason = nextEpisode.getSeNumb();
+		break;
+	    }
+	}
+
+//	System.out.println("NEXT: " + nextEpisode.getSeNumb() + " " + nextEpisode.getEpNumb());
+
 
 	this.setLayout(new MigLayout("debug, fill, gap 0, insets 0, top", "", ""));
 	JPanel headerContent = new SingleSeriesPanel(s);
-	this.add(headerContent,
-		 "wrap, w " + headerContent.getPreferredSize().width + "!, h " +
-		 headerContent.getPreferredSize().height + "!");
+	this.add(headerContent, "wrap, w " + headerContent.getPreferredSize().width + "!, h " +
+				headerContent.getPreferredSize().height + "!");
 	JButton backButton = new JButton("<< Back");
 	this.add(backButton, "split 3, gapleft 8");
 	createEpisodeList(s.getTvDbId());
@@ -63,17 +75,16 @@ public class SingleSeriesView extends JPanel
 	// Get number of seasons
 	for (Episode episode : episodes) {
 	    if (episode.getSeNumb() > numberOfSeasons) {
-		numberOfSeasons = episode.getEpNumb();
+		numberOfSeasons = episode.getSeNumb();
 
 		//create a panel to contain all the episodes
 	    }
 	}
 
 
-
 	// create "lables" for the seasons combobox
 	String[] seasons = new String[numberOfSeasons + 1];
-	for (int i = 0; i <= numberOfSeasons ; i++) {
+	for (int i = 0; i <= numberOfSeasons; i++) {
 	    seasons[i] = "Season " + i;
 	}
 
@@ -106,10 +117,12 @@ public class SingleSeriesView extends JPanel
 
 
 	this.add(episodePanel);
-	createEpisodePanel(1);
+	createEpisodePanel(selectedSeason);
 
 
-	System.out.println("LOG: (SingleSeriesView) Found " + numberOfSeasons + " season(s) with a total of " + episodes.size() + " episodes.");
+	System.out
+		.println("LOG: (SingleSeriesView) Found " + numberOfSeasons + " season(s) with a total of " + episodes.size() +
+			 " episodes.");
 
     }
 
@@ -123,11 +136,26 @@ public class SingleSeriesView extends JPanel
 	    }
 	}
 
-	new SwingWorker<Void, Void>() {
+	boolean found = false;
+	for (Episode episode : episodes) {
+	    if (episode.getWatchCount() == 0 && episode.getSeNumb() > 0) {
+		nextEpisode = episode;
+		found = true;
+		break;
+	    }
+	}
+
+	if (!found) {
+	    nextEpisode = episodes.get(0);
+	}
+
+	new SwingWorker<Void, Void>()
+	{
 	    @Override public Void doInBackground() {
 		TVDBDataMapper.addMultipleWatched(episodesWithSeason);
 		return null;
 	    }
+
 	    @Override public void done() {
 		episodePanel.removeAll();
 		createEpisodePanel(selectedSeason);
@@ -136,11 +164,17 @@ public class SingleSeriesView extends JPanel
     }
 
     private void createEpisodePanel(int seasonNumber) {
+
 	for (Episode episode : episodes) {
 	    if (episode.getSeNumb() == seasonNumber) {
+		JLabel episodeName = new JLabel(episode.getName());
+		if (nextEpisode != null && episode.getTvDbId() == nextEpisode.getTvDbId()) {
+		    episodeName.setForeground(Color.decode("#33CC33"));
+		}
 		String watched;
+
 		episodePanel.add(new JLabel(episode.getEpNumb() + ""));
-		episodePanel.add(new JLabel(episode.getName()), "gapleft 10");
+		episodePanel.add(episodeName, "gapleft 10");
 		JLabel incrementWatchCount = new JLabel("+");
 		JLabel decreaseWatchCount = new JLabel("-");
 		JLabel watchCount = new JLabel(episode.getWatchCount() + "");
@@ -154,6 +188,21 @@ public class SingleSeriesView extends JPanel
 			super.mousePressed(e);
 			episode.markAsWatched();
 			watchCount.setText(episode.getWatchCount() + "");
+			int episodeIndex = episodes.indexOf(nextEpisode);
+			episodeName.setForeground(Color.BLACK);
+
+			int currentEpisodeIndex = episodes.indexOf(episode);
+
+
+			for (Episode ep : episodes) {
+			    if (ep.getWatchCount() == 0 && ep.getSeNumb() > 0) {
+				nextEpisode = ep;
+				break;
+			    }
+			}
+
+			episodePanel.removeAll();
+			createEpisodePanel(selectedSeason);
 		    }
 		});
 
@@ -163,6 +212,17 @@ public class SingleSeriesView extends JPanel
 			super.mousePressed(e);
 			episode.removeMostRecentWatched();
 			watchCount.setText(episode.getWatchCount() + "");
+
+			    for (Episode ep : episodes) {
+				if (ep.getWatchCount() == 0 && ep.getSeNumb() > 0) {
+				    nextEpisode = ep;
+				    break;
+				}
+			    }
+
+			    episodePanel.removeAll();
+			    createEpisodePanel(selectedSeason);
+
 		    }
 		});
 	    }

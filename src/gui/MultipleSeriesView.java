@@ -2,6 +2,7 @@ package gui;
 
 import net.miginfocom.swing.MigLayout;
 import tvseries.DownloadFile;
+import tvseries.Episode;
 import tvseries.Series;
 import tvseries.TVDBDataMapper;
 
@@ -59,21 +60,24 @@ public class MultipleSeriesView extends JPanel
 
 	JLabel poster = new JLabel(PictureLoader.loadPoster(s.getTvDbId()));
 	JLabel name = new JLabel(s.getShowName());
-	JLabel network = new JLabel(s.getNextEpisode().toString());
+
+	JLabel nextEp = new JLabel(s.getNextEpisode().toString());
+
+
 	JLabel removeSeries = new JLabel("X");
 
 	poster.setBorder(darkBorder);
 
 	seriesPanel.add(poster, "al center");
 	seriesPanel.add(name, "width ::" + POSTER_WIDTH);
-	seriesPanel.add(network, "left, pushx, growx, split 2");
+	seriesPanel.add(nextEp, "left, pushx, growx, split 2");
 	seriesPanel.add(removeSeries, "");
 
 	seriesPanel.setBackground(Color.decode("#222222"));
 	seriesPanel.setBorder(darkBorder);
 
 	name.setForeground(Color.WHITE);
-	network.setForeground(Color.decode("#33CC33"));
+	nextEp.setForeground(Color.decode("#33CC33"));
 	removeSeries.setForeground(Color.decode("#FF3300"));
 
 	removeSeries.addMouseListener(new MouseInputAdapter()
@@ -131,6 +135,18 @@ public class MultipleSeriesView extends JPanel
 	}
     }
 
+    private Episode getNextEpisode(String seriesId) {
+	List<Episode> episodes = TVDBDataMapper.findByShowId(seriesId);
+
+	Episode nextEpisode = null;
+	for (Episode episode : episodes) {
+	    if (episode.getWatchCount() == 0 && episode.getSeNumb() > 0) {
+		nextEpisode = episode;
+		break;
+	    }
+	}
+	return nextEpisode;
+    }
 
 
 
