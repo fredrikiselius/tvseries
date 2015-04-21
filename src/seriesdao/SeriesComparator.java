@@ -1,7 +1,13 @@
 package seriesdao;
 
+import java.util.Comparator;
+
 /**
- * Created by Fredrik on 2015-04-21.
+ * Comparator for series objects.
  */
-public class SeriesComparator {
+public class SeriesComparator implements Comparator<Series> {
+    @Override
+    public int compare(Series s1, Series s2) {
+	return s1.getShowName().compareTo(s2.getShowName());
+    }
 }
