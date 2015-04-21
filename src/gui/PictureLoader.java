@@ -20,7 +20,7 @@ public class PictureLoader
      * @return ImageIcon
      */
 
-    public static ImageIcon loadPoster(String tvDbId) {
+    public static ImageIcon loadPoster(int tvDbId) {
 	File tvDbPoster = new File("showdata/" + tvDbId + "/poster.jpg");
 	File noPoster = new File("img/no.jpg");
 	return loadPicture(tvDbPoster, noPoster, POSTER_WIDTH, POSTER_HEIGHT);

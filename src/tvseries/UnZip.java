@@ -13,7 +13,7 @@ public class UnZip {
     private final static  String OUTPUT_FOLDER = "showdata/%s/";
 
 
-    public static void unZipIt(String tvDbId) {
+    public static void unZipIt(int tvDbId) {
 	String outputFolder = String.format(OUTPUT_FOLDER, tvDbId);
 	String zipFile = String.format(INPUT_ZIP_FILE, tvDbId);
     	byte[] buffer = new byte[BYTE_SIZE];

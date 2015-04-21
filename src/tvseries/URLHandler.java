@@ -23,4 +23,6 @@ public class URLHandler // TODO remove?
 	String SEARCH_SERIES_URL = "http://thetvdb.com/api/GetSeries.php?seriesname=";
 	return new URL(BASE_URL + SEARCH_SERIES_URL + seriesName.replaceAll(" ", "%20"));
     }
+
+
 }

@@ -1,23 +1,30 @@
 package tvseries;
 
 
+import parser.ShowDataParser;
+import seriesdao.Series;
+import episodedao.Episode;
+
 import java.io.IOException;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * TVDBDataMapper is used to interact with the database.
+ * There is functionality for adding new shows and episodes as well as removing them.
+ */
 public class TVDBDataMapper
 {
     static String dbName = PropHandler.getDatabaseName();
 
-    /**
-     * The initial insert of a series into the database. Only inserts the show name and the show id.
-     *
-     * @param showName
-     * @param tvDbId
-     */
 
+    /**
+     * Puts the initial data from choosing a series into the database
+     * @param showName the name of the series
+     * @param tvDbId the tvdbid for the series
+     */
     public static void initialData(String showName, String tvDbId) {
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
@@ -31,7 +38,11 @@ public class TVDBDataMapper
 	}
     }
 
-    public static void updateShow(String tvDbId) {
+    /**
+     * Using the ShowDataParser this method completes the entry created by initialData with the remaining data.
+     * @param tvDbId the tvdb id for the series
+     */
+    public static void updateShow(int tvDbId) {
 	ShowDataParser sdp = new ShowDataParser(tvDbId);
 	DBConnection dbc = new DBConnection(dbName);
 	sdp.parseShow();
@@ -48,16 +59,14 @@ public class TVDBDataMapper
 	try {
 	    dbc.getStatement().executeUpdate(seriesStatement);
 	    dbc.close();
-	    DownloadFile.fetchPoster(sdp.getPoster(), tvDbId);
-	    DownloadFile.fetchFanart(sdp.getFanart(), tvDbId);
+	    FileHandler.fetchPoster(sdp.getPoster(), tvDbId);
+	    FileHandler.fetchFanart(sdp.getFanart(), tvDbId);
 	} catch (SQLException e) {
-	    e.printStackTrace();
-	} catch (IOException e) {
 	    e.printStackTrace();
 	}
     }
 
-    public static void updateEpisodes(String tvDbId) {
+    public static void updateEpisodes(int tvDbId) {
 	ShowDataParser sdp = new ShowDataParser(tvDbId);
 	DBConnection dbc = new DBConnection(dbName);
 	sdp.parseShow();
@@ -173,7 +182,7 @@ public class TVDBDataMapper
 	    resultSet = dbc.getStatement().executeQuery(query);
 
 	    while (resultSet.next()) {
-		String id = resultSet.getString("tvdb_id");
+		int id = resultSet.getInt("tvdb_id");
 		String name = resultSet.getString("show_name");
 		String network = resultSet.getString("network");
 		String airday = resultSet.getString("airday");
@@ -211,7 +220,7 @@ public class TVDBDataMapper
     }
 
 
-    public static synchronized List<Episode> findByShowId(String showId) {
+    public static synchronized List<Episode> findByShowId(int showId) {
 	List<Episode> episodes = new ArrayList<Episode>();
 	ResultSet rs = null;
 	try {
@@ -238,8 +247,8 @@ public class TVDBDataMapper
 		ep.setName(name);
 		ep.setFirstAired(firstAired);
 		ep.setOverview(overview);
-		ep.setSeNumb(season);
-		ep.setEpNumb(episode);
+		ep.setSeasonNumber(season);
+		ep.setEpisodeNumber(episode);
 		ep.setWatchCount(watched);
 		if (watched > 0) {
 		    ep.setWatchedStatus(true);

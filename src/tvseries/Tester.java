@@ -1,6 +1,10 @@
 package tvseries;
 
 
+import database.CreateDatabase;
+import database.UpdateDatabase;
+import gui.SeriesFrame;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -15,6 +19,8 @@ public class Tester
 	CreateDatabase createDatabase = new CreateDatabase("tvseries");
 	// setup properties
 	PropHandler propHandler = new PropHandler();
+	// update db
+	UpdateDatabase.update();
 	// create the main window frame
 	SeriesFrame sFrame = new SeriesFrame();
     }

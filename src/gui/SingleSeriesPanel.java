@@ -1,7 +1,7 @@
 package gui;
 
 import net.miginfocom.swing.MigLayout;
-import tvseries.Series;
+import seriesdao.Series;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;

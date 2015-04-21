@@ -1,20 +1,18 @@
-package tvseries;
+package database;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
 /**
- * CreateDatabase is used to create the database if there is non.
+ * CreateDatabase is used to create the database if there is none.
  * It also creates the necessary tables
  */
-public class CreateDatabase
+public class CreateDatabase extends DBHandler
 {
-    private DBConnection dbConnection;
+
 
     public CreateDatabase(String database) throws SQLException {
-	this.dbConnection = new DBConnection(database);
 	createTables();
-	dbConnection.close();
     }
 
     /**
@@ -22,7 +20,8 @@ public class CreateDatabase
      * @throws SQLException
      * @throws IOException
      */
-    public void createTables() throws SQLException {
+    public void createTables() {
+	createConnection();
 	System.out.println("LOG: (CreateDatabase) Creating tables if necessary.");
 	String seriesTable = ("CREATE TABLE IF NOT EXISTS series " +
 			      "(tvdb_id INTEGER NOT NULL PRIMARY KEY UNIQUE," +
@@ -39,23 +38,27 @@ public class CreateDatabase
 	String episodeTable = ("CREATE TABLE IF NOT EXISTS episodes " +
 			       "(tvdb_id INTEGER NOT NULL PRIMARY KEY UNIQUE," +
 			       " show_id INTEGER NOT NULL," +
-			       " episode_name TEXT NOT NULL," +
-			       " first_aired TEXT NOT NULL," +
+			       " episode_name TEXT DEFAULT TBA," +
+			       " first_aired TEXT DEFAULT TBA," +
 			       " episodenumber INTEGER NOT NULL," +
 			       " seasonnumber INTEGER NOT NULL," +
 			       " absolutenumber INTEGER NOT NULL," +
 			       " overview TEXT NOT NULL," +
-			       " watched INTEGER DEFAULT 0)");
+			       " watch_count INTEGER DEFAULT 0)");
 
 	String historyTable = "CREATE TABLE IF NOT EXISTS history " +
 			      "(episode_id INTEGER NOT NULL, " +
 			      "watch_date TEXT NOT NULL)";
 
-	dbConnection.getStatement().executeUpdate(seriesTable);
-	dbConnection.getStatement().executeUpdate(episodeTable);
-	dbConnection.getStatement().executeUpdate(historyTable);
-
-
-
+	try {
+	    begin();
+	    statement.executeUpdate(seriesTable);
+	    statement.executeUpdate(episodeTable);
+	    statement.executeUpdate(historyTable);
+	    commit();
+	    close();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
     }
 }

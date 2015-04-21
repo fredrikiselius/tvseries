@@ -9,15 +9,20 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 // test class to download a zip
-public class DownloadFile {
+public class FileHandler
+{
     private static final int BUFFER_SIZE = 4096;
     public static final String DOWNLOAD_FOLDER_DATA = "showdata/";
     public static final String DOWNLOAD_FOLDER_IMG = "showdata/";
 
-    public static void deleteShowDir(String tvDbId) {
+    public static void deleteShowDir(int tvDbId) {
 	deleteDirectory(new File("showdata/"+tvDbId+"/"));
     }
 
+    /**
+     * Deletes the specified directory and all of its content
+     * @param directory The directory to be deleted
+     */
     private static void deleteDirectory(File directory) {
         if(directory.exists()){
             File[] files = directory.listFiles();
@@ -35,19 +40,37 @@ public class DownloadFile {
         directory.delete();
     }
 
-    public static void fetchPoster(String posterName, String tvDbId) throws IOException {
+    /**
+     * Downloads the poster for the specified tvdb id
+     * @param posterName name of the poster
+     * @param tvDbId The tvdb id
+     */
+    public static void fetchPoster(String posterName, int tvDbId) {
 	String posterUrl = "http://thetvdb.com/banners/_cache/" + posterName;
-	downloadFile(posterUrl, DOWNLOAD_FOLDER_IMG+tvDbId+"/", "poster");
+	try {
+	    downloadFile(posterUrl, DOWNLOAD_FOLDER_IMG + tvDbId + "/", "poster");
+	} catch (IOException e) {
+	    e.printStackTrace();
+	}
 
     }
 
-    public static void fetchFanart(String posterName, String tvDbId) throws IOException {
-	String posterUrl = "http://thetvdb.com/banners/" + posterName;
-	downloadFile(posterUrl, DOWNLOAD_FOLDER_IMG+tvDbId+"/", "fanart");
+    /**
+     * Downloads the fanart for the specified tvdb id
+     * @param fanartName Name of the fanart
+     * @param tvDbId The tvdb id
+     */
+    public static void fetchFanart(String fanartName, int tvDbId) {
+	String posterUrl = "http://thetvdb.com/banners/" + fanartName;
+	try {
+	    downloadFile(posterUrl, DOWNLOAD_FOLDER_IMG + tvDbId + "/", "fanart");
+	} catch (IOException e) {
+	    e.printStackTrace();
+	}
     }
 
-    public static void fetchZip(String tvDbId) throws IOException {
-	downloadFile(URLHandler.ZipUrl(tvDbId), DOWNLOAD_FOLDER_DATA + tvDbId, null);
+    public static void fetchZip(int tvDbId) throws IOException {
+	downloadFile(URLHandler.ZipUrl(tvDbId + ""), DOWNLOAD_FOLDER_DATA + tvDbId, null);
 	UnZip.unZipIt(tvDbId);
 
     }

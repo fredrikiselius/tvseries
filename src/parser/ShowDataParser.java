@@ -1,10 +1,12 @@
-package tvseries;
+package parser;
 
+import jdk.nashorn.internal.runtime.ParserException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import seriesdao.Series;
 
 import javax.xml.parsers.*;
 import java.io.File;
@@ -32,7 +34,7 @@ public class ShowDataParser
 
     };
 
-    public ShowDataParser(String tvDbId) {
+    public ShowDataParser(int tvDbId) {
 	String folderPath = String.format(PATH, tvDbId);
 	if ((new File(String.format(PATH, tvDbId))).exists()) {
 	    System.out.println("LOG: (ShowDataParser) Found folder to save information in.");

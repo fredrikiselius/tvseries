@@ -10,8 +10,10 @@ import java.util.Properties;
 
 public class PropHandler
 {
-    final static String PROP_FILE = "config.properties";
+    private static final String PROP_FILE = "config.properties";
+    private static final String DEFAULT_DB_NAME = "tvseries";
     private static String databaseName;
+    private int lastUpdate = 0;
 
     public PropHandler() {
 	File propFile = new File(PROP_FILE);
@@ -30,7 +32,16 @@ public class PropHandler
 	try {
 	    output = new FileOutputStream(PROP_FILE);
 
-	    prop.setProperty("databaseName", "tvseries");
+	    if (databaseName == null) {
+		databaseName = DEFAULT_DB_NAME;
+	    }
+
+	    if (lastUpdate == 0) {
+		lastUpdate = 0000000000;
+	    }
+
+	    prop.setProperty("databaseName", databaseName);
+	    prop.setProperty("lastUpdate", lastUpdate + "");
 
 	    prop.store(output, null);
 	} catch (IOException io) {
@@ -55,6 +66,7 @@ public class PropHandler
 	    prop.load(input);
 
 	    databaseName = prop.getProperty("databaseName");
+	    lastUpdate = Integer.parseInt(prop.getProperty("lastUpdate"));
 	} catch (IOException io) {
 	    io.printStackTrace();
 	} finally {
@@ -70,5 +82,14 @@ public class PropHandler
 
     public static String getDatabaseName() {
 	return databaseName;
+    }
+
+    public int getLastUpdate() {
+	return lastUpdate;
+    }
+
+    public void setLastUpdate(int lastUpdate) {
+	this.lastUpdate = lastUpdate;
+	saveProp();
     }
 }

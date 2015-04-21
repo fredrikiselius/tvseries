@@ -1,9 +1,11 @@
 package gui;
 
+import episodedao.EpisodeComparator;
+import episodedao.EpisodeDaoSQLite;
 import net.miginfocom.swing.MigLayout;
-import tvseries.Episode;
-import tvseries.Series;
-import tvseries.TVDBDataMapper;
+import episodedao.Episode;
+import seriesdao.Series;
+
 
 import javax.swing.*;
 
@@ -12,23 +14,40 @@ import javax.swing.event.MouseInputAdapter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class SingleSeriesView extends JPanel
 {
-    //
+
+    EpisodeDaoSQLite episodeDb;
+
     private List<ViewListener> viewListeners;
     private List<Episode> episodes;
-    private JPanel episodePanel = new JPanel(new MigLayout());
+    private JPanel episodePanel = new JPanel(new MigLayout(""));
+
     private int selectedSeason;
+    private Episode nextEpisode;
 
     public SingleSeriesView(Series s) {
-	this.viewListeners = new ArrayList<>();
-	this.episodes = TVDBDataMapper.findByShowId(s.getTvDbId());
-	this.selectedSeason = 1;
+	episodeDb = new EpisodeDaoSQLite();
 
-	this.setLayout(new MigLayout("debug, fill, gap 0, insets 0, top", "", ""));
+	// episode list
+	this.viewListeners = new ArrayList<>();
+	this.episodes = episodeDb.getAllEpisodes(s.getTvDbId()); // get all episodes for the series
+	Collections.sort(episodes, new EpisodeComparator()); // sort the episode list
+
+	getNextEpisode();
+	if (nextEpisode != null) {
+	    this.selectedSeason = nextEpisode.getSeasonNumber(); // season to view
+	} else {
+	    this.selectedSeason = 1; // default if everything is watched
+	}
+
+
+	this.setLayout(new MigLayout("fill, gap 0, insets 0, top", "", ""));
 	JPanel headerContent = new SingleSeriesPanel(s);
 	this.add(headerContent,
 		 "wrap, w " + headerContent.getPreferredSize().width + "!, h " +
@@ -46,6 +65,7 @@ public class SingleSeriesView extends JPanel
 
     }
 
+
     public void addViewListener(ViewListener vl) {
 	this.viewListeners.add(vl);
     }
@@ -56,20 +76,16 @@ public class SingleSeriesView extends JPanel
 	}
     }
 
-    private void createEpisodeList(String tvDbId) {
-
-	int numberOfSeasons = -1;
+    private void createEpisodeList(int tvDbId) {
 
 	// Get number of seasons
-	for (Episode episode : episodes) {
-	    if (episode.getSeNumb() > numberOfSeasons) {
-		numberOfSeasons = episode.getEpNumb();
+	int numberOfSeasons = -1;
 
-		//create a panel to contain all the episodes
+	for (Episode episode : episodes) {
+	    if (episode.getSeasonNumber() > numberOfSeasons) {
+		numberOfSeasons = episode.getSeasonNumber();
 	    }
 	}
-
-
 
 	// create "lables" for the seasons combobox
 	String[] seasons = new String[numberOfSeasons + 1];
@@ -80,33 +96,27 @@ public class SingleSeriesView extends JPanel
 	// combobox to be able to chose which season to display
 	JComboBox seasonList = new JComboBox(seasons);
 	seasonList.setSelectedIndex(selectedSeason);
-	seasonList.addActionListener(new ActionListener()
-	{
-	    @Override public void actionPerformed(final ActionEvent e) {
-		episodePanel.removeAll();
-		String selectedSeasonString = (String) seasonList.getSelectedItem();
-		selectedSeason = Integer.parseInt(selectedSeasonString.replace("Season ", ""));
-		System.out.println("LOG: (SingleSeriesView) Selected season: " + selectedSeasonString);
-		createEpisodePanel(selectedSeason);
-	    }
+	seasonList.addActionListener(e -> {
+	    episodePanel.removeAll();
+	    String selectedSeasonString = (String) seasonList.getSelectedItem();
+	    selectedSeason = Integer.parseInt(selectedSeasonString.replace("Season ", ""));
+	    System.out.println("LOG: (SingleSeriesView) Selected season: " + selectedSeasonString);
+	    createEpisodePanel(selectedSeason);
 	});
 	this.add(seasonList, "top, gap 8, split 2");
 
-	// mark all episodes as watched button
+	// mark all episodes as watched
 	JButton markAll = new JButton("Watched");
 	this.add(markAll, "wrap");
-	markAll.addActionListener(new ActionListener()
-	{
-	    @Override public void actionPerformed(final ActionEvent e) {
-		String selectedSeason = (String) seasonList.getSelectedItem();
-		int season = Integer.parseInt(selectedSeason.replace("Season ", ""));
-		markSeasonWatched(season);
-	    }
+	markAll.addActionListener(e -> {
+	    String selectedSeason1 = (String) seasonList.getSelectedItem();
+	    int season = Integer.parseInt(selectedSeason1.replace("Season ", ""));
+	    markSeasonWatched(season);
 	});
 
 
-	this.add(episodePanel);
-	createEpisodePanel(1);
+	this.add(episodePanel, "grow");
+	createEpisodePanel(selectedSeason);
 
 
 	System.out.println("LOG: (SingleSeriesView) Found " + numberOfSeasons + " season(s) with a total of " + episodes.size() + " episodes.");
@@ -116,16 +126,18 @@ public class SingleSeriesView extends JPanel
     private void markSeasonWatched(int season) {
 	List<Episode> episodesWithSeason = new ArrayList<>();
 	for (Episode episode : episodes) {
-	    if (episode.getSeNumb() == season) {
+	    if (episode.getSeasonNumber() == season) {
 		episode.setWatchedStatus(true);
-		episode.setWatchCount(episode.getWatchCount() + 1); // increment watch status with one
+		episode.incrementWatchCount(1);
 		episodesWithSeason.add(episode);
 	    }
 	}
 
+	getNextEpisode();
+
 	new SwingWorker<Void, Void>() {
 	    @Override public Void doInBackground() {
-		TVDBDataMapper.addMultipleWatched(episodesWithSeason);
+		episodeDb.updateWatchCountMultipleEpisodes(episodesWithSeason);
 		return null;
 	    }
 	    @Override public void done() {
@@ -135,25 +147,36 @@ public class SingleSeriesView extends JPanel
 	}.execute();
     }
 
+    /**
+     * Creates a list of jlabels containing all episodes for the specified season
+     * @param seasonNumber The season to which the episode belongs
+     */
     private void createEpisodePanel(int seasonNumber) {
 	for (Episode episode : episodes) {
-	    if (episode.getSeNumb() == seasonNumber) {
-		String watched;
-		episodePanel.add(new JLabel(episode.getEpNumb() + ""));
-		episodePanel.add(new JLabel(episode.getName()), "gapleft 10");
+	    if (episode.getSeasonNumber() == seasonNumber) {
+		JLabel episodeName = new JLabel(episode.getName());
+		if (episode.equals(nextEpisode)) {
+		    episodeName.setForeground(Color.decode("#999999"));
+		}
+		episodePanel.add(new JLabel(episode.getEpisodeNumber() + ""), "");
+		episodePanel.add(episodeName, "gapleft 10, grow 2");
 		JLabel incrementWatchCount = new JLabel("+");
 		JLabel decreaseWatchCount = new JLabel("-");
 		JLabel watchCount = new JLabel(episode.getWatchCount() + "");
-		episodePanel.add(incrementWatchCount, "gapleft 10");
-		episodePanel.add(decreaseWatchCount, "gapleft 5");
-		episodePanel.add(watchCount, "wrap");
+		episodePanel.add(incrementWatchCount, "gapleft 30");
+		episodePanel.add(decreaseWatchCount, "gapleft 10");
+		episodePanel.add(watchCount, "gapleft 10, wrap");
 
 		incrementWatchCount.addMouseListener(new MouseInputAdapter()
 		{
 		    @Override public void mousePressed(final MouseEvent e) {
 			super.mousePressed(e);
-			episode.markAsWatched();
-			watchCount.setText(episode.getWatchCount() + "");
+			episode.setWatchCount(episode.getWatchCount() + 1);
+			episodeDb.updateWatchCount(episode);
+			getNextEpisode();
+
+			episodePanel.removeAll();
+			createEpisodePanel(seasonNumber);
 		    }
 		});
 
@@ -161,13 +184,29 @@ public class SingleSeriesView extends JPanel
 		{
 		    @Override public void mousePressed(final MouseEvent e) {
 			super.mousePressed(e);
-			episode.removeMostRecentWatched();
-			watchCount.setText(episode.getWatchCount() + "");
+			episode.setWatchCount(episode.getWatchCount() - 1);
+			episodeDb.updateWatchCount(episode);
+			getNextEpisode();
+
+			episodePanel.removeAll();
+			createEpisodePanel(seasonNumber);
+
 		    }
 		});
 	    }
 	}
 	episodePanel.repaint();
 	episodePanel.revalidate();
+    }
+
+    private void getNextEpisode() {
+	Episode nextEpisode = null; // in case all episodes has been watched
+	for (Episode episode : episodes) {
+	    if (episode.getWatchCount() == 0 && episode.getSeasonNumber() > 0) {
+		nextEpisode = episode;
+		break;
+	    }
+	}
+	this.nextEpisode = nextEpisode;
     }
 }

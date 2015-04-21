@@ -1,10 +1,16 @@
-package tvseries;
+package gui;
 
 
-import gui.MultipleSeriesView;
-import gui.SingleSeriesView;
-import gui.ViewListener;
+import episodedao.Episode;
+import episodedao.EpisodeDaoSQLite;
+import episodedao.EpisodeXMLParser;
 import net.miginfocom.swing.MigLayout;
+import seriesdao.Series;
+import seriesdao.SeriesDaoSQLite;
+import seriesdao.SeriesXMLParser;
+import tvseries.FileHandler;
+import parser.ShowDataParser;
+import parser.XMLReader;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -15,6 +21,7 @@ import java.awt.event.ActionListener;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 public class SeriesFrame extends JFrame implements ViewListener
 {
@@ -173,19 +180,43 @@ public class SeriesFrame extends JFrame implements ViewListener
 			searchField.setEditable(false);
 
 			String name = resultList.getSelectedValue();
-			String id = searchResults.get(name);
+			int id = Integer.parseInt(searchResults.get(name));
+			String fixedName = name.replaceAll("'", "");
 
 
 			try {
-			    DownloadFile.fetchZip(id);
+			    FileHandler.fetchZip(id);
 			} catch (IOException e) {
 			    e.printStackTrace();
 			}
-			    TVDBDataMapper.initialData(name.replaceAll("'", ""), id);
-			    TVDBDataMapper.updateShow(id);
-			TVDBDataMapper.updateEpisodes(id);
-			msv.reloadShowPanels();
-			//pack();
+
+			// parse show
+			ShowDataParser sdp = new ShowDataParser(id);
+			sdp.parseBanners();
+
+			SeriesXMLParser seriesParser = new SeriesXMLParser();
+			Series series = seriesParser.getSeries(id);
+
+
+			// fetch showart
+			FileHandler.fetchPoster(sdp.getPoster(), id);
+			FileHandler.fetchFanart(sdp.getFanart(), id);
+
+
+			//update view
+			msv.addSeriesToView(series);
+			msv.updateView();
+
+			// write series to db
+			SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
+			seriesDb.insertSeries(series);
+
+			// write episodes to db
+			EpisodeXMLParser episodeParser = new EpisodeXMLParser();
+			List<Episode> parsedEpisodes = episodeParser.getEpisodes(id);
+
+			EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
+			episodeDb.insertMultipleEpisodes(parsedEpisodes);
 
 
 			return null;
@@ -247,6 +278,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 	this.remove(ssv);
 	this.add(mySeries, "north, w " + ((POSTER_PANEL_WIDTH) * NUMBER_OF_POSTERS_ROW + POSTER_PANEL_WIDTH_FIX) +
 					  "!, pushy, growy, wrap");
+	msv.updateView();
 	this.revalidate();
 	this.repaint();
     }
