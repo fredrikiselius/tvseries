@@ -4,13 +4,13 @@ package seriesdao;
 import java.util.List;
 
 public interface SeriesDao {
-    public void insertSeries(series series);
+    public void insertSeries(Series series);
 
-    public series getSeries(int seriesID); // where seriesID is the tvdb id..
-    public List<series> getAllSeries();
+    public Series getSeries(int seriesID); // where seriesID is the tvdb id..
+    public List<Series> getAllSeries();
 
-    public void updateSeries(series series);
-    public void updateMultipleSeries(List<series> series);
+    public void updateSeries(Series series);
+    public void updateMultipleSeries(List<Series> series);
 
-    public void deleteSeries(series series);
+    public void deleteSeries(Series series);
 }

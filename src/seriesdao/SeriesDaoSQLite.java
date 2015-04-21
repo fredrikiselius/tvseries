@@ -7,17 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class handles all the querys to the series table in the database.
+ * This class handles all the querys to the Series table in the database.
  * There are methods for adding, updateing and deleting..
  */
 public class SeriesDaoSQLite extends DBHandler implements SeriesDao{
 
-    private static final String UPDATE_STATEMENT = "UPDATE series SET " +
+    private static final String UPDATE_STATEMENT = "UPDATE Series SET " +
 						  "network='%s', airday='%s', airtime='%s', overview='%s', " +
 						  "status='%s' " +
 						  "WHERE tvdb_id=%s";
 
-    private static final String INSERT_STATEMENT = "INSERT INTO series " +
+    private static final String INSERT_STATEMENT = "INSERT INTO Series " +
 						   "(tvdb_id, show_name, network, airday," +
 						   "airtime, overview, status) " +
 						   "VALUES ('%s', '%s', '%s', '%s', '%s', " +
@@ -25,11 +25,11 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao{
 
     private static final String SELECT_STATEMENT = "SELECT tvdb_id, show_name, network, airday, " +
 						   "airtime, overview, status, runtime " +
-						   "FROM series";
+						   "FROM Series";
 
-    private static final String DELETE_STATEMENT = "DELETE FROM series where tvdb_id=%s";
+    private static final String DELETE_STATEMENT = "DELETE FROM Series where tvdb_id=%s";
 
-    private static final String SELECT_ALL_IDS = "SELECT tvdb_id FROM series";
+    private static final String SELECT_ALL_IDS = "SELECT tvdb_id FROM Series";
 
 
     private boolean isExecuting;
@@ -39,11 +39,11 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao{
     }
 
     /**
-     * Inserts a new series into the database
-     * @param series the series to be inserted.
+     * Inserts a new Series into the database
+     * @param series the Series to be inserted.
      */
     @Override
-    public void insertSeries(series series) {
+    public void insertSeries(Series series) {
 	createConnection();
 	isExecuting = true;
 	String insertStatement = String.format(INSERT_STATEMENT,
@@ -67,11 +67,11 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao{
     }
 
     /**
-     * Updates a series already in the databse
-     * @param series the series to be updated
+     * Updates a Series already in the databse
+     * @param series the Series to be updated
      */
     @Override
-    public void updateSeries(series series) {
+    public void updateSeries(Series series) {
 	createConnection();
 	isExecuting = true;
 	String updateStatement = String.format(UPDATE_STATEMENT,
@@ -96,16 +96,16 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao{
     }
 
     /**
-     * Updates multiple series already in the database
-     * @param series List containing the series to be updated
+     * Updates multiple Series already in the database
+     * @param series List containing the Series to be updated
      */
     @Override
-    public void updateMultipleSeries(List<series> series) {
+    public void updateMultipleSeries(List<Series> series) {
 	createConnection();
 	isExecuting = true;
 	try {
 	    statement.executeUpdate("BEGIN");
-	    for (seriesdao.series show : series) {
+	    for (Series show : series) {
 		System.out.println("LOG: (SeriesDaoSQLite) Updating " + show.getShowName());
 		String updateStatement = String.format(UPDATE_STATEMENT,
 				show.getNetwork(), show.getAirday(), show.getAirtime(),
@@ -129,16 +129,16 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao{
     }
 
     /**
-     * Fetches all information about a series from the database
-     * @param seriesID the tvdb id for the series to fetched
-     * @return new series object with the fetched information
+     * Fetches all information about a Series from the database
+     * @param seriesID the tvdb id for the Series to fetched
+     * @return new Series object with the fetched information
      */
     @Override
-    public series getSeries(int seriesID) {
+    public Series getSeries(int seriesID) {
 	createConnection();
 	isExecuting = true;
 	ResultSet resultSet;
-	series series = null;
+	Series series = null;
 	try {
 	    resultSet = statement.executeQuery(SELECT_STATEMENT + " WHERE tvdb_id=" + seriesID);
 	    while (resultSet.next()) {
@@ -150,7 +150,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao{
 		String status = resultSet.getString("status");
 		String runtime = resultSet.getString("runtime");
 
-		series = new series(seriesID);
+		series = new Series(seriesID);
 		series.setShowName(name);
 		series.setNetwork(network);
 		series.setAirday(airday);
@@ -175,14 +175,14 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao{
     }
 
     /**
-     * Fetches all series currently in the database
-     * @return List<series> containing series objects from all the series
+     * Fetches all Series currently in the database
+     * @return List<Series> containing Series objects from all the Series
      */
     @Override
-    public List<series> getAllSeries() {
+    public List<Series> getAllSeries() {
 	createConnection();
 	isExecuting = true;
-	List<series> allSeries = new ArrayList<>();
+	List<Series> allSeries = new ArrayList<>();
 	ResultSet resultSet;
 	try {
 	    resultSet = statement.executeQuery(SELECT_STATEMENT);
@@ -196,7 +196,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao{
 	    	String status = resultSet.getString("status");
 	    	String runtime = resultSet.getString("runtime");
 
-	    	series series = new series(id);
+	    	Series series = new Series(id);
 	    	series.setShowName(name);
 	    	series.setNetwork(network);
 	    	series.setAirday(airday);
@@ -223,11 +223,11 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao{
     }
 
     /**
-     * Deletes a series from the database
-     * @param series the series to be deleted
+     * Deletes a Series from the database
+     * @param series the Series to be deleted
      */
     @Override
-    public void deleteSeries(series series) {
+    public void deleteSeries(Series series) {
 	createConnection();
 	try {
 	    statement.executeUpdate(String.format(DELETE_STATEMENT, series.getTvDbId()));
@@ -244,7 +244,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao{
     }
 
     /**
-     * Fetches all the series ids from the database
+     * Fetches all the Series ids from the database
      * @return List<String> contaning all the ids
      */
     public List<String> selectAllIds() {

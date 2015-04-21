@@ -17,22 +17,22 @@ public class SeriesXMLParser
     private static final String XML_FILE_PATH = "showdata/%d/en.xml";
 
     /**
-     * Parses the xml document for information about the specified series
-     * @param seriesID the tvdb id of the series to be parsed
-     * @return the parsed series object.
+     * Parses the xml document for information about the specified Series
+     * @param seriesID the tvdb id of the Series to be parsed
+     * @return the parsed Series object.
      */
-    public series getSeries(int seriesID) {
+    public Series getSeries(int seriesID) {
 	File xmlFile = new File(String.format(XML_FILE_PATH, seriesID));
 	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
-	series series = new series();
+	Series series = new Series();
 	if (xmlFile.exists()) {
 	    try {
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document document = builder.parse(new File(String.format(XML_FILE_PATH, seriesID)));
 		document.getDocumentElement().normalize();
 
-		NodeList seriesNodeList = document.getElementsByTagName("series");
+		NodeList seriesNodeList = document.getElementsByTagName("Series");
 		for (int i = 0; i < seriesNodeList.getLength(); i++) {
 		    NodeList dataNodeList = seriesNodeList.item(i).getChildNodes();
 		    for (int j = 0; j < dataNodeList.getLength(); j++) {
