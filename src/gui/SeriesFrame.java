@@ -78,15 +78,15 @@ public class SeriesFrame extends JFrame implements ViewListener
 	msv.addViewListener(this);
 
 	mySeries = new JScrollPane(msv);
-	mySeries.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+	mySeries.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 	mySeries.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 	mySeries.setBorder(BorderFactory.createEmptyBorder());
 
-
+	// ((POSTER_PANEL_WIDTH) * NUMBER_OF_POSTERS_ROW + POSTER_PANEL_WIDTH_FIX)
 	contentPane.add(createStatusBar(), "south, h 20!, wrap");
 	contentPane.add(createLeftMenu(), "west, w " + MENU_WIDTH + "!");
-	contentPane.add(mySeries, "north, w " + ((POSTER_PANEL_WIDTH) * NUMBER_OF_POSTERS_ROW + POSTER_PANEL_WIDTH_FIX) +
-				  "!, pushy, growy, wrap");
+	contentPane.add(mySeries, "north, w " + (Toolkit.getDefaultToolkit().getScreenSize().width-200) +
+				  "!, pushy, grow, wrap");
 
 
 	setContentPane(contentPane);
@@ -232,10 +232,13 @@ public class SeriesFrame extends JFrame implements ViewListener
 			resultList = null;
 			searchResults.clear();
 			searchField.setEditable(true);
-				mySeries.revalidate();
-				mySeries.repaint();
+
 		    }
 		}.execute();
+		System.out.println(msv.getPreferredSize().width + " " + msv.getPreferredSize().height);
+		mySeries.setPreferredSize(msv.getPreferredSize());
+		mySeries.getViewport().revalidate();
+		mySeries.getViewport().repaint();
 
 
 		// Update all posters in mySeries
@@ -280,8 +283,8 @@ public class SeriesFrame extends JFrame implements ViewListener
 
     public void singleViewChanged() {
 	this.remove(ssv);
-	this.add(mySeries, "north, w " + ((POSTER_PANEL_WIDTH) * NUMBER_OF_POSTERS_ROW + POSTER_PANEL_WIDTH_FIX) +
-					  "!, pushy, growy, wrap");
+	this.add(mySeries, "north, w " + msv.getPreferredSize().width +
+					  "!, h " + msv.getPreferredSize().height + ", pushy, growy, wrap");
 	msv.updateView();
 	this.revalidate();
 	this.repaint();

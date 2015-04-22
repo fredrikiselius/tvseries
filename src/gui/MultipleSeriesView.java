@@ -42,13 +42,20 @@ public class MultipleSeriesView extends JPanel {
     List<ViewListener> viewListeners;
 
     public MultipleSeriesView() {
+
         seriesDb = new SeriesDaoSQLite();
         this.series = new ArrayList<>();
-        this.setLayout(new MigLayout("insets 0, gap 0, wrap " + NUMBER_OF_POSTERS_ROW, "", ""));
+        this.setLayout(new MigLayout("insets 0, gap 0, wrap " + numberOfPostersRow(), "", ""));
         this.viewListeners = new ArrayList<>();
         fetchSeries();
         updateView();
         this.setVisible(true);
+    }
+
+    private int numberOfPostersRow() {
+        int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
+        return (screenWidth - 200) / POSTER_PANEL_WIDTH;
+
     }
 
     public void addViewListener(ViewListener vl) {
@@ -66,22 +73,23 @@ public class MultipleSeriesView extends JPanel {
 
         JLabel poster = new JLabel(PictureLoader.loadPoster(s.getTvDbId()));
         JLabel name = new JLabel(s.getShowName());
-        JLabel network = new JLabel(s.getNextAirDate().toString());
+        JLabel next = new JLabel(s.getNextAirDate().toString());
         JLabel removeSeries = new JLabel("X");
 
         poster.setBorder(darkBorder);
 
         seriesPanel.add(poster, "al center");
         seriesPanel.add(name, "width ::" + POSTER_WIDTH);
-        seriesPanel.add(network, "left, pushx, growx, split 2");
+        seriesPanel.add(next, "left, pushx, growx, split 2");
         seriesPanel.add(removeSeries, "");
 
         seriesPanel.setBackground(Color.decode("#222222"));
         seriesPanel.setBorder(darkBorder);
 
         name.setForeground(Color.WHITE);
-        network.setForeground(Color.decode("#33CC33"));
+        next.setForeground(Color.WHITE);
         removeSeries.setForeground(Color.decode("#FF3300"));
+
 
         removeSeries.addMouseListener(new MouseInputAdapter() {
             @Override
@@ -97,6 +105,16 @@ public class MultipleSeriesView extends JPanel {
                 seriesDb.updateSeries(s, QueryType.DELETE);
                 FileHandler.deleteShowDir(s.getTvDbId());
             }
+
+            @Override public void mouseEntered(final MouseEvent e) {
+                super.mouseEntered(e);
+                removeSeries.setForeground(Color.decode("#B22400"));
+            }
+
+            @Override public void mouseExited(final MouseEvent e) {
+                super.mouseExited(e);
+                removeSeries.setForeground(Color.decode("#FF3300"));
+            }
         });
 
         poster.addMouseListener(new MouseInputAdapter() {
@@ -107,6 +125,37 @@ public class MultipleSeriesView extends JPanel {
                 ssv = new SingleSeriesView(s);
                 notifyViewListeners(ssv);
 
+            }
+
+            @Override public void mouseEntered(final MouseEvent e) {
+                super.mouseEntered(e);
+                name.setForeground(Color.decode("#FF9900"));
+            }
+
+            @Override public void mouseExited(final MouseEvent e) {
+                super.mouseExited(e);
+                name.setForeground(Color.WHITE);
+            }
+        });
+
+        name.addMouseListener(new MouseInputAdapter()
+        {
+            @Override public void mousePressed(final MouseEvent e) {
+                super.mousePressed(e);
+                System.out.println("LOG: (MultipleSeriesView) Opening " + s.getShowName() + ".");
+                ssv = new SingleSeriesView(s);
+                notifyViewListeners(ssv);
+
+            }
+
+            @Override public void mouseEntered(final MouseEvent e) {
+                super.mouseEntered(e);
+                name.setForeground(Color.decode("#FF9900"));
+            }
+
+            @Override public void mouseExited(final MouseEvent e) {
+                super.mouseExited(e);
+                name.setForeground(Color.WHITE);
             }
         });
 
@@ -125,6 +174,21 @@ public class MultipleSeriesView extends JPanel {
     public void addSeriesToView(Series s) {
         series.add(s);
         Collections.sort(series, new SeriesComparator());
+        this.setPreferredSize(getNewSize());
+    }
+
+    private Dimension getNewSize() {
+        int width = Toolkit.getDefaultToolkit().getScreenSize().width - 200;
+        int height = series.size()/numberOfPostersRow();
+        return new Dimension(width, height);
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        int width = Toolkit.getDefaultToolkit().getScreenSize().width - 200;
+        int height = ((series.size()+numberOfPostersRow())/numberOfPostersRow())*POSTER_PANEL_HEIGHT;
+        System.out.println(width + " " + height);
+        return new Dimension(width, height);
     }
 
     /**
@@ -140,17 +204,6 @@ public class MultipleSeriesView extends JPanel {
         } else {
             System.out.println("LOG: (MultipleSeriesView) The database is empty.");
         }
-
-	/*List<String> idList = TVDBDataMapper.selectAllIds();
-    if (!idList.isEmpty()) {
-	    for (String id : idList) {
-		Series.add(TVDBDataMapper.findByTvDbId(id));
-	    }
-
-	    System.out.println("LOG: (MultipleSeriesView) Loaded " + idList.size() + " Series.");
-	} else {
-	    System.out.println("LOG: (MultipleSeriesView) The database is empty."); //TODO LOG
-	}*/
     }
 
 

@@ -166,7 +166,7 @@ public class SingleSeriesView extends JPanel
 
 		// check if episode is the next one to watch
 		if (episode.equals(nextEpisode)) {
-		    episodeName.setForeground(Color.decode("#999999"));
+		    episodeName.setForeground(Color.decode("#FF9900"));
 		}
 
 		episodePanel.add(new JLabel(episode.getEpisodeNumber() + ""), "");

@@ -15,6 +15,7 @@ import java.sql.SQLException;
 public class Tester
 {
     public static void main(String[] args) throws SQLException, IOException {
+	System.out.println(15/8);
 	// create the local database
 	CreateDatabase createDatabase = new CreateDatabase("tvseries");
 	// setup properties
