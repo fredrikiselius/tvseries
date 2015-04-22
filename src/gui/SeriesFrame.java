@@ -117,6 +117,7 @@ public class SeriesFrame extends JFrame implements ViewListener
     private JPanel createLeftMenu() {
 	JPanel menuPane = new JPanel(new MigLayout("", "[]", "[][::" + MENU_WIDTH + "px][]"));
 	final JButton addBtn = new JButton("Add");
+	JLabel searchLabel = new JLabel("Search:");
 	final JTextField searchField = new JTextField();
 	final JScrollPane resultScroll = new JScrollPane(resultList);
 	resultScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -126,6 +127,8 @@ public class SeriesFrame extends JFrame implements ViewListener
 
 	menuPane.setBorder(darkBorder);
 	menuPane.setBackground(Color.decode("#222222"));
+
+	searchLabel.setForeground(Color.decode("#999999"));
 
 	searchField.setBorder(darkBorder);
 	searchField.setBackground(Color.decode("#191919"));
@@ -142,6 +145,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 	addBtn.setForeground(Color.decode("#999999"));
 
 
+	menuPane.add(searchLabel, "left, wrap");
 	menuPane.add(searchField, "left, pushx, growx, wrap");
 	menuPane.add(resultScroll, "left, pushx, growx, wrap");
 	menuPane.add(addBtn, "right, wrap");

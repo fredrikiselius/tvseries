@@ -81,7 +81,6 @@ public class SingleSeriesView extends JPanel
 
 	// Get number of seasons
 	int numberOfSeasons = -1;
-
 	for (Episode episode : episodes) {
 	    if (episode.getSeasonNumber() > numberOfSeasons) {
 		numberOfSeasons = episode.getSeasonNumber();
@@ -98,33 +97,39 @@ public class SingleSeriesView extends JPanel
 	JComboBox seasonList = new JComboBox(seasons);
 	seasonList.setSelectedIndex(selectedSeason);
 	seasonList.addActionListener(e -> {
-	    episodePanel.removeAll();
+	    // Get the selected season
 	    String selectedSeasonString = (String) seasonList.getSelectedItem();
 	    selectedSeason = Integer.parseInt(selectedSeasonString.replace("Season ", ""));
-	    System.out.println("LOG: (SingleSeriesView) Selected season: " + selectedSeasonString);
+
+	    // Empty episodePanel and add new episodes
+	    episodePanel.removeAll();
 	    createEpisodePanel(selectedSeason);
 	});
 	this.add(seasonList, "top, gap 8, split 2");
 
-	// mark all episodes as watched
-	JButton markAll = new JButton("Watched");
-	this.add(markAll, "wrap");
-	markAll.addActionListener(e -> {
-		String selectedSeason1 = (String) seasonList.getSelectedItem();
-		int season = Integer.parseInt(selectedSeason1.replace("Season ", ""));
-		markSeasonWatched(season);
+	// mark season as watched
+	JButton markSeasonBtn = new JButton("Watched");
+	this.add(markSeasonBtn, "wrap");
+
+	markSeasonBtn.addActionListener(e -> {
+	    String selectedSeason1 = (String) seasonList.getSelectedItem();
+	    int season = Integer.parseInt(selectedSeason1.replace("Season ", ""));
+	    markSeasonWatched(season);
 	});
-		createEpisodePanel(selectedSeason);
-		this.episodeListScroller = new JScrollPane(episodePanel);
 
-		this.add(episodeListScroller, "grow");
-
+	// create the episode list and add to scroller
+	createEpisodePanel(selectedSeason);
+	this.episodeListScroller = new JScrollPane(episodePanel);
+	this.add(episodeListScroller, "grow");
 
 
 	System.out.println("LOG: (SingleSeriesView) Found " + numberOfSeasons + " season(s) with a total of " + episodes.size() + " episodes.");
-
     }
 
+    /**
+     * Marks the season as watched
+     * @param season The season to mark as watched
+     */
     private void markSeasonWatched(int season) {
 	List<Episode> episodesWithSeason = new ArrayList<>();
 	for (Episode episode : episodes) {
@@ -135,6 +140,7 @@ public class SingleSeriesView extends JPanel
 	    }
 	}
 
+	// update which episode to watch next
 	getNextEpisode();
 
 	new SwingWorker<Void, Void>() {
@@ -157,9 +163,12 @@ public class SingleSeriesView extends JPanel
 	for (Episode episode : episodes) {
 	    if (episode.getSeasonNumber() == seasonNumber) {
 		JLabel episodeName = new JLabel(episode.getName());
+
+		// check if episode is the next one to watch
 		if (episode.equals(nextEpisode)) {
 		    episodeName.setForeground(Color.decode("#999999"));
 		}
+
 		episodePanel.add(new JLabel(episode.getEpisodeNumber() + ""), "");
 		episodePanel.add(episodeName, "gapleft 10, grow 2");
 		JLabel incrementWatchCount = new JLabel("+");
