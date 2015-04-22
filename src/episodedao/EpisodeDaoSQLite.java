@@ -1,7 +1,6 @@
 package episodedao;
 
 import database.DBHandler;
-import seriesdao.Series;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -244,6 +243,20 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
     }
 
     @Override public void deleteMultipleEpisodes(final List<Episode> episodes) {
+		createConnection();
 
+		String deleteStatement = "DELETE FROM episodes where tvdb_id=%s";
+		try {
+			statement.executeUpdate("BEGIN");
+			for (Episode episode : episodes) {
+				statement.executeUpdate(String.format(deleteStatement, episode.getTvDbId()));
+			}
+			statement.executeUpdate("COMMIT");
+			System.out.println("LOG: EpisodeDaoSQLite Removed " + episodes.size() + " episodes from the database");
+			statement.close();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
     }
 }

@@ -34,7 +34,7 @@ public class SeriesFrame extends JFrame implements ViewListener
     final static int MIN_FRAME_WIDTH = 800;
     final static int MIN_FRAME_HEIGHT = 600;
 
-    final static int POSTER_PANEL_WIDTH = 200; // Size for the panel containing the series poster
+    final static int POSTER_PANEL_WIDTH = 200; // Size for the panel containing the Series poster
     final static int POSTER_PANEL_HEIGHT = 320; // and name in myseries
 
     private final static int MENU_WIDTH = 200;
@@ -207,7 +207,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 			msv.addSeriesToView(series);
 			msv.updateView();
 
-			// write series to db
+			// write Series to db
 			SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
 			seriesDb.insertSeries(series);
 
@@ -230,6 +230,8 @@ public class SeriesFrame extends JFrame implements ViewListener
 			resultList = null;
 			searchResults.clear();
 			searchField.setEditable(true);
+				mySeries.revalidate();
+				mySeries.repaint();
 		    }
 		}.execute();
 

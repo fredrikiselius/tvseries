@@ -27,6 +27,7 @@ public class SingleSeriesView extends JPanel
     private List<ViewListener> viewListeners;
     private List<Episode> episodes;
     private JPanel episodePanel = new JPanel(new MigLayout(""));
+	private JScrollPane episodeListScroller;
 
     private int selectedSeason;
     private Episode nextEpisode;
@@ -36,7 +37,7 @@ public class SingleSeriesView extends JPanel
 
 	// episode list
 	this.viewListeners = new ArrayList<>();
-	this.episodes = episodeDb.getAllEpisodes(s.getTvDbId()); // get all episodes for the series
+	this.episodes = episodeDb.getAllEpisodes(s.getTvDbId()); // get all episodes for the Series
 	Collections.sort(episodes, new EpisodeComparator()); // sort the episode list
 
 	getNextEpisode();
@@ -109,14 +110,15 @@ public class SingleSeriesView extends JPanel
 	JButton markAll = new JButton("Watched");
 	this.add(markAll, "wrap");
 	markAll.addActionListener(e -> {
-	    String selectedSeason1 = (String) seasonList.getSelectedItem();
-	    int season = Integer.parseInt(selectedSeason1.replace("Season ", ""));
-	    markSeasonWatched(season);
+		String selectedSeason1 = (String) seasonList.getSelectedItem();
+		int season = Integer.parseInt(selectedSeason1.replace("Season ", ""));
+		markSeasonWatched(season);
 	});
+		createEpisodePanel(selectedSeason);
+		this.episodeListScroller = new JScrollPane(episodePanel);
 
+		this.add(episodeListScroller, "grow");
 
-	this.add(episodePanel, "grow");
-	createEpisodePanel(selectedSeason);
 
 
 	System.out.println("LOG: (SingleSeriesView) Found " + numberOfSeasons + " season(s) with a total of " + episodes.size() + " episodes.");

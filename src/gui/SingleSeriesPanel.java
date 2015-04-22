@@ -2,6 +2,7 @@ package gui;
 
 import net.miginfocom.swing.MigLayout;
 import seriesdao.Series;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +13,7 @@ import java.io.File;
 /**
  * Custom JPanel used in the SingleSeriesView to display fanart,
  * basic information such as airdays and airtime.
- * It also displays the overview for the series
+ * It also displays the overview for the Series
  */
 public class SingleSeriesPanel extends JPanel
 {
@@ -87,7 +88,7 @@ public class SingleSeriesPanel extends JPanel
 		      0, TEXT_Y_OFFSET, Math.min(width, fanart.getWidth()), TEXT_Y_OFFSET + FANART_HEIGHT, // area to draw from
 		      this);
 
-	// draw series information
+	// draw Series information
 	g2d.setFont(font);
 	g2d.drawString(info, TEXT_X_OFFSET, TEXT_Y_OFFSET);
     }

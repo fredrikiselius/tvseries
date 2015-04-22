@@ -5,7 +5,6 @@ import parser.ShowDataParser;
 import seriesdao.Series;
 import episodedao.Episode;
 
-import java.io.IOException;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -21,14 +20,14 @@ public class TVDBDataMapper
 
 
     /**
-     * Puts the initial data from choosing a series into the database
-     * @param showName the name of the series
-     * @param tvDbId the tvdbid for the series
+     * Puts the initial data from choosing a Series into the database
+     * @param showName the name of the Series
+     * @param tvDbId the tvdbid for the Series
      */
     public static void initialData(String showName, String tvDbId) {
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
-	    String statement = String.format("INSERT INTO series (tvdb_id, show_name) VALUES (%s, \'%s\');", tvDbId,
+	    String statement = String.format("INSERT INTO Series (tvdb_id, show_name) VALUES (%s, \'%s\');", tvDbId,
 					     showName.replaceAll("'", "\'\'"));
 	    dbc.getStatement().executeUpdate(statement);
 	    System.out.println("LOG: (TVDBDataMapper) Added " + showName + " (ID:" + tvDbId + ")");
@@ -40,7 +39,7 @@ public class TVDBDataMapper
 
     /**
      * Using the ShowDataParser this method completes the entry created by initialData with the remaining data.
-     * @param tvDbId the tvdb id for the series
+     * @param tvDbId the tvdb id for the Series
      */
     public static void updateShow(int tvDbId) {
 	ShowDataParser sdp = new ShowDataParser(tvDbId);
@@ -49,7 +48,7 @@ public class TVDBDataMapper
 	sdp.parseBanners();
 
 
-	String seriesStatement = String.format(("UPDATE series " +
+	String seriesStatement = String.format(("UPDATE Series " +
 						"SET network='%s', airday='%s', airtime='%s', firstaired='%s', " +
 						"overview='%s', status='%s', runtime='%s', lastupdated=%s " +
 						"WHERE tvdb_id=%s"), sdp.getNetwork(), sdp.getAirday(), sdp.getAirtime(),
@@ -177,7 +176,7 @@ public class TVDBDataMapper
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
 	    String query = "SELECT tvdb_id, show_name, network, airday, airtime, overview, status, runtime " +
-			   "FROM series WHERE tvdb_id=" + tvDbId + " ORDER BY show_name ASC";
+			   "FROM Series WHERE tvdb_id=" + tvDbId + " ORDER BY show_name ASC";
 
 	    resultSet = dbc.getStatement().executeQuery(query);
 
@@ -285,7 +284,7 @@ public class TVDBDataMapper
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
 	    List<String> arrayList = new ArrayList<String>();
-	    String query = "SELECT tvdb_id FROM series ORDER BY show_name ASC";
+	    String query = "SELECT tvdb_id FROM Series ORDER BY show_name ASC";
 	    resultSet = dbc.getStatement().executeQuery(query);
 	    while (resultSet.next()) {
 		arrayList.add(resultSet.getString("tvdb_id"));
@@ -309,7 +308,7 @@ public class TVDBDataMapper
     public static synchronized void delete(String tvDbId) {
 	try {
 	    DBConnection dbc = new DBConnection(dbName);
-	    String sStatement = String.format("DELETE FROM series where tvdb_id=%s", tvDbId);
+	    String sStatement = String.format("DELETE FROM Series where tvdb_id=%s", tvDbId);
 	    String eStatement = String.format("DELETE FROM episodes where show_id=%s", tvDbId);
 
 	    dbc.getStatement().executeUpdate("BEGIN");

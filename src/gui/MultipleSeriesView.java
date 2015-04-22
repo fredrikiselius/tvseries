@@ -1,10 +1,12 @@
 package gui;
 
+import episodedao.Episode;
+import episodedao.EpisodeDaoSQLite;
 import net.miginfocom.swing.MigLayout;
+import seriesdao.Series;
 import seriesdao.SeriesDaoSQLite;
 import seriesdao.SeriesComparator;
 import tvseries.FileHandler;
-import seriesdao.Series;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -19,10 +21,9 @@ import java.util.List;
 /**
  * This class creates an overview for all the shows added to the program. The shows are displayed in seperate panels containing
  * a poster and the show name.
- * Each time a new series is added the shows are reloaded from the database and all panels are recreated.
+ * Each time a new Series is added the shows are reloaded from the database and all panels are recreated.
  */
-public class MultipleSeriesView extends JPanel
-{
+public class MultipleSeriesView extends JPanel {
 
     private Border darkBorder = BorderFactory.createLineBorder(Color.decode("#444444"), 1);
 
@@ -40,114 +41,116 @@ public class MultipleSeriesView extends JPanel
     List<ViewListener> viewListeners;
 
     public MultipleSeriesView() {
-	seriesDb = new SeriesDaoSQLite();
-	this.series = new ArrayList<>();
-	this.setLayout(new MigLayout("insets 0, gap 0, wrap " + NUMBER_OF_POSTERS_ROW, "", ""));
-	this.viewListeners = new ArrayList<>();
-	fetchSeries();
-	updateView();
-	this.setVisible(true);
+        seriesDb = new SeriesDaoSQLite();
+        this.series = new ArrayList<>();
+        this.setLayout(new MigLayout("insets 0, gap 0, wrap " + NUMBER_OF_POSTERS_ROW, "", ""));
+        this.viewListeners = new ArrayList<>();
+        fetchSeries();
+        updateView();
+        this.setVisible(true);
     }
 
     public void addViewListener(ViewListener vl) {
-	this.viewListeners.add(vl);
+        this.viewListeners.add(vl);
     }
 
     private void notifyViewListeners(SingleSeriesView ssv) {
-	for (ViewListener viewListener : viewListeners) {
-	    viewListener.multipleViewChanged(ssv);
-	}
+        for (ViewListener viewListener : viewListeners) {
+            viewListener.multipleViewChanged(ssv);
+        }
     }
 
     private void createSeriesPanel(Series s) {
-	JPanel seriesPanel = new JPanel(new MigLayout("wrap"));
+        JPanel seriesPanel = new JPanel(new MigLayout("wrap"));
 
-	JLabel poster = new JLabel(PictureLoader.loadPoster(s.getTvDbId()));
-	JLabel name = new JLabel(s.getShowName());
-	JLabel network = new JLabel(s.getNextAirDate().toString());
-	JLabel removeSeries = new JLabel("X");
+        JLabel poster = new JLabel(PictureLoader.loadPoster(s.getTvDbId()));
+        JLabel name = new JLabel(s.getShowName());
+        JLabel network = new JLabel(s.getNextAirDate().toString());
+        JLabel removeSeries = new JLabel("X");
 
-	poster.setBorder(darkBorder);
+        poster.setBorder(darkBorder);
 
-	seriesPanel.add(poster, "al center");
-	seriesPanel.add(name, "width ::" + POSTER_WIDTH);
-	seriesPanel.add(network, "left, pushx, growx, split 2");
-	seriesPanel.add(removeSeries, "");
+        seriesPanel.add(poster, "al center");
+        seriesPanel.add(name, "width ::" + POSTER_WIDTH);
+        seriesPanel.add(network, "left, pushx, growx, split 2");
+        seriesPanel.add(removeSeries, "");
 
-	seriesPanel.setBackground(Color.decode("#222222"));
-	seriesPanel.setBorder(darkBorder);
+        seriesPanel.setBackground(Color.decode("#222222"));
+        seriesPanel.setBorder(darkBorder);
 
-	name.setForeground(Color.WHITE);
-	network.setForeground(Color.decode("#33CC33"));
-	removeSeries.setForeground(Color.decode("#FF3300"));
+        name.setForeground(Color.WHITE);
+        network.setForeground(Color.decode("#33CC33"));
+        removeSeries.setForeground(Color.decode("#FF3300"));
 
-	removeSeries.addMouseListener(new MouseInputAdapter()
-	{
-	    @Override public void mousePressed(final MouseEvent e) {
-		super.mousePressed(e);
+        removeSeries.addMouseListener(new MouseInputAdapter() {
+            @Override
+            public void mousePressed(final MouseEvent e) {
+                super.mousePressed(e);
+                // Remove episodes
+                EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
+                List<Episode> episodesToRemove = episodeDb.getAllEpisodes(s.getTvDbId());
+                episodeDb.deleteMultipleEpisodes(episodesToRemove);
 
-		series.remove(s);
-		updateView();
-		seriesDb.deleteSeries(s);
-		FileHandler.deleteShowDir(s.getTvDbId());
-	    }
-	});
+                series.remove(s);
+                updateView();
+                seriesDb.deleteSeries(s);
+                FileHandler.deleteShowDir(s.getTvDbId());
+            }
+        });
 
-	poster.addMouseListener(new MouseInputAdapter()
-	{
-	    @Override public void mousePressed(final MouseEvent e) {
-		super.mousePressed(e);
-		System.out.println("LOG: (MultipleSeriesView) Opening " + s.getShowName() + ".");
-		ssv = new SingleSeriesView(s);
-		notifyViewListeners(ssv);
+        poster.addMouseListener(new MouseInputAdapter() {
+            @Override
+            public void mousePressed(final MouseEvent e) {
+                super.mousePressed(e);
+                System.out.println("LOG: (MultipleSeriesView) Opening " + s.getShowName() + ".");
+                ssv = new SingleSeriesView(s);
+                notifyViewListeners(ssv);
 
-	    }
-	});
+            }
+        });
 
-	this.add(seriesPanel, "top, w " + POSTER_PANEL_WIDTH + "!, h " + POSTER_PANEL_HEIGHT + "!");
+        this.add(seriesPanel, "top, w " + POSTER_PANEL_WIDTH + "!, h " + POSTER_PANEL_HEIGHT + "!");
     }
 
     public void updateView() {
-	this.removeAll();
-	for (Series s : series) {
-	    createSeriesPanel(s);
-	}
-	this.repaint();
-	this.revalidate();
+        this.removeAll();
+        for (Series s : series) {
+            createSeriesPanel(s);
+        }
+        this.repaint();
+        this.revalidate();
     }
 
     public void addSeriesToView(Series s) {
-	series.add(s);
-	Collections.sort(series, new SeriesComparator());
+        series.add(s);
+        Collections.sort(series, new SeriesComparator());
     }
 
     /**
-     * Fetches all series in the database and sorts them alphabetically
+     * Fetches all Series in the database and sorts them alphabetically
      */
     private void fetchSeries() {
-	System.out.println("LOG: (MultipleSeriesView) Fetching ids from database...");
-	series = seriesDb.getAllSeries();
+        System.out.println("LOG: (MultipleSeriesView) Fetching ids from database...");
+        series = seriesDb.getAllSeries();
 
-	if (!series.isEmpty()) {
-	    System.out.println("LOG: (MultipleSeriesView) Loaded " + series.size() + " series.");
-	    Collections.sort(series, new SeriesComparator());
-	} else {
-	    System.out.println("LOG: (MultipleSeriesView) The database is empty.");
-	}
+        if (!series.isEmpty()) {
+            System.out.println("LOG: (MultipleSeriesView) Loaded " + series.size() + " Series.");
+            Collections.sort(series, new SeriesComparator());
+        } else {
+            System.out.println("LOG: (MultipleSeriesView) The database is empty.");
+        }
 
 	/*List<String> idList = TVDBDataMapper.selectAllIds();
-	if (!idList.isEmpty()) {
+    if (!idList.isEmpty()) {
 	    for (String id : idList) {
-		series.add(TVDBDataMapper.findByTvDbId(id));
+		Series.add(TVDBDataMapper.findByTvDbId(id));
 	    }
 
-	    System.out.println("LOG: (MultipleSeriesView) Loaded " + idList.size() + " series.");
+	    System.out.println("LOG: (MultipleSeriesView) Loaded " + idList.size() + " Series.");
 	} else {
 	    System.out.println("LOG: (MultipleSeriesView) The database is empty."); //TODO LOG
 	}*/
     }
-
-
 
 
 }

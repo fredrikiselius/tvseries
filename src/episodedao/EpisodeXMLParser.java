@@ -3,7 +3,6 @@ package episodedao;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import seriesdao.Series;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,8 +17,8 @@ public class EpisodeXMLParser
     private static final String XML_FILE_PATH = "showdata/%d/en.xml";
 
     /**
-     * Parses the xml document for information about the specified series
-     * @param seriesID the tvdb id of the series to be parsed
+     * Parses the xml document for information about the specified Series
+     * @param seriesID the tvdb id of the Series to be parsed
      * @return the parsed Series object
      */
     public List<Episode> getEpisodes(int seriesID) {
