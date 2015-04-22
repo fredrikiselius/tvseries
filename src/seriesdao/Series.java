@@ -2,7 +2,6 @@ package seriesdao;
 
 import episodedao.Episode;
 import episodedao.EpisodeDaoSQLite;
-import tvseries.TVDBDataMapper;
 
 import java.text.DateFormat;
 import java.text.ParseException;

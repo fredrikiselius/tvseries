@@ -1,9 +1,8 @@
 package episodedao;
 
-import tvseries.TVDBDataMapper;
+
 
 import javax.swing.*;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -128,32 +127,6 @@ public class Episode
         }
     }
 
-    /**
-     * Marks the episode as watched. It also calls upon the addWatched method to make an entry in the database.
-     */
-    public void markAsWatched() {
-	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	Date currentDate = new Date();
-	this.watchedStatus = true;
-	this.watchCount++;
-
-	EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
-        episodeDb.updateEpisode(this);
-    }
-
-    public void removeMostRecentWatched() {
-	if (watchCount > 0) {
-            watchCount--;
-        }
-
-	new SwingWorker<Void, Void>() {
-	    @Override protected Void doInBackground() throws Exception {
-		TVDBDataMapper.removeWatched(tvDbId, watchCount);
-		return null;
-	    }
-	}.execute();
-
-    }
 
     public void setWatchedStatus(final boolean watchedStatus) {
 	this.watchedStatus = watchedStatus;

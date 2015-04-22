@@ -98,8 +98,8 @@ public class UpdateDatabase extends DBHandler {
 	    episodes.addAll(parsedEpisodes);
 	}
 
-	episodeDb.updateMultipleEpisodes(episodes);
-	seriesDb.updateMultipleSeries(series);
+	episodeDb.updateMultipleEpisodes(episodes, QueryType.UPDATE);
+	seriesDb.updateMultipleSeries(series, QueryType.UPDATE);
 	pHandler.setLastUpdate(getCurrentServerTime());
     }
 

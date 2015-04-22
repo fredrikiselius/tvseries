@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-public abstract class DBHandler {
+public abstract class DBHandler  {
     protected static final String DATABASE_NAME = "tvseries";
 
     protected Connection connection;
@@ -27,10 +27,21 @@ public abstract class DBHandler {
 	}
     }
 
+    /**
+     * Executes the update to the database
+     *
+     * @param updateStatement The update statement.
+     */
     protected void executeUpdate(String updateStatement) {
 	createConnection();
 	try {
-	    statement.executeUpdate(updateStatement);
+	    if (updateStatement.startsWith("UPDATE") || updateStatement.startsWith("INSERT") || updateStatement.startsWith("DELETE")) {
+		statement.executeUpdate(updateStatement);
+	    } else {
+		System.out.println("Unknown query type: ");
+		System.out.println(updateStatement);
+	    }
+
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	} finally {
@@ -46,11 +57,16 @@ public abstract class DBHandler {
     protected void executeMultipleUpdates(List<String> updateStatements) {
 	createConnection();
 	try {
-	    begin();
+	    statement.executeUpdate("BEGIN");
 	    for (String updateStatement : updateStatements) {
-		statement.executeUpdate(updateStatement);
+		if (updateStatement.startsWith("UPDATE") || updateStatement.startsWith("INSERT") || updateStatement.startsWith("DELETE")) {
+		    statement.executeUpdate(updateStatement);
+		} else {
+		    System.out.println("Unknown query type.");
+		    System.out.println(updateStatement);
+		}
 	    }
-	    commit();
+	    statement.executeUpdate("COMMIT");
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	} finally {
@@ -60,31 +76,6 @@ public abstract class DBHandler {
 	    } catch (SQLException e) {
 		e.printStackTrace();
 	    }
-	}
-    }
-
-    protected void begin() {
-	try {
-	    statement.executeUpdate("BEGIN");
-	} catch(SQLException e) {
-	    e.printStackTrace();
-	}
-    }
-
-    protected void commit() {
-	try {
-	    statement.executeUpdate("COMMIT");
-	} catch(SQLException e) {
-	    e.printStackTrace();
-	}
-    }
-
-    protected void close() {
-	try {
-	    statement.close();
-	    connection.close();
-	} catch (SQLException e) {
-	    e.printStackTrace();
 	}
     }
 }

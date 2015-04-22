@@ -1,6 +1,6 @@
 package gui;
 
-
+import database.QueryType;
 import episodedao.Episode;
 import episodedao.EpisodeDaoSQLite;
 import episodedao.EpisodeXMLParser;
@@ -213,16 +213,14 @@ public class SeriesFrame extends JFrame implements ViewListener
 
 			// write Series to db
 			SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
-			seriesDb.insertSeries(series);
+			seriesDb.updateSeries(series, QueryType.INSERT);
 
 			// write episodes to db
 			EpisodeXMLParser episodeParser = new EpisodeXMLParser();
 			List<Episode> parsedEpisodes = episodeParser.getEpisodes(id);
 
 			EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
-			episodeDb.insertMultipleEpisodes(parsedEpisodes);
-
-
+			episodeDb.updateMultipleEpisodes(parsedEpisodes, QueryType.INSERT);
 			return null;
 		    }
 

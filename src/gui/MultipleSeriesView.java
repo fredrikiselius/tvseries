@@ -1,5 +1,6 @@
 package gui;
 
+import database.QueryType;
 import episodedao.Episode;
 import episodedao.EpisodeDaoSQLite;
 import net.miginfocom.swing.MigLayout;
@@ -89,11 +90,11 @@ public class MultipleSeriesView extends JPanel {
                 // Remove episodes
                 EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
                 List<Episode> episodesToRemove = episodeDb.getAllEpisodes(s.getTvDbId());
-                episodeDb.deleteMultipleEpisodes(episodesToRemove);
+                episodeDb.updateMultipleEpisodes(episodesToRemove, QueryType.DELETE);
 
                 series.remove(s);
                 updateView();
-                seriesDb.deleteSeries(s);
+                seriesDb.updateSeries(s, QueryType.DELETE);
                 FileHandler.deleteShowDir(s.getTvDbId());
             }
         });

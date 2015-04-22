@@ -51,14 +51,20 @@ public class CreateDatabase extends DBHandler
 			      "watch_date TEXT NOT NULL)";
 
 	try {
-	    begin();
+	    statement.executeUpdate("BEGIN");
 	    statement.executeUpdate(seriesTable);
 	    statement.executeUpdate(episodeTable);
 	    statement.executeUpdate(historyTable);
-	    commit();
-	    close();
+	    statement.executeUpdate("COMMIT");
 	} catch (SQLException e) {
 	    e.printStackTrace();
+	} finally {
+	    try {
+		statement.close();
+		connection.close();
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
 	}
     }
 }
