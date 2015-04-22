@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 public abstract class DBHandler {
     protected static final String DATABASE_NAME = "tvseries";
@@ -23,6 +24,42 @@ public abstract class DBHandler {
 
 	} catch (SQLException | ClassNotFoundException e) {
 	    e.printStackTrace();
+	}
+    }
+
+    protected void executeUpdate(String updateStatement) {
+	createConnection();
+	try {
+	    statement.executeUpdate(updateStatement);
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	} finally {
+	    try {
+		statement.close();
+		connection.close();
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
+	}
+    }
+
+    protected void executeMultipleUpdates(List<String> updateStatements) {
+	createConnection();
+	try {
+	    begin();
+	    for (String updateStatement : updateStatements) {
+		statement.executeUpdate(updateStatement);
+	    }
+	    commit();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	} finally {
+	    try {
+		statement.close();
+		connection.close();
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
 	}
     }
 
