@@ -18,6 +18,8 @@ public class Tester
 	System.out.println(15/8);
 	// create the local database
 	CreateDatabase createDatabase = new CreateDatabase("tvseries");
+	// create download folder
+	FileHandler.checkShowDataFolder();
 	// setup properties
 	PropHandler propHandler = new PropHandler();
 	// update db

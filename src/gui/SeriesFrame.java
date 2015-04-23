@@ -88,7 +88,8 @@ public class SeriesFrame extends JFrame implements ViewListener
 	contentPane.add(mySeries, "north, w " + (Toolkit.getDefaultToolkit().getScreenSize().width-200) +
 				  "!, pushy, grow, wrap");
 
-
+	GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	System.out.println(gd.getDisplayMode().getWidth());
 	setContentPane(contentPane);
 	setVisible(true);
 	pack();
@@ -207,9 +208,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 			FileHandler.fetchFanart(sdp.getFanart(), id);
 
 
-			//update view
-			msv.addSeriesToView(series);
-			msv.updateView();
+
 
 			// write Series to db
 			SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
@@ -221,6 +220,10 @@ public class SeriesFrame extends JFrame implements ViewListener
 
 			EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
 			episodeDb.updateMultipleEpisodes(parsedEpisodes, QueryType.INSERT);
+
+			//update view
+			msv.addSeriesToView(series);
+			msv.updateView();
 			return null;
 		    }
 
@@ -235,7 +238,6 @@ public class SeriesFrame extends JFrame implements ViewListener
 
 		    }
 		}.execute();
-		System.out.println(msv.getPreferredSize().width + " " + msv.getPreferredSize().height);
 		mySeries.setPreferredSize(msv.getPreferredSize());
 		mySeries.getViewport().revalidate();
 		mySeries.getViewport().repaint();

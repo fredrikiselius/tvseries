@@ -130,7 +130,6 @@ public class Series
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        System.out.println(getFirstAiredString());
     }
 
     public String getFirstAiredString() {

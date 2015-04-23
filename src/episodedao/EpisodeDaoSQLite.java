@@ -34,6 +34,11 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
     private static final String SELECT_ALL_IDS = "SELECT tvdb_id FROM episodes";
 
 
+    /**
+     * Preforms a database update on the episode
+     * @param episode
+     * @param queryType
+     */
     public void updateEpisode(Episode episode, QueryType queryType) {
 	String statement = createStatement(episode, queryType);
 	executeUpdate(statement);

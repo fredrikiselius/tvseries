@@ -11,7 +11,7 @@ import java.net.URL;
 // test class to download a zip
 public class FileHandler {
     private static final int BUFFER_SIZE = 4096;
-    public static final String DOWNLOAD_FOLDER_DATA = "showdata/";
+    public static final String DOWNLOAD_FOLDER = "showdata/";
     public static final String DOWNLOAD_FOLDER_IMG = "showdata/";
 
     public static void deleteShowDir(int tvDbId) {
@@ -37,6 +37,15 @@ public class FileHandler {
             }
         }
         directory.delete();
+    }
+
+    public static void checkShowDataFolder() {
+        File showDataFolder = new File(DOWNLOAD_FOLDER);
+
+        if (!showDataFolder.exists()) {
+            showDataFolder.mkdir();
+        }
+
     }
 
     /**
@@ -71,7 +80,7 @@ public class FileHandler {
     }
 
     public static void fetchZip(int tvDbId) throws IOException {
-        downloadFile(URLHandler.ZipUrl(tvDbId + ""), DOWNLOAD_FOLDER_DATA + tvDbId, null);
+        downloadFile(URLHandler.ZipUrl(tvDbId + ""), DOWNLOAD_FOLDER + tvDbId, null);
         UnZip.unZipIt(tvDbId);
 
     }

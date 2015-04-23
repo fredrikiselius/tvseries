@@ -6,6 +6,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+
+/**
+ * DBHandler is used to extend other dataase classes.
+ * It has methods for updating and querieing a database.
+ */
 public abstract class DBHandler  {
     protected static final String DATABASE_NAME = "tvseries";
 
@@ -28,7 +33,8 @@ public abstract class DBHandler  {
     }
 
     /**
-     * Executes the update to the database
+     * Executes a update to the database.
+     * It can either be a UPDATE, INSERT or a DELETE statement.
      *
      * @param updateStatement The update statement.
      */
@@ -54,6 +60,11 @@ public abstract class DBHandler  {
 	}
     }
 
+    /**
+     * Executes multiple updates to the database.
+     * It can either be UPDATE, INSERT or DELETE statements.
+     * @param updateStatements The statements to be updated.
+     */
     protected void executeMultipleUpdates(List<String> updateStatements) {
 	createConnection();
 	try {

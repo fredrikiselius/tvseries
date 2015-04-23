@@ -54,6 +54,7 @@ public class MultipleSeriesView extends JPanel {
 
     private int numberOfPostersRow() {
         int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
+        System.out.println((screenWidth - 200) / POSTER_PANEL_WIDTH);
         return (screenWidth - 200) / POSTER_PANEL_WIDTH;
 
     }
@@ -73,7 +74,7 @@ public class MultipleSeriesView extends JPanel {
 
         JLabel poster = new JLabel(PictureLoader.loadPoster(s.getTvDbId()));
         JLabel name = new JLabel(s.getShowName());
-        JLabel next = new JLabel(s.getNextAirDate().toString());
+        JLabel next = new JLabel(s.getNextAirDate());
         JLabel removeSeries = new JLabel("X");
 
         poster.setBorder(darkBorder);
@@ -174,7 +175,6 @@ public class MultipleSeriesView extends JPanel {
     public void addSeriesToView(Series s) {
         series.add(s);
         Collections.sort(series, new SeriesComparator());
-        this.setPreferredSize(getNewSize());
     }
 
     private Dimension getNewSize() {
@@ -187,7 +187,6 @@ public class MultipleSeriesView extends JPanel {
     public Dimension getPreferredSize() {
         int width = Toolkit.getDefaultToolkit().getScreenSize().width - 200;
         int height = ((series.size()+numberOfPostersRow())/numberOfPostersRow())*POSTER_PANEL_HEIGHT;
-        System.out.println(width + " " + height);
         return new Dimension(width, height);
     }
 
