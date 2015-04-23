@@ -16,7 +16,6 @@ public abstract class DBHandler  {
 
     protected Connection connection;
     protected Statement statement;
-    protected boolean isExecuting;
 
     /**
      * Opens a connection to the database
@@ -41,7 +40,8 @@ public abstract class DBHandler  {
     protected void executeUpdate(String updateStatement) {
 	createConnection();
 	try {
-	    if (updateStatement.startsWith("UPDATE") || updateStatement.startsWith("INSERT") || updateStatement.startsWith("DELETE")) {
+	    if (updateStatement.startsWith("UPDATE") || updateStatement.startsWith("INSERT") ||
+		updateStatement.startsWith("DELETE") || updateStatement.startsWith("CREATE")) {
 		statement.executeUpdate(updateStatement);
 	    } else {
 		System.out.println("Unknown query type: ");
@@ -70,7 +70,8 @@ public abstract class DBHandler  {
 	try {
 	    statement.executeUpdate("BEGIN");
 	    for (String updateStatement : updateStatements) {
-		if (updateStatement.startsWith("UPDATE") || updateStatement.startsWith("INSERT") || updateStatement.startsWith("DELETE")) {
+		if (updateStatement.startsWith("UPDATE") || updateStatement.startsWith("INSERT") ||
+		    updateStatement.startsWith("DELETE") || updateStatement.startsWith("CREATE")) {
 		    statement.executeUpdate(updateStatement);
 		} else {
 		    System.out.println("Unknown query type.");

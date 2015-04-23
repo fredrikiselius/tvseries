@@ -75,7 +75,6 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 
     @Override public Episode getEpisode(int episodeId) {
 	createConnection();
-	isExecuting = true;
 	ResultSet resultSet;
 	Episode episode = null;
 	try {
@@ -88,12 +87,12 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 		int watchCount = resultSet.getInt("watch_count");
 		String name = resultSet.getString("episode_name");
 		String overview = resultSet.getString("overview");
-		String firstAried = resultSet.getString("first_aired");
+		String firstAired = resultSet.getString("first_aired");
 
 		episode =
 			new Episode(name, overview, showId, episodeId, episodeNumber, seasonNumber, absoluteNumber, watchCount);
 		episode.deciedWatchedStatus(watchCount);
-		episode.setFirstAired(firstAried);
+		episode.setFirstAired(firstAired);
 	    }
 
 	} catch (SQLException e) {
@@ -102,7 +101,6 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 	    try {
 		statement.close();
 		connection.close();
-		isExecuting = false;
 	    } catch (SQLException e) {
 		e.printStackTrace();
 	    }
@@ -113,7 +111,6 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
     @Override public List<Episode> getAllEpisodes(int seriesId) {
 	createConnection();
 	List<Episode> episodes = new ArrayList<>();
-	isExecuting = true;
 	ResultSet resultSet;
 	try {
 	    resultSet = statement.executeQuery(String.format(SELECT_ALL_STATEMENT, seriesId));
@@ -125,12 +122,12 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 		int watchCount = resultSet.getInt("watch_count");
 		String name = resultSet.getString("episode_name");
 		String overview = resultSet.getString("overview");
-		String firstAried = resultSet.getString("first_aired");
+		String firstAired = resultSet.getString("first_aired");
 
 		Episode episode = new Episode(name, overview, seriesId, episodeId, episodeNumber, seasonNumber, absoluteNumber,
 					      watchCount);
 		episode.deciedWatchedStatus(watchCount);
-		episode.setFirstAired(firstAried);
+		episode.setFirstAired(firstAired);
 		episodes.add(episode);
 	    }
 
@@ -140,7 +137,6 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 	    try {
 		statement.close();
 		connection.close();
-		isExecuting = false;
 	    } catch (SQLException e) {
 		e.printStackTrace();
 	    }

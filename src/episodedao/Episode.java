@@ -7,6 +7,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * The episode class contains information about each seperate episode.
+ */
 public class Episode
 {
     private String name;

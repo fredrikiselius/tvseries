@@ -36,7 +36,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 
 
     public SeriesDaoSQLite() {
-	isExecuting = false;
+
     }
 
     /**
@@ -90,7 +90,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
      */
     @Override public Series getSeries(int seriesID) {
 	createConnection();
-	isExecuting = true;
+
 	ResultSet resultSet;
 	Series series = null;
 	try {
@@ -120,7 +120,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 	    try {
 		statement.close();
 		connection.close();
-		isExecuting = false;
+
 	    } catch (SQLException e) {
 		e.printStackTrace();
 	    }
@@ -135,7 +135,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
      */
     @Override public List<Series> getAllSeries() {
 	createConnection();
-	isExecuting = true;
+
 	List<Series> allSeries = new ArrayList<>();
 	ResultSet resultSet;
 	try {
@@ -168,7 +168,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 	    try {
 		statement.close();
 		connection.close();
-		isExecuting = false;
+
 	    } catch (SQLException e) {
 		e.printStackTrace();
 	    }

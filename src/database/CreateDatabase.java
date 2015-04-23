@@ -2,6 +2,8 @@ package database;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * CreateDatabase is used to create the database if there is none.
@@ -11,7 +13,7 @@ public class CreateDatabase extends DBHandler
 {
 
 
-    public CreateDatabase(String database) throws SQLException {
+    public CreateDatabase() {
 	createTables();
     }
 
@@ -23,7 +25,8 @@ public class CreateDatabase extends DBHandler
     public void createTables() {
 	createConnection();
 	System.out.println("LOG: (CreateDatabase) Creating tables if necessary.");
-	String seriesTable = ("CREATE TABLE IF NOT EXISTS series " +
+	List<String> tables = new ArrayList<>();
+	final String seriesTable = ("CREATE TABLE IF NOT EXISTS series " +
 			      "(tvdb_id INTEGER NOT NULL PRIMARY KEY UNIQUE," +
 			      " show_name TEXT NOT NULL," +
 			      " network TEXT," +
@@ -35,7 +38,7 @@ public class CreateDatabase extends DBHandler
 			      " runtime TEXT," +
 			      " lastupdated INTEGER)");
 
-	String episodeTable = ("CREATE TABLE IF NOT EXISTS episodes " +
+	final String episodeTable = ("CREATE TABLE IF NOT EXISTS episodes " +
 			       "(tvdb_id INTEGER NOT NULL PRIMARY KEY UNIQUE," +
 			       " show_id INTEGER NOT NULL," +
 			       " episode_name TEXT DEFAULT TBA," +
@@ -46,25 +49,14 @@ public class CreateDatabase extends DBHandler
 			       " overview TEXT NOT NULL," +
 			       " watch_count INTEGER DEFAULT 0)");
 
-	String historyTable = "CREATE TABLE IF NOT EXISTS history " +
+	final String historyTable = "CREATE TABLE IF NOT EXISTS history " +
 			      "(episode_id INTEGER NOT NULL, " +
 			      "watch_date TEXT NOT NULL)";
 
-	try {
-	    statement.executeUpdate("BEGIN");
-	    statement.executeUpdate(seriesTable);
-	    statement.executeUpdate(episodeTable);
-	    statement.executeUpdate(historyTable);
-	    statement.executeUpdate("COMMIT");
-	} catch (SQLException e) {
-	    e.printStackTrace();
-	} finally {
-	    try {
-		statement.close();
-		connection.close();
-	    } catch (SQLException e) {
-		e.printStackTrace();
-	    }
-	}
+	tables.add(seriesTable);
+	tables.add(episodeTable);
+	tables.add(historyTable);
+
+	executeMultipleUpdates(tables);
     }
 }

@@ -28,9 +28,8 @@ public class MultipleSeriesView extends JPanel {
 
     private Border darkBorder = BorderFactory.createLineBorder(Color.decode("#444444"), 1);
 
-    private final static int NUMBER_OF_POSTERS_ROW = 5;
+    private final static int LEFT_MENU = 200;
     final static int POSTER_WIDTH = 180;
-    final static int POSTER_HEIGHT = 265; //TODO remove?
     final static int POSTER_PANEL_WIDTH = 200; // Size for the panel containing the show poster
     final static int POSTER_PANEL_HEIGHT = 320; // and name in myseries
 
@@ -39,9 +38,13 @@ public class MultipleSeriesView extends JPanel {
     private SeriesDaoSQLite seriesDb;
     private SingleSeriesView ssv;
 
-    List<ViewListener> viewListeners;
+    private int screenWidth;
+
+    private List<ViewListener> viewListeners;
 
     public MultipleSeriesView() {
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+       	this.screenWidth = gd.getDisplayMode().getWidth();
 
         seriesDb = new SeriesDaoSQLite();
         this.series = new ArrayList<>();
@@ -53,9 +56,7 @@ public class MultipleSeriesView extends JPanel {
     }
 
     private int numberOfPostersRow() {
-        int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
-        System.out.println((screenWidth - 200) / POSTER_PANEL_WIDTH);
-        return (screenWidth - 200) / POSTER_PANEL_WIDTH;
+        return (this.screenWidth - LEFT_MENU) / POSTER_PANEL_WIDTH;
 
     }
 
@@ -177,17 +178,10 @@ public class MultipleSeriesView extends JPanel {
         Collections.sort(series, new SeriesComparator());
     }
 
-    private Dimension getNewSize() {
-        int width = Toolkit.getDefaultToolkit().getScreenSize().width - 200;
-        int height = series.size()/numberOfPostersRow();
-        return new Dimension(width, height);
-    }
-
     @Override
     public Dimension getPreferredSize() {
-        int width = Toolkit.getDefaultToolkit().getScreenSize().width - 200;
         int height = ((series.size()+numberOfPostersRow())/numberOfPostersRow())*POSTER_PANEL_HEIGHT;
-        return new Dimension(width, height);
+        return new Dimension(screenWidth - LEFT_MENU, height);
     }
 
     /**

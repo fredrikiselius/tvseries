@@ -23,6 +23,10 @@ import java.util.List;
 
 public class UpdateDatabase extends DBHandler {
 
+    /**
+     * Gets the current server time from thetvdb.com
+     * @return int Server time
+     */
     private static int getCurrentServerTime() {
 	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	int currentServerTime = 0;
@@ -40,6 +44,11 @@ public class UpdateDatabase extends DBHandler {
 	return currentServerTime;
     }
 
+    /**
+     * Fetech series ids to be updated
+     * @param lastUpdate Server time from last update
+     * @return List<String> Series ids
+     */
     private static List<String> getSeriesToUpdate(int lastUpdate) {
 	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	List<String> seriesIds = new ArrayList<>();
@@ -59,6 +68,9 @@ public class UpdateDatabase extends DBHandler {
 	return seriesIds;
     }
 
+    /**
+     * Updates the series that are in need of updates
+     */
     public static void update() {
 	PropHandler pHandler = new PropHandler();
 	SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
