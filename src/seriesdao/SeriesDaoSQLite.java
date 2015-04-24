@@ -22,9 +22,9 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 
     private static final String INSERT_STATEMENT = "INSERT INTO Series " +
 						   "(tvdb_id, show_name, network, airday," +
-						   "airtime, overview, status) " +
+						   "airtime, overview, status, runtime) " +
 						   "VALUES ('%s', '%s', '%s', '%s', '%s', " +
-						   "'%s', '%s')";
+						   "'%s', '%s', %d)";
 
     private static final String SELECT_STATEMENT = "SELECT tvdb_id, show_name, network, airday, " +
 						   "airtime, overview, status, runtime " +
@@ -72,7 +72,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 		break;
 	    case INSERT:
 		statement = String.format(INSERT_STATEMENT, series.getTvDbId(), series.getShowName(), series.getNetwork(),
-					  series.getAirday(), series.getAirtime(), series.getOverview(), series.getStatus());
+					  series.getAirday(), series.getAirtime(), series.getOverview(), series.getStatus(), series.getRuntime());
 		break;
 	    case DELETE:
 		statement = String.format(DELETE_STATEMENT, series.getTvDbId());
@@ -102,7 +102,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 		String airtime = resultSet.getString("airtime");
 		String overview = resultSet.getString("overview");
 		String status = resultSet.getString("status");
-		String runtime = resultSet.getString("runtime");
+		int runtime = resultSet.getInt("runtime");
 
 		series = new Series(seriesID);
 		series.setShowName(name);
@@ -148,7 +148,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 		String airtime = resultSet.getString("airtime");
 		String overview = resultSet.getString("overview");
 		String status = resultSet.getString("status");
-		String runtime = resultSet.getString("runtime");
+		int runtime = resultSet.getInt("runtime");
 
 		Series series = new Series(id);
 		series.setShowName(name);

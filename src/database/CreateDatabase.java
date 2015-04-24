@@ -35,7 +35,7 @@ public class CreateDatabase extends DBHandler
 			      " firstaired TEXT," +
 			      " overview TEXT," +
 			      " status TEXT," +
-			      " runtime TEXT," +
+			      " runtime INTEGER," +
 			      " lastupdated INTEGER)");
 
 	final String episodeTable = ("CREATE TABLE IF NOT EXISTS episodes " +

@@ -36,10 +36,14 @@ public class SingleSeriesPanel extends JPanel
 	this.width = screenSize.width - MENU_WIDTH;
 
 	File fanartUrl = new File("showdata/" + series.getTvDbId() + "/fanart.jpg");
-	try {
-	    fanart = ImageIO.read(fanartUrl);
-	} catch (IOException e) {
-	    e.printStackTrace();
+	if (fanartUrl.exists()) {
+	    try {
+		fanart = ImageIO.read(fanartUrl);
+	    } catch (IOException e) {
+		e.printStackTrace();
+	    }
+	} else {
+	    fanart = null;
 	}
 
 	setLayout(new MigLayout());
@@ -83,10 +87,12 @@ public class SingleSeriesPanel extends JPanel
 	// draw header image, fanart
 	g2d.setColor(Color.BLACK);
 	g2d.fillRect(0, 0, width, FANART_HEIGHT);
-	g2d.drawImage(fanart,
-		      0, 0, Math.min(width, fanart.getWidth()), FANART_HEIGHT, // area to draw
-		      0, TEXT_Y_OFFSET, Math.min(width, fanart.getWidth()), TEXT_Y_OFFSET + FANART_HEIGHT, // area to draw from
-		      this);
+	if (fanart != null) {
+	    g2d.drawImage(fanart, 0, 0, Math.min(width, fanart.getWidth()), FANART_HEIGHT, // area to draw
+			  0, TEXT_Y_OFFSET, Math.min(width, fanart.getWidth()), TEXT_Y_OFFSET + FANART_HEIGHT,
+			  // area to draw from
+			  this);
+	}
 
 	// draw Series information
 	g2d.setFont(font);

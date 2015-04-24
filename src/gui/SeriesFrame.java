@@ -41,6 +41,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 
 
     private JScrollPane mySeries;
+    private JTextArea watchTimeDisplay;
 
     // views
     private MultipleSeriesView msv;
@@ -72,7 +73,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 	// adds everything to the contentpane
 	GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 	contentPane.add(createLeftMenu(), "west, w " + MENU_WIDTH + "!");
-	contentPane.add(mySeries, "north, w " + (gd.getDisplayMode().getWidth()-MENU_WIDTH) +
+	contentPane.add(mySeries, "north, w " + (gd.getDisplayMode().getWidth() - MENU_WIDTH) +
 				  "!, pushy, grow, wrap");
 
 	setContentPane(contentPane);
@@ -81,9 +82,9 @@ public class SeriesFrame extends JFrame implements ViewListener
     }
 
 
-
     /**
      * Creates the left bar containing the search window
+     *
      * @return
      */
     private JPanel createLeftMenu() {
@@ -93,6 +94,8 @@ public class SeriesFrame extends JFrame implements ViewListener
 	JTextField searchField = new JTextField();
 	JScrollPane resultScroll = new JScrollPane(resultList);
 	resultScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+	JLabel timeLabel = new JLabel("Total watch time:");
+	watchTimeDisplay = new JTextArea();
 
 	resultScroll.setVisible(false);
 	addBtn.setVisible(false);
@@ -108,6 +111,15 @@ public class SeriesFrame extends JFrame implements ViewListener
 	searchField.setBorder(darkBorder);
 	searchField.setBackground(Color.decode("#191919"));
 	searchField.setForeground(Color.decode("#999999"));
+
+	// set style to time label
+	timeLabel.setForeground(Color.decode("#999999"));
+
+	// set style to watch time field
+	watchTimeDisplay.setBorder(darkBorder);
+	watchTimeDisplay.setBackground(Color.decode("#191919"));
+	watchTimeDisplay.setForeground(Color.decode("#999999"));
+	watchTimeDisplay.setText(getTotalWatchTime() + "");
 
 	// set style to the result window
 	resultScroll.setBorder(darkBorder);
@@ -125,6 +137,8 @@ public class SeriesFrame extends JFrame implements ViewListener
 	menuPane.add(searchField, "left, pushx, growx, wrap");
 	menuPane.add(resultScroll, "left, pushx, growx, wrap");
 	menuPane.add(addBtn, "right, wrap");
+	menuPane.add(timeLabel, "wrap");
+	menuPane.add(watchTimeDisplay, "grow");
 
 	// adds action to search on enter
 	searchField.addActionListener(new ActionListener()
@@ -154,7 +168,8 @@ public class SeriesFrame extends JFrame implements ViewListener
 		resultScroll.setVisible(false);
 		addBtn.setVisible(false);
 
-		new SwingWorker<Void, Void>() {
+		new SwingWorker<Void, Void>()
+		{
 		    @Override public Void doInBackground() {
 			// get series id
 			String name = resultList.getSelectedValue();
@@ -188,12 +203,15 @@ public class SeriesFrame extends JFrame implements ViewListener
 	    e.printStackTrace();
 	}
 
+
 	// parse show
 	ShowDataParser sdp = new ShowDataParser(id);
 	sdp.parseBanners();
 
+
 	SeriesXMLParser seriesParser = new SeriesXMLParser();
 	Series series = seriesParser.getSeries(id);
+	System.out.println(series);
 
 
 	// fetch showart
@@ -253,10 +271,55 @@ public class SeriesFrame extends JFrame implements ViewListener
     public void singleViewChanged() {
 	this.remove(ssv);
 	this.add(mySeries, "north, w " + msv.getPreferredSize().width +
-					  "!, h " + msv.getPreferredSize().height + ", pushy, growy, wrap");
+			   "!, h " + msv.getPreferredSize().height + ", pushy, growy, wrap");
 	msv.updateView();
 	this.revalidate();
 	this.repaint();
+    }
+
+    public void totalTimeChanged() {
+	watchTimeDisplay.setText(getTotalWatchTime());
+	watchTimeDisplay.revalidate();
+	watchTimeDisplay.repaint();
+    }
+
+    private String getTotalWatchTime() {
+	int minutesWatched = 0; // in min
+	int episodesWatched = 0;
+
+
+	EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
+	for (Series series : msv.getLoadedSeries()) {
+	    List<Episode> episodes = episodeDb.getAllEpisodes(series.getTvDbId());
+	    for (Episode episode : episodes) {
+		int watchCount = episode.getWatchCount();
+		if (watchCount > 0) {
+		    episodesWatched += watchCount;
+		    minutesWatched += watchCount * series.getRuntime();
+		}
+	    }
+	}
+
+	StringBuilder builder = new StringBuilder();
+	builder.append("Episodes: " + episodesWatched + "\n");
+
+	int monthsWatched = minutesWatched / 43829;
+	minutesWatched %= 43829;
+	builder.append("Months: " + monthsWatched + "\n");
+
+
+	int daysWatched = minutesWatched / 1440;
+	minutesWatched %= 1440;
+	builder.append("Days: " + daysWatched + "\n");
+
+
+	int hoursWatched = minutesWatched / 60;
+	minutesWatched %= 60;
+	builder.append("Hours: " + hoursWatched + "\n");
+	builder.append("Minutes: " + minutesWatched);
+
+
+	return builder.toString();
     }
 
 }

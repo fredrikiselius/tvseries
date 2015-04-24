@@ -7,4 +7,6 @@ public interface ViewListener {
 
     // Go from single to multiple
     public void singleViewChanged();
+
+    public void totalTimeChanged();
 }

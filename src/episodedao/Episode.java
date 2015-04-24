@@ -146,16 +146,11 @@ public class Episode
 
     }
 
-    public void incrementWatchCount(int size) {
-        if (size > 0) {
-            this.watchCount += size;
-        }
-    }
+
 
     @Override public String toString() {
         return "Episode{" +
-               "name='" + name + '\'' +
-               ", seasonNumber=" + seasonNumber +
+               "seasonNumber=" + seasonNumber +
                ", episodeNumber=" + episodeNumber +
                '}';
     }

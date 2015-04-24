@@ -33,6 +33,7 @@ public class SingleSeriesView extends JPanel
     private Episode nextEpisode;
 
     public SingleSeriesView(Series s) {
+	this.setLayout(new MigLayout("fill, gap 0, insets 0, top", "", ""));
 	episodeDb = new EpisodeDaoSQLite();
 
 	// episode list
@@ -48,21 +49,23 @@ public class SingleSeriesView extends JPanel
 	}
 
 
-	this.setLayout(new MigLayout("fill, gap 0, insets 0, top", "", ""));
+
 	JPanel headerContent = new SingleSeriesPanel(s);
 	this.add(headerContent,
 		 "wrap, w " + headerContent.getPreferredSize().width + "!, h " +
 		 headerContent.getPreferredSize().height + "!");
 	JButton backButton = new JButton("<< Back");
 	this.add(backButton, "split 3, gapleft 8");
-	createEpisodeList(s.getTvDbId());
+	if (episodes.size() > 0) {
+	    createEpisodeList(s.getTvDbId());
+	}
 
-	backButton.addActionListener(new ActionListener()
-	{
-	    @Override public void actionPerformed(final ActionEvent e) {
-		notifyViewListeners();
-	    }
-	});
+	    backButton.addActionListener(new ActionListener()
+	    {
+		@Override public void actionPerformed(final ActionEvent e) {
+		    notifyViewListeners();
+		}
+	    });
 
     }
 
@@ -74,6 +77,12 @@ public class SingleSeriesView extends JPanel
     private void notifyViewListeners() {
 	for (ViewListener viewListener : viewListeners) {
 	    viewListener.singleViewChanged();
+	}
+    }
+
+    private void notifyTimeChanged() {
+	for (ViewListener viewListener : viewListeners) {
+	    viewListener.totalTimeChanged();
 	}
     }
 
@@ -135,7 +144,7 @@ public class SingleSeriesView extends JPanel
 	for (Episode episode : episodes) {
 	    if (episode.getSeasonNumber() == season) {
 		episode.setWatchedStatus(true);
-		episode.incrementWatchCount(1);
+		episode.setWatchCount(episode.getWatchCount() + 1);
 		episodesWithSeason.add(episode);
 	    }
 	}
@@ -151,8 +160,10 @@ public class SingleSeriesView extends JPanel
 	    @Override public void done() {
 		episodePanel.removeAll();
 		createEpisodePanel(selectedSeason);
+		notifyTimeChanged();
 	    }
 	}.execute();
+
     }
 
     /**
@@ -188,6 +199,7 @@ public class SingleSeriesView extends JPanel
 
 			episodePanel.removeAll();
 			createEpisodePanel(seasonNumber);
+			notifyTimeChanged();
 		    }
 		});
 
@@ -201,7 +213,7 @@ public class SingleSeriesView extends JPanel
 
 			episodePanel.removeAll();
 			createEpisodePanel(seasonNumber);
-
+			notifyTimeChanged();
 		    }
 		});
 	    }

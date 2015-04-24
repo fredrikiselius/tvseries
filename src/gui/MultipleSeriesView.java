@@ -70,6 +70,12 @@ public class MultipleSeriesView extends JPanel {
         }
     }
 
+    private void notifyViewListeners() {
+        for (ViewListener viewListener : viewListeners) {
+            viewListener.totalTimeChanged();
+        }
+    }
+
     private void createSeriesPanel(Series s) {
         JPanel seriesPanel = new JPanel(new MigLayout("wrap"));
 
@@ -106,6 +112,7 @@ public class MultipleSeriesView extends JPanel {
                 updateView();
                 seriesDb.updateSeries(s, QueryType.DELETE);
                 FileHandler.deleteShowDir(s.getTvDbId());
+                notifyViewListeners();
             }
 
             @Override public void mouseEntered(final MouseEvent e) {
@@ -198,6 +205,11 @@ public class MultipleSeriesView extends JPanel {
             System.out.println("LOG: (MultipleSeriesView) The database is empty.");
         }
     }
+
+    public List<Series> getLoadedSeries() {
+        return series;
+    }
+
 
 
 }

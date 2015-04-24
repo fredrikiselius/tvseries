@@ -1,11 +1,13 @@
 package seriesdao;
 
 import episodedao.Episode;
+import episodedao.EpisodeComparator;
 import episodedao.EpisodeDaoSQLite;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -21,7 +23,7 @@ public class Series
     private String airtime;
     private String overview;
     private String status;
-    private String runtime;
+    private int runtime;
     private String nextAirDate;
     private Date firstAired;
 
@@ -53,7 +55,7 @@ public class Series
      * @param firstAired The date that the Series was first aired
      */
     public Series(int tvDbId, String showName, String network, String airday, String airtime, String overview, String status,
-                  String runtime, String firstAired)
+                  int runtime, String firstAired)
     {
         this.tvDbId = tvDbId;
         this.showName = showName;
@@ -80,6 +82,7 @@ public class Series
     private void calculateNextEp() {
         EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
         List<Episode> episodes = episodeDb.getAllEpisodes(this.tvDbId);
+        Collections.sort(episodes, new EpisodeComparator());
         Date currentDate = new Date(); // must be of Date type to be able to compare
 
         DateFormat df = new SimpleDateFormat("dd MMMM");
@@ -125,10 +128,12 @@ public class Series
 
     public void setFirstAired(String firstAiredString) {
         SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            this.firstAired = originalFormat.parse(firstAiredString);
-        } catch (ParseException e) {
-            e.printStackTrace();
+        if (!firstAiredString.isEmpty()) {
+            try {
+                this.firstAired = originalFormat.parse(firstAiredString);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -189,8 +194,12 @@ public class Series
         this.status = status;
     }
 
-    public void setRuntime(final String runtime) {
+    public void setRuntime(int runtime) {
         this.runtime = runtime;
+    }
+
+    public int getRuntime() {
+        return runtime;
     }
 
     @Override public String toString() {

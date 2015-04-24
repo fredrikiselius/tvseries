@@ -32,38 +32,39 @@ public class SeriesXMLParser extends XMLParser
 		    NodeList dataNodeList = nodeList.item(i).getChildNodes();
 		    for (int j = 0; j < dataNodeList.getLength(); j++) {
 			String data = dataNodeList.item(j).getTextContent().replaceAll("'", "");
-			switch (dataNodeList.item(j).getNodeName()) {
-			    case "id":
-				series.setTvDbId(Integer.parseInt(data));
-				break;
-			    case "Airs_DayOfWeek":
-				series.setAirday(data);
-				break;
-			    case "Airs_Time":
-				series.setAirtime(data);
-				break;
-			    case "FirstAired": //TODO parse to date object
-				series.setFirstAired(data);
-				break;
-			    case "Network":
-				series.setNetwork(data);
-				break;
-			    case "Overview":
-				series.setOverview(data);
-				break;
-			    case "Runtime":
-				series.setRuntime(data);
-				break;
-			    case "SeriesName":
-				series.setShowName(data);
-				break;
-			    case "Status":
-				series.setStatus(data);
-				break;
+			if (!data.isEmpty()) {
+			    switch (dataNodeList.item(j).getNodeName()) {
+				case "id":
+				    series.setTvDbId(Integer.parseInt(data));
+				    break;
+				case "Airs_DayOfWeek":
+				    series.setAirday(data);
+				    break;
+				case "Airs_Time":
+				    series.setAirtime(data);
+				    break;
+				case "FirstAired": //TODO parse to date object
+				    series.setFirstAired(data);
+				    break;
+				case "Network":
+				    series.setNetwork(data);
+				    break;
+				case "Overview":
+				    series.setOverview(data);
+				    break;
+				case "Runtime":
+				    series.setRuntime(Integer.parseInt(data));
+				    break;
+				case "SeriesName":
+				    series.setShowName(data);
+				    break;
+				case "Status":
+				    series.setStatus(data);
+				    break;
+			    }
 			}
 		    }
 		}
-
 	return series;
     }
 }

@@ -32,6 +32,9 @@ public abstract class XMLParser{
 		    case EPISODE:
 			nodeList = document.getElementsByTagName("Episode");
 			break;
+		    case IMAGE:
+			nodeList = document.getElementsByTagName("Banner");
+			break;
 		    default:
 			System.out.println("Unknown parse type");
 		}
