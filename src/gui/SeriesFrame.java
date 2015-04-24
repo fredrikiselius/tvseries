@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.*;
 import java.util.List;
 
@@ -175,7 +176,15 @@ public class SeriesFrame extends JFrame implements ViewListener
 			String name = resultList.getSelectedValue();
 			int id = Integer.parseInt(searchResults.get(name));
 
-			addShow(id);
+			SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
+			List<String> seriesInDb = seriesDb.selectAllIds();
+
+
+			if (!seriesInDb.contains(id + "")) {
+			    addShow(id);
+			} else {
+			    System.out.println("The series " + "'" + name + "'" + " is already in the database.");
+			}
 			return null;
 		    }
 

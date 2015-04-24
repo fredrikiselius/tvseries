@@ -78,10 +78,9 @@ public class UpdateDatabase extends DBHandler {
 	SeriesXMLParser seriesParser = new SeriesXMLParser();
 	EpisodeXMLParser episodeParser = new EpisodeXMLParser();
 
-	UpdateDatabase dbUpdate = new UpdateDatabase();
 
 	List<String> seriesInDb = seriesDb.selectAllIds();
-	List<String> seriesUpdatedSinceLast = dbUpdate.getSeriesToUpdate(pHandler.getLastUpdate());
+	List<String> seriesUpdatedSinceLast = getSeriesToUpdate(pHandler.getLastUpdate());
 	List<String> seriesToUpdate = new ArrayList<>();
 
 	for (String id : seriesUpdatedSinceLast) {

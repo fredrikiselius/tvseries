@@ -2,11 +2,11 @@ package seriesdao;
 
 import database.DBHandler;
 import database.QueryType;
-import episodedao.Episode;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * This class handles all the querys to the Series table in the database. There are methods for adding, updateing and
@@ -35,6 +35,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
     private static final String SELECT_ALL_IDS = "SELECT tvdb_id FROM Series";
 
 
+
     public SeriesDaoSQLite() {
 
     }
@@ -47,6 +48,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
     public void updateSeries(Series series, QueryType queryType) {
 	String statement = createStatement(series, queryType);
 	executeUpdate(statement);
+
     }
 
     public void updateMultipleSeries(List<Series> seriesList, QueryType queryType) {

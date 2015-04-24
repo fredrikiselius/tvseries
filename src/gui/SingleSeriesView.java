@@ -5,6 +5,7 @@ import episodedao.EpisodeDaoSQLite;
 import net.miginfocom.swing.MigLayout;
 import episodedao.Episode;
 import seriesdao.Series;
+import tvseries.DateHandler;
 
 
 import javax.swing.*;
@@ -17,6 +18,7 @@ import java.awt.event.MouseEvent;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class SingleSeriesView extends JPanel
@@ -200,6 +202,9 @@ public class SingleSeriesView extends JPanel
 			episodePanel.removeAll();
 			createEpisodePanel(seasonNumber);
 			notifyTimeChanged();
+
+			List<Date> dates = episodeDb.getWatchHistoryForEpisode(episode);
+
 		    }
 		});
 
@@ -214,6 +219,9 @@ public class SingleSeriesView extends JPanel
 			episodePanel.removeAll();
 			createEpisodePanel(seasonNumber);
 			notifyTimeChanged();
+			List<Date> dates = episodeDb.getWatchHistoryForEpisode(episode);
+			System.out.println(DateHandler.dateToString(dates.get(dates.size()-1)));
+			episodeDb.removeHistoryEntry(dates.get(dates.size()-1));
 		    }
 		});
 	    }

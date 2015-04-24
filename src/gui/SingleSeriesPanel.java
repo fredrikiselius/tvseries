@@ -81,8 +81,8 @@ public class SingleSeriesPanel extends JPanel
 	final Graphics2D g2d = (Graphics2D) g;
 	Font font = new Font("Arial", Font.BOLD, FONT_SIZE);
 
-	String info = series.getShowName()+ " " + series.getAirday() + " at " + series.getAirtime() + " "
-					   + series.getNetwork() + " " + series.getStatus();
+	String info = series.getShowName()+ " - " + series.getAirday() + " at " + series.getAirtime() + " - "
+					   + series.getNetwork() + " - " + series.getStatus();
 
 	// draw header image, fanart
 	g2d.setColor(Color.BLACK);

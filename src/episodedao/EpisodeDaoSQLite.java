@@ -2,10 +2,12 @@ package episodedao;
 
 import database.DBHandler;
 import database.QueryType;
+import tvseries.DateHandler;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
@@ -30,6 +32,10 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
     private static final String SELECT_ALL_STATEMENT = "SELECT tvdb_id, episode_name, first_aired, episodenumber, " +
 						       "seasonnumber, absolutenumber, overview, watch_count " +
 						       "FROM episodes WHERE show_id=%d";
+
+    private static final String ADD_TO_HISTORY = "INSERT INTO history " +
+    						"(episode_id, watch_date) " +
+    						"VALUES ('%s', '%s');";
 
     private static final String SELECT_ALL_IDS = "SELECT tvdb_id FROM episodes";
 
@@ -148,20 +154,60 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 
 
     public void updateWatchCount(Episode episode) {
+	List<String> statements = new ArrayList<>();
+
+	String currentDate = DateHandler.dateToString(new Date());
 	String updateStatement = String.format("UPDATE episodes SET watch_count=%d WHERE tvdb_id=%d", episode.getWatchCount(),
 					       episode.getTvDbId());
-	executeUpdate(updateStatement);
+	String historyStatement = String.format(ADD_TO_HISTORY, episode.getTvDbId(), currentDate);
+
+	statements.add(updateStatement);
+	statements.add(historyStatement);
+
+	executeMultipleUpdates(statements);
     }
 
     public void updateWatchCountMultipleEpisodes(List<Episode> episodes) {
 	List<String> updateStatements = new ArrayList<>();
+	String currentDate = DateHandler.dateToString(new Date());
 	for (Episode episode : episodes) {
 	    System.out.println("LOG: (EpisodeDaoSQLite) Updating: " + episode.getName());
 	    String updateStatement =
 		    String.format("UPDATE episodes SET watch_count=%d WHERE tvdb_id=%d", episode.getWatchCount(),
 				  episode.getTvDbId());
+	    String historyStatement = String.format(ADD_TO_HISTORY, episode.getTvDbId(), currentDate);
 	    updateStatements.add(updateStatement);
+	    updateStatements.add(historyStatement);
 	}
 	executeMultipleUpdates(updateStatements);
+    }
+
+    public List<Date> getWatchHistoryForEpisode(Episode episode) {
+	createConnection();
+	List<Date> dates = new ArrayList<>();
+	ResultSet resultSet;
+	try {
+	    resultSet = statement.executeQuery(String.format("SELECT watch_date from history WHERE episode_id=%d", episode.getTvDbId()));
+	    while (resultSet.next()) {
+		Date date = DateHandler.stringToDate(resultSet.getString("watch_date"));
+		dates.add(date);
+	    }
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	} finally {
+	    try {
+		statement.close();
+		connection.close();
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
+	}
+	return dates;
+    }
+
+    public void removeHistoryEntry(Date date) {
+	String dateString = DateHandler.dateToString(date);
+	String statement = String.format("DELETE from history WHERE watch_date='%s'", dateString);
+	executeUpdate(statement);
     }
 }
