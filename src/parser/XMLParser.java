@@ -12,17 +12,23 @@ import java.io.File;
 import java.io.IOException;
 
 public abstract class XMLParser{
-    protected static final String XML_FILE_PATH = "showdata/%d/en.xml";
+    protected static final String XML_INFO_FILE_PATH = "showdata/%d/en.xml";
+    protected static final String XML_IMAGES_FILE_PATH = "showdata/%d/banners.xml";
 
     protected NodeList parseSeriesInfo(int seriesID, ParseType parseType) {
-	File xmlFile = new File(String.format(XML_FILE_PATH, seriesID));
+	File xmlFile = new File(String.format(XML_INFO_FILE_PATH, seriesID));
 	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
 	NodeList nodeList = null;
 	if (xmlFile.exists()) {
+	    Document document = null;
 	    try {
 		DocumentBuilder builder = factory.newDocumentBuilder();
-		Document document = builder.parse(new File(String.format(XML_FILE_PATH, seriesID)));
+		if (parseType == ParseType.IMAGE) {
+		    document = builder.parse(new File(String.format(XML_IMAGES_FILE_PATH, seriesID)));
+		} else {
+		    document = builder.parse(new File(String.format(XML_INFO_FILE_PATH, seriesID)));
+		}
 		document.getDocumentElement().normalize();
 
 		switch (parseType) {
@@ -42,7 +48,7 @@ public abstract class XMLParser{
 		e.printStackTrace();
 	    }
 	} else {
-	    System.out.println("Could not locate " + String.format(XML_FILE_PATH, seriesID));
+	    System.out.println("Could not locate " + String.format(XML_INFO_FILE_PATH, seriesID));
 	}
 	return nodeList;
     }

@@ -5,11 +5,12 @@ import episodedao.Episode;
 import episodedao.EpisodeDaoSQLite;
 import episodedao.EpisodeXMLParser;
 import net.miginfocom.swing.MigLayout;
+import parser.BannerXMLParser;
+import parser.ParseType;
 import seriesdao.Series;
 import seriesdao.SeriesDaoSQLite;
 import seriesdao.SeriesXMLParser;
 import tvseries.FileHandler;
-import parser.ShowDataParser;
 import parser.XMLReader;
 
 import javax.swing.*;
@@ -20,7 +21,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import java.io.IOException;
-import java.sql.SQLOutput;
 import java.util.*;
 import java.util.List;
 
@@ -214,8 +214,8 @@ public class SeriesFrame extends JFrame implements ViewListener
 
 
 	// parse show
-	ShowDataParser sdp = new ShowDataParser(id);
-	sdp.parseBanners();
+	BannerXMLParser banners = new BannerXMLParser();
+	HashMap<ParseType, String> imagePaths = banners.getImageURLs(id);
 
 
 	SeriesXMLParser seriesParser = new SeriesXMLParser();
@@ -224,8 +224,8 @@ public class SeriesFrame extends JFrame implements ViewListener
 
 
 	// fetch showart
-	FileHandler.fetchPoster(sdp.getPoster(), id);
-	FileHandler.fetchFanart(sdp.getFanart(), id);
+	FileHandler.fetchPoster(imagePaths.get(ParseType.POSTER), id);
+	FileHandler.fetchFanart(imagePaths.get(ParseType.FANART), id);
 
 
 	// write Series to db

@@ -2,5 +2,5 @@ package parser;
 
 public enum ParseType
 {
-    SERIES, EPISODE, IMAGE, URL
+    SERIES, EPISODE, IMAGE, FANART, POSTER
 }

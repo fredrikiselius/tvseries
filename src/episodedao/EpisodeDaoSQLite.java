@@ -154,24 +154,15 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 
 
     public void updateWatchCount(Episode episode) {
-	List<String> statements = new ArrayList<>();
-
-	String currentDate = DateHandler.dateToString(new Date());
 	String updateStatement = String.format("UPDATE episodes SET watch_count=%d WHERE tvdb_id=%d", episode.getWatchCount(),
 					       episode.getTvDbId());
-	String historyStatement = String.format(ADD_TO_HISTORY, episode.getTvDbId(), currentDate);
-
-	statements.add(updateStatement);
-	statements.add(historyStatement);
-
-	executeMultipleUpdates(statements);
+	executeUpdate(updateStatement);
     }
 
     public void updateWatchCountMultipleEpisodes(List<Episode> episodes) {
 	List<String> updateStatements = new ArrayList<>();
 	String currentDate = DateHandler.dateToString(new Date());
 	for (Episode episode : episodes) {
-	    System.out.println("LOG: (EpisodeDaoSQLite) Updating: " + episode.getName());
 	    String updateStatement =
 		    String.format("UPDATE episodes SET watch_count=%d WHERE tvdb_id=%d", episode.getWatchCount(),
 				  episode.getTvDbId());
@@ -182,6 +173,12 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 	executeMultipleUpdates(updateStatements);
     }
 
+
+    /**
+     * Fetches the watch history for a specified episode
+     * @param episode The episode for which to get the watch history
+     * @return List<Dates> dates, containing the watch history
+     */
     public List<Date> getWatchHistoryForEpisode(Episode episode) {
 	createConnection();
 	List<Date> dates = new ArrayList<>();
@@ -205,9 +202,25 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 	return dates;
     }
 
-    public void removeHistoryEntry(Date date) {
+    /**
+     * Removes an entry in the database
+     * @param date Date entry to be matched
+     * @param episode Episode id to be matched
+     */
+    public void removeHistoryEntry(Date date, Episode episode) {
 	String dateString = DateHandler.dateToString(date);
-	String statement = String.format("DELETE from history WHERE watch_date='%s'", dateString);
+	System.out.println("Remove " + dateString);
+	String statement = String.format("DELETE from history WHERE watch_date='%s' AND episode_id=%d", dateString, episode.getTvDbId());
+	executeUpdate(statement);
+    }
+
+    /**
+     * Add an entry in the history table
+     * @param episode the episode to be added
+     */
+    public void addHistoryEntry(Episode episode) {
+	String currentDate = DateHandler.dateToString(new Date());
+	String statement = String.format(ADD_TO_HISTORY, episode.getTvDbId(), currentDate);
 	executeUpdate(statement);
     }
 }

@@ -197,14 +197,12 @@ public class SingleSeriesView extends JPanel
 			super.mousePressed(e);
 			episode.setWatchCount(episode.getWatchCount() + 1);
 			episodeDb.updateWatchCount(episode);
+			episodeDb.addHistoryEntry(episode);
 			getNextEpisode();
 
 			episodePanel.removeAll();
 			createEpisodePanel(seasonNumber);
 			notifyTimeChanged();
-
-			List<Date> dates = episodeDb.getWatchHistoryForEpisode(episode);
-
 		    }
 		});
 
@@ -220,8 +218,11 @@ public class SingleSeriesView extends JPanel
 			createEpisodePanel(seasonNumber);
 			notifyTimeChanged();
 			List<Date> dates = episodeDb.getWatchHistoryForEpisode(episode);
-			System.out.println(DateHandler.dateToString(dates.get(dates.size()-1)));
-			episodeDb.removeHistoryEntry(dates.get(dates.size()-1));
+			System.out.println(dates);
+			if (!dates.isEmpty()) {
+			    episodeDb.removeHistoryEntry(dates.get(dates.size() - 1), episode);
+			    System.out.println("Date to remove " + DateHandler.dateToString(dates.get(dates.size() -1 )));
+			}
 		    }
 		});
 	    }
