@@ -2,13 +2,12 @@ package database;
 
 import episodedao.Episode;
 import episodedao.EpisodeDaoSQLite;
-import episodedao.EpisodeXMLParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import parser.XMLParser;
 import seriesdao.Series;
 import seriesdao.SeriesDaoSQLite;
-import seriesdao.SeriesXMLParser;
 import tvseries.FileHandler;
 import tvseries.PropHandler;
 
@@ -75,8 +74,7 @@ public class UpdateDatabase extends DBHandler {
 	PropHandler pHandler = new PropHandler();
 	SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
 	EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
-	SeriesXMLParser seriesParser = new SeriesXMLParser();
-	EpisodeXMLParser episodeParser = new EpisodeXMLParser();
+	XMLParser xmlParser = new XMLParser();
 
 
 	List<String> seriesInDb = seriesDb.selectAllIds();
@@ -102,8 +100,8 @@ public class UpdateDatabase extends DBHandler {
 	    }
 
 	    // parse new data
-	    Series s = seriesParser.getSeries(id);
-	    List<Episode> parsedEpisodes = episodeParser.getEpisodes(id);
+	    Series s = xmlParser.getSeries(id);
+	    List<Episode> parsedEpisodes = xmlParser.getEpisodes(id);
 
 	    series.add(s);
 	    episodes.addAll(parsedEpisodes);

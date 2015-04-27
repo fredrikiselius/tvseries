@@ -1,5 +1,7 @@
 package database;
 
+import tvseries.PropHandler;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -12,7 +14,7 @@ import java.util.List;
  * It has methods for updating and querieing a database.
  */
 public abstract class DBHandler  {
-    protected static final String DATABASE_NAME = "tvseries";
+    protected static final String DATABASE_NAME = PropHandler.getDatabaseName();
 
     protected Connection connection;
     protected Statement statement;

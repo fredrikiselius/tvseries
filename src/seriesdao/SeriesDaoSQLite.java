@@ -42,7 +42,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 
     /**
      * Updated the database based on the query type. It can update, insert and delete.
-     * @param series The series to be updated
+     * @param series	The series to be updated
      * @param queryType The query type to be used
      */
     public void updateSeries(Series series, QueryType queryType) {
@@ -51,6 +51,11 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 
     }
 
+    /**
+     * Updates multiple series in the database based on the query type
+     * @param seriesList	A list containing all the series to be updated
+     * @param queryType		The query type to be used.
+     */
     public void updateMultipleSeries(List<Series> seriesList, QueryType queryType) {
 	List<String> updatestatements = new ArrayList<>();
 	for (Series series : seriesList) {
@@ -61,9 +66,9 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 
     /**
      * Creates a statement based on the query type.
-     * @param series The series used to create the statement
+     * @param series	The series used to create the statement
      * @param queryType The type of statement to be created
-     * @return A string containing the statement
+     * @return 		A string containing the statement
      */
     private String createStatement(Series series, QueryType queryType) {
 	String statement = "";
@@ -85,10 +90,8 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 
     /**
      * Fetches all information about a Series from the database
-     *
-     * @param seriesID the tvdb id for the Series to fetched
-     *
-     * @return new Series object with the fetched information
+     * @param seriesID 	the tvdb id for the Series to fetched
+     * @return 		new Series object with the fetched information
      */
     @Override public Series getSeries(int seriesID) {
 	createConnection();
@@ -132,7 +135,6 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 
     /**
      * Fetches all Series currently in the database
-     *
      * @return List<Series> containing Series objects from all the Series
      */
     @Override public List<Series> getAllSeries() {

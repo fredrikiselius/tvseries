@@ -7,12 +7,20 @@ import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+ * UnZip is used to unpack files.
+ */
 public class UnZip {
     private final static int BYTE_SIZE = 1024;
     private final static  String INPUT_ZIP_FILE = "showdata/%s/en.zip";
     private final static  String OUTPUT_FOLDER = "showdata/%s/";
 
 
+    /**
+     * Unzips the en.zip file, which needs to be downloaded from the tvdb first.
+     * The code is copied from an unknow source.
+     * @param tvDbId The tvdb is used to specify the path to the zipfile.
+     */
     public static void unZipIt(int tvDbId) {
 	String outputFolder = String.format(OUTPUT_FOLDER, tvDbId);
 	String zipFile = String.format(INPUT_ZIP_FILE, tvDbId);

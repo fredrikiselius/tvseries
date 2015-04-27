@@ -10,50 +10,37 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class XMLReader
+public class UrlXMLReader
 {
     private String xmlSource;
-    private String sourceType;
     public static NodeList nodeList = null;
     public Map<String, String> result = new HashMap<String, String>();
 
 
-    public XMLReader(String xmlSource, String sourceType) {
+    public UrlXMLReader(String xmlSource) {
 	this.xmlSource = xmlSource;
-	this.sourceType = sourceType;
 	fetchData();
     }
 
 
     private void createNodeList() {
+	Document document;
 	try {
 	    DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
 	    DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-	    Document doc = null;
 
-	    if (sourceType == "file") {
-		doc = docBuilder.parse(new File(xmlSource));
-	    } else if (sourceType == "url") {
-		    doc = docBuilder.parse(new URL("http://thetvdb.com/api/GetSeries.php?seriesname="+xmlSource).openStream());
-	    } else {
-		    System.out.println("ERROR");
-	    }
+	    document = docBuilder.parse(new URL("http://thetvdb.com/api/GetSeries.php?seriesname="+xmlSource).openStream());
 
-	    if (doc != null) {
-		doc.getDocumentElement().normalize();
-		nodeList = doc.getElementsByTagName("Series");
+	    if (document != null) {
+		document.getDocumentElement().normalize();
+		nodeList = document.getElementsByTagName("Series");
 	    }
-	} catch (ParserConfigurationException e) {
-	    e.printStackTrace();
-	} catch (IOException e) {
-	    e.printStackTrace();
-	} catch (SAXException e) {
+	} catch (ParserConfigurationException | IOException | SAXException e) {
 	    e.printStackTrace();
 	}
     }

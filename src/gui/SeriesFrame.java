@@ -3,15 +3,13 @@ package gui;
 import database.QueryType;
 import episodedao.Episode;
 import episodedao.EpisodeDaoSQLite;
-import episodedao.EpisodeXMLParser;
 import net.miginfocom.swing.MigLayout;
-import parser.BannerXMLParser;
 import parser.ParseType;
+import parser.XMLParser;
 import seriesdao.Series;
 import seriesdao.SeriesDaoSQLite;
-import seriesdao.SeriesXMLParser;
 import tvseries.FileHandler;
-import parser.XMLReader;
+import parser.UrlXMLReader;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -214,12 +212,11 @@ public class SeriesFrame extends JFrame implements ViewListener
 
 
 	// parse show
-	BannerXMLParser banners = new BannerXMLParser();
-	HashMap<ParseType, String> imagePaths = banners.getImageURLs(id);
+	XMLParser xmlParser = new XMLParser();
+	HashMap<ParseType, String> imagePaths = xmlParser.getImageURLs(id);
 
 
-	SeriesXMLParser seriesParser = new SeriesXMLParser();
-	Series series = seriesParser.getSeries(id);
+	Series series = xmlParser.getSeries(id);
 	System.out.println(series);
 
 
@@ -233,8 +230,8 @@ public class SeriesFrame extends JFrame implements ViewListener
 	seriesDb.updateSeries(series, QueryType.INSERT);
 
 	// write episodes to db
-	EpisodeXMLParser episodeParser = new EpisodeXMLParser();
-	List<Episode> parsedEpisodes = episodeParser.getEpisodes(id);
+
+	List<Episode> parsedEpisodes = xmlParser.getEpisodes(id);
 
 	EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
 	episodeDb.updateMultipleEpisodes(parsedEpisodes, QueryType.INSERT);
@@ -248,7 +245,7 @@ public class SeriesFrame extends JFrame implements ViewListener
     private void updateResultScroll(String searchString) {
 	System.out.println("LOG: (SeriesFrame) Searching THETVDB for: " + searchString);
 
-	XMLReader xmlReader = new XMLReader(searchString.replaceAll(" ", "%20"), "url");
+	UrlXMLReader xmlReader = new UrlXMLReader(searchString.replaceAll(" ", "%20"));
 	searchResults = xmlReader.result;
 	String[] shows = new String[searchResults.keySet().size()];
 	int iterIndex = 0;

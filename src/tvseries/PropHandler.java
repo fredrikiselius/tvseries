@@ -8,8 +8,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
 
-public class PropHandler
-{
+/**
+ * PropHandler is used to read and write to the properties file.
+ */
+public class PropHandler {
     private static final String PROP_FILE = "config.properties";
     private static final String DEFAULT_DB_NAME = "tvseries";
     private static String databaseName;

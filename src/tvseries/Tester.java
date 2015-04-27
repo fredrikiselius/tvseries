@@ -15,12 +15,13 @@ import java.sql.SQLException;
 public class Tester
 {
     public static void main(String[] args) throws SQLException, IOException {
+		// setup properties
+	PropHandler propHandler = new PropHandler();
 	// create the local database
 	CreateDatabase createDatabase = new CreateDatabase();
 	// create download folder
 	FileHandler.checkShowDataFolder();
-	// setup properties
-	PropHandler propHandler = new PropHandler();
+
 	// update db
 	UpdateDatabase.update();
 	// create the main window frame

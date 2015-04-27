@@ -34,7 +34,6 @@ public class Series
 
     /**
      * Create a Series with just the tvdb id
-     *
      * @param tvDbId The tvdb id for the Series.
      */
     public Series(int tvDbId) {
@@ -43,7 +42,6 @@ public class Series
 
     /**
      * Create a Series with all its data.
-     *
      * @param tvDbId     The tvdb id for the Series.
      * @param showName   The name of the Series.
      * @param network    The network where the Series airs.
@@ -135,11 +133,6 @@ public class Series
                 e.printStackTrace();
             }
         }
-    }
-
-    public String getFirstAiredString() {
-        SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd");
-        return originalFormat.format(firstAired);
     }
 
     public int getTvDbId() {

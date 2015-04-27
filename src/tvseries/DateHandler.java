@@ -2,15 +2,21 @@ package tvseries;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
+
+/**
+ * This class is used to convert strings to dates and dates to string.
+ * The date format used is as follows: 2014-09-01T09:10:11.000Z
+ */
 public class DateHandler{
-
-    // 2014-09-01T09:10:11.000Z
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.XX");
 
+    /**
+     * Converts a string contaning a date to a date object.
+     * @param dateString String containing the date to be converted.
+     * @return Date
+     */
     public static Date stringToDate(String dateString) {
 	Date date = null;
 	try {
@@ -21,15 +27,12 @@ public class DateHandler{
 	return date;
     }
 
+    /**
+     * Converts a date to a string.
+     * @param date The date to be converted.
+     * @return String containing the date.
+     */
     public static String dateToString(Date date){
 	return sdf.format(date);
-    }
-
-    public static Date getNewestDate(List<Date> dates) {
-	Collections.sort(dates);
-	for (Date date : dates) {
-	    System.out.println(dateToString(date));
-	}
-	return dates.get(0);
     }
 }
