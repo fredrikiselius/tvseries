@@ -45,6 +45,7 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
      * @param episode
      * @param queryType
      */
+    @Override
     public void updateEpisode(Episode episode, QueryType queryType) {
 	String statement = createStatement(episode, queryType);
 	executeUpdate(statement);
@@ -79,7 +80,7 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 	return statement;
     }
 
-    @Override public Episode getEpisode(int episodeId) {
+    public Episode getEpisode(int episodeId) {
 	createConnection();
 	ResultSet resultSet;
 	Episode episode = null;

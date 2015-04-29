@@ -206,39 +206,37 @@ public class SeriesFrame extends JFrame implements ViewListener
     private void addShow(int id) {
 	try {
 	    FileHandler.fetchZip(id);
+
+	    // parse show
+	    XMLParser xmlParser = new XMLParser();
+	    HashMap<ParseType, String> imagePaths = xmlParser.getImageURLs(id);
+
+
+	    Series series = xmlParser.getSeries(id);
+
+
+	    // fetch showart
+	    FileHandler.fetchPoster(imagePaths.get(ParseType.POSTER), id);
+	    FileHandler.fetchFanart(imagePaths.get(ParseType.FANART), id);
+
+
+	    // write Series to db
+	    SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
+	    seriesDb.updateSeries(series, QueryType.INSERT);
+
+	    // write episodes to db
+
+	    List<Episode> parsedEpisodes = xmlParser.getEpisodes(id);
+
+	    EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
+	    episodeDb.updateMultipleEpisodes(parsedEpisodes, QueryType.INSERT);
+
+	    //update view
+	    msv.addSeriesToView(series);
+	    msv.updateView();
 	} catch (IOException e) {
 	    e.printStackTrace();
 	}
-
-
-	// parse show
-	XMLParser xmlParser = new XMLParser();
-	HashMap<ParseType, String> imagePaths = xmlParser.getImageURLs(id);
-
-
-	Series series = xmlParser.getSeries(id);
-	System.out.println(series);
-
-
-	// fetch showart
-	FileHandler.fetchPoster(imagePaths.get(ParseType.POSTER), id);
-	FileHandler.fetchFanart(imagePaths.get(ParseType.FANART), id);
-
-
-	// write Series to db
-	SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
-	seriesDb.updateSeries(series, QueryType.INSERT);
-
-	// write episodes to db
-
-	List<Episode> parsedEpisodes = xmlParser.getEpisodes(id);
-
-	EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
-	episodeDb.updateMultipleEpisodes(parsedEpisodes, QueryType.INSERT);
-
-	//update view
-	msv.addSeriesToView(series);
-	msv.updateView();
     }
 
 

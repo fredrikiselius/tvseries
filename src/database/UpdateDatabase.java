@@ -77,7 +77,9 @@ public class UpdateDatabase extends DBHandler {
 	XMLParser xmlParser = new XMLParser();
 
 
+	// fetch all ids in the db
 	List<String> seriesInDb = seriesDb.selectAllIds();
+	// fetch all ids updated since last update
 	List<String> seriesUpdatedSinceLast = getSeriesToUpdate(pHandler.getLastUpdate());
 	List<String> seriesToUpdate = new ArrayList<>();
 
