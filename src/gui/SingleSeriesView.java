@@ -73,15 +73,11 @@ public class SingleSeriesView extends JPanel {
     }
 
     private void notifyViewListeners() {
-	for (ViewListener viewListener : viewListeners) {
-	    viewListener.singleViewChanged();
-	}
+	viewListeners.forEach(ViewListener::singleViewChanged);
     }
 
     private void notifyTimeChanged() {
-	for (ViewListener viewListener : viewListeners) {
-	    viewListener.totalTimeChanged();
-	}
+	viewListeners.forEach(ViewListener::totalTimeChanged);
     }
 
     private void createEpisodeList() {
@@ -95,13 +91,11 @@ public class SingleSeriesView extends JPanel {
 	}
 
 	// create "lables" for the seasons combobox
-	String[] seasons = new String[numberOfSeasons + 1];
+	JComboBox<String> seasonList = new JComboBox<>();
 	for (int i = 0; i <= numberOfSeasons ; i++) {
-	    seasons[i] = "Season " + i;
+	    seasonList.addItem("Season " + i);
 	}
 
-	// combobox to be able to chose which season to display
-	JComboBox seasonList = new JComboBox(seasons);
 	seasonList.setSelectedIndex(selectedSeason);
 	seasonList.addActionListener(e -> {
 	    // Get the selected season
@@ -139,13 +133,12 @@ public class SingleSeriesView extends JPanel {
      */
     private void markSeasonWatched(int season) {
 	Collection<Episode> episodesWithSeason = new ArrayList<>();
-	for (Episode episode : episodes) {
-	    if (episode.getSeasonNumber() == season) {
-		episode.setWatchedStatus(true);
-		episode.setWatchCount(episode.getWatchCount() + 1);
-		episodesWithSeason.add(episode);
-	    }
-	}
+	//episode.setWatchedStatus(true);
+	episodes.stream().filter(episode -> episode.getSeasonNumber() == season).forEach(episode -> {
+	    //episode.setWatchedStatus(true);
+	    episode.setWatchCount(episode.getWatchCount() + 1);
+	    episodesWithSeason.add(episode);
+	});
 
 	// update which episode to watch next
 	getNextEpisode();
@@ -156,6 +149,7 @@ public class SingleSeriesView extends JPanel {
 		return null;
 	    }
 	    @Override public void done() {
+		super.done();
 		episodePanel.removeAll();
 		createEpisodePanel(selectedSeason);
 		notifyTimeChanged();
@@ -169,60 +163,61 @@ public class SingleSeriesView extends JPanel {
      * @param seasonNumber The season to which the episode belongs
      */
     private void createEpisodePanel(int seasonNumber) {
-	for (Episode episode : episodes) {
-	    if (episode.getSeasonNumber() == seasonNumber) {
-		JLabel episodeName = new JLabel(episode.getName());
+	// check if episode is the next one to watch
+//We decided to use date since it seemed simple to implement
+	episodes.stream().filter(episode -> episode.getSeasonNumber() == seasonNumber).forEach(episode -> {
+	    JLabel episodeName = new JLabel(episode.getName());
 
-		// check if episode is the next one to watch
-		if (episode.equals(nextEpisode)) {
-		    episodeName.setForeground(Color.decode("#FF9900"));
-		}
-
-		episodePanel.add(new JLabel(Integer.toString(episode.getEpisodeNumber())), "");
-		episodePanel.add(episodeName, "gapleft 10, grow 2");
-		JLabel incrementWatchCount = new JLabel("+");
-		JLabel decreaseWatchCount = new JLabel("-");
-		JLabel watchCount = new JLabel(episode.getWatchCount() + "");
-		episodePanel.add(incrementWatchCount, "gapleft 30");
-		episodePanel.add(decreaseWatchCount, "gapleft 10");
-		episodePanel.add(watchCount, "gapleft 10, wrap");
-
-		incrementWatchCount.addMouseListener(new MouseInputAdapter()
-		{
-		    @Override public void mousePressed(final MouseEvent e) {
-			super.mousePressed(e);
-			episode.setWatchCount(episode.getWatchCount() + 1);
-			episodeDb.updateWatchCount(episode);
-			episodeDb.addHistoryEntry(episode);
-			getNextEpisode();
-
-			episodePanel.removeAll();
-			createEpisodePanel(seasonNumber);
-			notifyTimeChanged();
-		    }
-		});
-
-		decreaseWatchCount.addMouseListener(new MouseInputAdapter()
-		{
-		    @Override public void mousePressed(final MouseEvent e) {
-			super.mousePressed(e);
-			episode.setWatchCount(episode.getWatchCount() - 1);
-			episodeDb.updateWatchCount(episode);
-			getNextEpisode();
-
-			episodePanel.removeAll();
-			createEpisodePanel(seasonNumber);
-			notifyTimeChanged();
-			List<Date> dates = episodeDb.getWatchHistoryForEpisode(episode);
-			System.out.println(dates);
-			if (!dates.isEmpty()) {
-			    episodeDb.removeHistoryEntry(dates.get(dates.size() - 1), episode);
-			    System.out.println("Date to remove " + DateHandler.dateToString(dates.get(dates.size() -1 )));
-			}
-		    }
-		});
+	    // check if episode is the next one to watch
+	    if (episode.equals(nextEpisode)) {
+		episodeName.setForeground(Color.decode("#FF9900"));
 	    }
-	}
+
+	    episodePanel.add(new JLabel(Integer.toString(episode.getEpisodeNumber())), "");
+	    episodePanel.add(episodeName, "gapleft 10, grow 2");
+	    JLabel incrementWatchCount = new JLabel("+");
+	    JLabel decreaseWatchCount = new JLabel("-");
+	    JLabel watchCount = new JLabel(Integer.toString(episode.getWatchCount()));
+	    episodePanel.add(incrementWatchCount, "gapleft 30");
+	    episodePanel.add(decreaseWatchCount, "gapleft 10");
+	    episodePanel.add(watchCount, "gapleft 10, wrap");
+
+	    incrementWatchCount.addMouseListener(new MouseInputAdapter()
+	    {
+		@Override public void mousePressed(final MouseEvent e) {
+		    super.mousePressed(e);
+		    episode.setWatchCount(episode.getWatchCount() + 1);
+		    episodeDb.updateWatchCount(episode);
+		    episodeDb.addHistoryEntry(episode);
+		    getNextEpisode();
+
+		    episodePanel.removeAll();
+		    createEpisodePanel(seasonNumber);
+		    notifyTimeChanged();
+		}
+	    });
+
+	    decreaseWatchCount.addMouseListener(new MouseInputAdapter()
+	    {
+		@Override public void mousePressed(final MouseEvent e) {
+		    super.mousePressed(e);
+		    episode.setWatchCount(episode.getWatchCount() - 1);
+		    episodeDb.updateWatchCount(episode);
+		    getNextEpisode();
+
+		    episodePanel.removeAll();
+		    createEpisodePanel(seasonNumber);
+		    notifyTimeChanged();
+		    List<Date> dates = episodeDb
+			    .getWatchHistoryForEpisode(episode); //We decided to use date since it seemed simple to implement
+		    System.out.println(dates);
+		    if (!dates.isEmpty()) {
+			episodeDb.removeHistoryEntry(dates.get(dates.size() - 1), episode);
+			System.out.println("Date to remove " + DateHandler.dateToString(dates.get(dates.size() - 1)));
+		    }
+		}
+	    });
+	});
 	episodePanel.repaint();
 	episodePanel.revalidate();
     }

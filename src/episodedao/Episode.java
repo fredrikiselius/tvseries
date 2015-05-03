@@ -21,12 +21,10 @@ public class Episode
     private int absoluteNumber;
     private int watchCount;
 
-    private Date firstAired = null;
-    private boolean watchedStatus;
+    private Date firstAired = null; //We decided to use date since it seemed simple to implement
 
 
     public Episode() {
-	this.watchedStatus = false;
     }
 
     public Episode(String name, String overview, int showId, int tvDbId, int episodeNumber,
@@ -94,7 +92,7 @@ public class Episode
 	this.overview = overview;
     }
 
-    public Date getFirstAired() {
+    public Date getFirstAired() { //We decided to use date since it seemed simple to implement
 	return (Date) firstAired.clone();
     }
 
@@ -119,19 +117,6 @@ public class Episode
 		e.printStackTrace();
 	    }
 	}
-    }
-
-    public void deciedWatchedStatus(int watchCount) {
-        if (watchCount > 0) {
-            watchedStatus = true;
-        } else {
-            watchedStatus = false;
-        }
-    }
-
-
-    public void setWatchedStatus(final boolean watchedStatus) {
-	this.watchedStatus = watchedStatus;
     }
 
     public int getWatchCount() {

@@ -61,7 +61,7 @@ public class PropHandler {
 	    input = new FileInputStream(PROP_FILE);
 	    prop.load(input);
 
-	    databaseName = prop.getProperty("databaseName");
+	    databaseName = prop.getProperty("databaseName"); // Caused some issues in the DBHandler when databaseName was non static
 	    lastUpdate = Integer.parseInt(prop.getProperty("lastUpdate"));
 	} catch (IOException io) {
 	    io.printStackTrace();

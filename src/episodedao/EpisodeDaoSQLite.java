@@ -30,9 +30,6 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 
     private static final String DELETE_STATEMENT = "DELETE FROM episodes where tvdb_id=%s";
 
-    private static final String SELECT_ONE_STATEMENT = "SELECT show_id, episode_name, first_aired, episodenumber, " +
-						       "seasonnumber, absolutenumber, overview, watch_count " +
-						       "FROM episodes WHERE tvdb_id=%d";
 
     private static final String SELECT_ALL_STATEMENT = "SELECT tvdb_id, episode_name, first_aired, episodenumber, " +
 						       "seasonnumber, absolutenumber, overview, watch_count " +
@@ -42,19 +39,7 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
     						"(episode_id, watch_date) " +
     						"VALUES ('%s', '%s');";
 
-    private static final String SELECT_ALL_IDS = "SELECT tvdb_id FROM episodes";
 
-
-    /**
-     * Preforms a database update on the episode
-     * @param episode The episode to b update
-     * @param queryType The type of statement to be used
-     */
-    @Override
-    public void updateEpisode(Episode episode, QueryType queryType) {
-	String statement = createStatement(episode, queryType);
-	executeUpdate(statement);
-    }
 
     public void updateMultipleEpisodes(List<Episode> episodes, QueryType queryType) {
 	Collection<String> updateStatements =
@@ -83,42 +68,11 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 	return statement;
     }
 
-    public Episode getEpisode(int episodeId) {
-	createConnection();
-	Episode episode = null;
-	try (ResultSet resultSet = statement.executeQuery(String.format(SELECT_ONE_STATEMENT, episodeId))) {
-	    while (resultSet.next()) {
-		int showId = resultSet.getInt("show_id");
-		int episodeNumber = resultSet.getInt("episodenumber");
-		int seasonNumber = resultSet.getInt("seasonnumber");
-		int absoluteNumber = resultSet.getInt("absolutenumber");
-		int watchCount = resultSet.getInt("watch_count");
-		String name = resultSet.getString("episode_name");
-		String overview = resultSet.getString("overview");
-		String firstAired = resultSet.getString("first_aired");
-
-		episode =
-			new Episode(name, overview, showId, episodeId, episodeNumber, seasonNumber, absoluteNumber, watchCount);
-		episode.deciedWatchedStatus(watchCount);
-		episode.setFirstAired(firstAired);
-	    }
-	    resultSet.close();
-	} catch (SQLException e) {
-	    e.printStackTrace();
-	} finally {
-	    try {
-		statement.close();
-		connection.close();
-	    } catch (SQLException e) {
-		e.printStackTrace();
-	    }
-	}
-	return episode;
-    }
-
     @Override public List<Episode> getAllEpisodes(int seriesId) {
 	createConnection();
 	List<Episode> episodes = new ArrayList<>();
+	// The database is local thus there is no need to worry about security
+	//noinspection JDBCExecuteWithNonConstantString
 	try (ResultSet resultSet = statement.executeQuery(String.format(SELECT_ALL_STATEMENT, seriesId))) {
 	    while (resultSet.next()) {
 		int episodeId = resultSet.getInt("tvdb_id");
@@ -132,7 +86,6 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 
 		Episode episode = new Episode(name, overview, seriesId, episodeId, episodeNumber, seasonNumber, absoluteNumber,
 					      watchCount);
-		episode.deciedWatchedStatus(watchCount);
 		episode.setFirstAired(firstAired);
 		episodes.add(episode);
 	    }
@@ -179,9 +132,11 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
      * @param episode The episode for which to get the watch history
      * @return List<Dates> dates, containing the watch history
      */
-    public List<Date> getWatchHistoryForEpisode(Episode episode) {
+    public List<Date> getWatchHistoryForEpisode(Episode episode) { //We decided to use date since it seemed simple to implement
 	createConnection();
 	List<Date> dates = new ArrayList<>();
+	// The database is local thus there is no need to worry about security
+	//noinspection JDBCExecuteWithNonConstantString
 	try (ResultSet resultSet = statement.executeQuery(String.format("SELECT watch_date from history WHERE episode_id=%d", episode.getTvDbId()))) {
 	    while (resultSet.next()) {
 		Date date = DateHandler.stringToDate(resultSet.getString("watch_date"));
@@ -205,7 +160,7 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
      * @param date Date entry to be matched
      * @param episode Episode id to be matched
      */
-    public void removeHistoryEntry(Date date, Episode episode) {
+    public void removeHistoryEntry(Date date, Episode episode) { //We decided to use date since it seemed simple to implement
 	String dateString = DateHandler.dateToString(date);
 	System.out.println("Remove " + dateString);
 	String statement = String.format("DELETE from history WHERE watch_date='%s' AND episode_id=%d", dateString, episode.getTvDbId());

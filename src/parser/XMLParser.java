@@ -15,7 +15,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +34,7 @@ public class XMLParser{
 	if (xmlFile.exists()) {
 	    try {
 		DocumentBuilder builder = factory.newDocumentBuilder();
-		Document document = null;
+		Document document;
 		if (parseType == ParseType.IMAGE) {
 		    document = builder.parse(new File(String.format(XML_IMAGES_FILE_PATH, seriesID)));
 		} else {
@@ -178,7 +178,7 @@ public class XMLParser{
 	String fanartBannerPath = "";
 	String posterBannerPath = "";
 
-	Map<ParseType, String> imagePaths = new HashMap<>();
+	Map<ParseType, String> imagePaths = new EnumMap<>(ParseType.class);
 
 	for (int bannerIndex = 0; bannerIndex < nodeList.getLength(); bannerIndex++) {
 	    Node bannerNode = nodeList.item(bannerIndex);

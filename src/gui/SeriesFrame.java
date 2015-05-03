@@ -18,7 +18,6 @@ import javax.swing.border.Border;
 
 import java.awt.*;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -87,6 +86,24 @@ public class SeriesFrame extends JFrame implements ViewListener {
     }
 
 
+    private void setStyle(JComponent component) {
+	if (JPanel.class.isInstance(component)) {
+	    System.out.println("JPanel");
+	    component.setBorder(darkBorder);
+	    component.setBackground(Color.decode("#222222"));
+	}else if (JLabel.class.isInstance(component)) {
+	    component.setForeground(Color.decode("#999999"));
+	} else if (JTextField.class.isInstance(component) || JTextArea.class.isInstance(component) || JScrollPane.class.isInstance(component) ||
+		   JButton.class.isInstance(component)) {
+	    component.setBorder(darkBorder);
+	    component.setBackground(Color.decode("#191919"));
+	    component.setForeground(Color.decode("#999999"));
+	}
+
+	System.out.println("HEEEEEEEEEERE: " + component.getName());
+    }
+
+
     /**
      * Creates the left bar containing the search window
      * @return JPanel containing the left menu
@@ -104,37 +121,15 @@ public class SeriesFrame extends JFrame implements ViewListener {
 	resultScroll.setVisible(false);
 	addBtn.setVisible(false);
 
-	//set style to the menu pane
-	menuPane.setBorder(darkBorder);
-	menuPane.setBackground(Color.decode("#222222"));
-
-	// set style to the searchlabel
-	searchLabel.setForeground(Color.decode("#999999"));
-
-	// set style to the searchfield
-	searchField.setBorder(darkBorder);
-	searchField.setBackground(Color.decode("#191919"));
-	searchField.setForeground(Color.decode("#999999"));
-
-	// set style to time label
-	timeLabel.setForeground(Color.decode("#999999"));
-
-	// set style to watch time field
-	watchTimeDisplay.setBorder(darkBorder);
-	watchTimeDisplay.setBackground(Color.decode("#191919"));
-	watchTimeDisplay.setForeground(Color.decode("#999999"));
+	setStyle(menuPane);
+	setStyle(searchLabel);
+	setStyle(searchField);
+	setStyle(timeLabel);
+	setStyle(watchTimeDisplay);
 	watchTimeDisplay.setText(getTotalWatchTime());
-
-	// set style to the result window
-	resultScroll.setBorder(darkBorder);
-	resultScroll.setBackground(Color.decode("#191919"));
-	resultScroll.setForeground(Color.decode("#999999"));
+	setStyle(resultScroll);
 	resultScroll.getViewport().setBackground(Color.BLACK);
-
-	// set style to the add button
-	addBtn.setBorder(darkBorder);
-	addBtn.setBackground(Color.decode("#191919"));
-	addBtn.setForeground(Color.decode("#999999"));
+	setStyle(addBtn);
 
 	// add everything to the menu pane
 	menuPane.add(searchLabel, "left, wrap");
@@ -174,7 +169,7 @@ public class SeriesFrame extends JFrame implements ViewListener {
 		    String name = resultList.getSelectedValue();
 		    int id = Integer.parseInt(searchResults.get(name));
 
-		    SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
+		    SeriesDao seriesDb = new SeriesDaoSQLite();
 		    List<String> seriesInDb = seriesDb.selectAllIds();
 
 
@@ -187,11 +182,13 @@ public class SeriesFrame extends JFrame implements ViewListener {
 		}
 
 		@Override public void done() {
+		    super.done();
 		    System.out.println("LOG: (SeriesFrame) Done saving changes.");
 
 		    resultList = null;
 		    searchResults.clear();
 		    searchField.setEditable(true);
+
 
 		}
 	    }.execute();
@@ -203,7 +200,6 @@ public class SeriesFrame extends JFrame implements ViewListener {
     }
 
     private void addShow(int id) {
-	try {
 	    FileHandler.fetchZip(id);
 
 	    // parse show
@@ -215,8 +211,12 @@ public class SeriesFrame extends JFrame implements ViewListener {
 
 
 	    // fetch showart
+	if (!imagePaths.get(ParseType.POSTER).isEmpty()) {
 	    FileHandler.fetchPoster(imagePaths.get(ParseType.POSTER), id);
+	}
+	if (!imagePaths.get(ParseType.FANART).isEmpty()) {
 	    FileHandler.fetchFanart(imagePaths.get(ParseType.FANART), id);
+	}
 
 
 	    // write Series to db
@@ -233,9 +233,6 @@ public class SeriesFrame extends JFrame implements ViewListener {
 	    //update view
 	    msv.addSeriesToView(series);
 	    msv.updateView();
-	} catch (IOException e) {
-	    e.printStackTrace();
-	}
     }
 
 
@@ -304,22 +301,22 @@ public class SeriesFrame extends JFrame implements ViewListener {
 	}
 
 	StringBuilder builder = new StringBuilder();
-	builder.append("Episodes: " + episodesWatched + "\n");
+	builder.append(String.format("Episodes: %d \n",episodesWatched));
 
 	int monthsWatched = minutesWatched / MINUTES_MONTH;
 	minutesWatched %= MINUTES_MONTH;
-	builder.append("Months: " + monthsWatched + "\n");
+	builder.append(String.format("Months: %d \n", monthsWatched));
 
 
 	int daysWatched = minutesWatched / MINUTES_DAY;
 	minutesWatched %= MINUTES_DAY;
-	builder.append("Days: " + daysWatched + "\n");
+	builder.append(String.format("Days: %d \n", daysWatched));
 
 
 	int hoursWatched = minutesWatched / MINUTES_HOUR;
 	minutesWatched %= MINUTES_HOUR;
-	builder.append("Hours: " + hoursWatched + "\n");
-	builder.append("Minutes: " + minutesWatched);
+	builder.append(String.format("Hours: %d \n", hoursWatched));
+	builder.append(String.format("Minutes: %d", minutesWatched));
 
 
 	return builder.toString();

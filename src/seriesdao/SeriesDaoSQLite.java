@@ -41,6 +41,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
      * @param series	The series to be updated
      * @param queryType The query type to be used
      */
+    @Override
     public void updateSeries(Series series, QueryType queryType) {
 	String statement = createStatement(series, queryType);
 	executeUpdate(statement);
@@ -52,6 +53,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
      * @param seriesList	A list containing all the series to be updated
      * @param queryType		The query type to be used.
      */
+    @Override
     public void updateMultipleSeries(List<Series> seriesList, QueryType queryType) {
 	Collection<String> updateStatements =
 		seriesList.stream().map(series -> createStatement(series, queryType)).collect(Collectors.toList());
@@ -83,52 +85,11 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
     }
 
     /**
-     * Fetches all information about a Series from the database
-     * @param seriesID 	the tvdb id for the Series to fetched
-     * @return 		new Series object with the fetched information
-     */
-    @Override public Series getSeries(int seriesID) {
-	createConnection();
-
-	Series series = null;
-	try (ResultSet resultSet = statement.executeQuery(SELECT_STATEMENT + " WHERE tvdb_id=" + seriesID)){
-	    while (resultSet.next()) {
-		String name = resultSet.getString("show_name");
-		String network = resultSet.getString("network");
-		String airday = resultSet.getString("airday");
-		String airtime = resultSet.getString("airtime");
-		String overview = resultSet.getString("overview");
-		String status = resultSet.getString("status");
-		int runtime = resultSet.getInt("runtime");
-
-		series = new Series(seriesID);
-		series.setShowName(name);
-		series.setNetwork(network);
-		series.setAirday(airday);
-		series.setAirtime(airtime);
-		series.setOverview(overview);
-		series.setStatus(status);
-		series.setRuntime(runtime);
-	    }
-
-	} catch (SQLException e) {
-	    e.printStackTrace();
-	} finally {
-	    try {
-		statement.close();
-		connection.close();
-	    } catch (SQLException e) {
-		e.printStackTrace();
-	    }
-	}
-	return series;
-    }
-
-    /**
      * Fetches all Series currently in the database
      * @return List<Series> containing Series objects from all the Series
      */
-    @Override public List<Series> getAllSeries() {
+    @Override
+    public List<Series> getAllSeries() {
 	createConnection();
 
 	List<Series> allSeries = new ArrayList<>();

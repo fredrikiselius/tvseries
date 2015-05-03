@@ -25,6 +25,7 @@ public final class PictureLoader
 
     public static ImageIcon loadPoster(int tvDbId) {
 	File tvDbPoster = new File("showdata/" + tvDbId + "/poster.jpg");
+
 	File noPoster = new File("img/no.jpg");
 	return loadPicture(tvDbPoster, noPoster, POSTER_WIDTH, POSTER_HEIGHT);
     }
@@ -45,6 +46,7 @@ public final class PictureLoader
 	} catch (IOException ioe) {
 	    ioe.printStackTrace();
 	}
+
 
 	if (img != null) {
 	    return new ImageIcon(img.getScaledInstance(width, height, Image.SCALE_DEFAULT));

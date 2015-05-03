@@ -28,7 +28,6 @@ public class SingleSeriesPanel extends JPanel
     private BufferedImage fanart = null;
     private Series series;
     private int width;
-    private int height;
 
     public SingleSeriesPanel(Series series) {
 	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -49,7 +48,7 @@ public class SingleSeriesPanel extends JPanel
 	setLayout(new MigLayout());
 	addOverview();
 
-	this.height = (FANART_HEIGHT + SPACING*2 + 10 + OVERVIEW_HEIGHT);
+	int height = (FANART_HEIGHT + SPACING * 2 + 10 + OVERVIEW_HEIGHT);
 	this.setPreferredSize(new Dimension(width, height));
     }
 
@@ -70,10 +69,6 @@ public class SingleSeriesPanel extends JPanel
 	jTextArea.setCaretPosition(0); // to make sure to display the top of the scrollpane first
 	this.add(overviewScroller, "w 550!, h " + OVERVIEW_HEIGHT + "! , gaptop " + (FANART_HEIGHT + (SPACING * 2)) + ", gapleft 8");
 
-    }
-
-    @Override public Dimension getPreferredSize() {
-	return new Dimension(width, height);
     }
 
     @Override public void paintComponent(Graphics g) {

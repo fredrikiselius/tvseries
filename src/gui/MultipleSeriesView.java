@@ -6,6 +6,7 @@ import episodedao.EpisodeDao;
 import episodedao.EpisodeDaoSQLite;
 import net.miginfocom.swing.MigLayout;
 import seriesdao.Series;
+import seriesdao.SeriesDao;
 import seriesdao.SeriesDaoSQLite;
 import seriesdao.SeriesComparator;
 import tvseries.FileHandler;
@@ -36,7 +37,7 @@ public class MultipleSeriesView extends JPanel {
 
     private List<Series> series; // contains all loaded shows from the database
 
-    private SeriesDaoSQLite seriesDb;
+    private SeriesDao seriesDb;
     private SingleSeriesView ssv = null;
 
     private int screenWidth;
@@ -72,9 +73,7 @@ public class MultipleSeriesView extends JPanel {
     }
 
     private void notifyViewListeners() {
-        for (ViewListener viewListener : viewListeners) {
-            viewListener.totalTimeChanged();
-        }
+        viewListeners.forEach(ViewListener::totalTimeChanged);
     }
 
     private void createSeriesPanel(Series series) {
@@ -174,9 +173,7 @@ public class MultipleSeriesView extends JPanel {
 
     public void updateView() {
         this.removeAll();
-        for (Series show : series) {
-            createSeriesPanel(show);
-        }
+        series.forEach(this::createSeriesPanel);
         this.repaint();
         this.revalidate();
     }
@@ -189,8 +186,10 @@ public class MultipleSeriesView extends JPanel {
     @Override
     public Dimension getPreferredSize() {
         int height = ((series.size()+numberOfPostersRow())/numberOfPostersRow())*POSTER_PANEL_HEIGHT;
-        return new Dimension(screenWidth - LEFT_MENU, height);
+        setPreferredSize(new Dimension(screenWidth - LEFT_MENU, height));
+        return super.getPreferredSize();
     }
+
 
     /**
      * Fetches all Series in the database and sorts them alphabetically

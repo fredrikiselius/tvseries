@@ -32,6 +32,7 @@ public final class UnZip
 	try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
 	    File folder = new File(outputFolder);
 	    if (!folder.exists()) {
+		//noinspection ResultOfMethodCallIgnored
 		folder.mkdir();
 	    }
 
@@ -43,13 +44,15 @@ public final class UnZip
 		String fileName = ze.getName();
 		File newFile = new File(outputFolder + File.separator + fileName);
 
+		//noinspection ResultOfMethodCallIgnored
 		new File(newFile.getParent()).mkdirs();
 
 		outputStream = new FileOutputStream(newFile);
 
-		int len;
-		while (0 < (len = zis.read(buffer))) {
+		int len = zis.read(buffer);
+		while (0 < len) {
 		    outputStream.write(buffer, 0, len);
+		    len = zis.read(buffer);
 		}
 
 		outputStream.close();

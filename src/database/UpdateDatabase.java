@@ -8,6 +8,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import parser.XMLParser;
 import seriesdao.Series;
+import seriesdao.SeriesDao;
 import seriesdao.SeriesDaoSQLite;
 import tvseries.FileHandler;
 import tvseries.PropHandler;
@@ -81,7 +82,7 @@ public class UpdateDatabase extends DBHandler
      */
     public static void update() {
 	PropHandler pHandler = new PropHandler();
-	SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
+	SeriesDao seriesDb = new SeriesDaoSQLite();
 	EpisodeDao episodeDb = new EpisodeDaoSQLite();
 	XMLParser xmlParser = new XMLParser();
 
@@ -92,7 +93,7 @@ public class UpdateDatabase extends DBHandler
 	List<String> seriesUpdatedSinceLast = getSeriesToUpdate(pHandler.getLastUpdate());
 	Collection<String> seriesToUpdate = new ArrayList<>();
 
-	seriesUpdatedSinceLast.stream().filter(id -> seriesInDb.contains(id)).forEach(id -> {
+	seriesUpdatedSinceLast.stream().filter(seriesInDb::contains).forEach(id -> {
 	    seriesToUpdate.add(id);
 	    System.out.println("Series ID TO UPDATE: " + id);
 	});
@@ -102,7 +103,6 @@ public class UpdateDatabase extends DBHandler
 	for (String idString : seriesToUpdate) {
 	    int id = Integer.parseInt(idString);
 	    // fetch new data
-	    try {
 		FileHandler.fetchZip(id);
 		// parse new data
 		Series show = xmlParser.getSeries(id);
@@ -110,9 +110,6 @@ public class UpdateDatabase extends DBHandler
 
 		series.add(show);
 		episodes.addAll(parsedEpisodes);
-	    } catch (IOException e) {
-		e.printStackTrace();
-	    }
 
 
 	}

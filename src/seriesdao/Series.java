@@ -26,7 +26,7 @@ public class Series
     private String status = null;
     private int runtime;
     private String nextAirDate = null;
-    private Date firstAired = null;
+    private Date firstAired = null; //We decided to use date since it seemed simple to implement
 
 
     public Series() {
@@ -41,38 +41,6 @@ public class Series
         this.tvDbId = tvDbId;
     }
 
-    /**
-     * Create a Series with all its data.
-     * @param tvDbId     The tvdb id for the Series.
-     * @param showName   The name of the Series.
-     * @param network    The network where the Series airs.
-     * @param airday     Day of the week that the Series airs.
-     * @param airtime    The time when the Series airs (The timezone is that of where the network resides)
-     * @param overview   Overview of the Series
-     * @param status     The Series status, ex: continueing, ended
-     * @param runtime    The duration of each episode
-     * @param firstAired The date that the Series was first aired
-     */
-    public Series(int tvDbId, String showName, String network, String airday, String airtime, String overview, String status,
-                  int runtime, String firstAired)
-    {
-        this.tvDbId = tvDbId;
-        this.showName = showName;
-        this.network = network;
-        this.airday = airday;
-        this.airtime = airtime;
-        this.overview = overview;
-        this.status = status;
-        this.runtime = runtime;
-
-        SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            this.firstAired = originalFormat.parse(firstAired);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     /**
      * Decides which episode that will air next. If the latest aired episode was aired prior to todays date, then nextAirDate is
@@ -82,13 +50,14 @@ public class Series
         EpisodeDao episodeDb = new EpisodeDaoSQLite();
         List<Episode> episodes = episodeDb.getAllEpisodes(this.tvDbId);
         Collections.sort(episodes, new EpisodeComparator());
-        Date currentDate = new Date(); // must be of Date type to be able to compare
+        //We decided to use date since it seemed simple to implement
+        Comparable<Date> currentDate = new Date(); // must be of Date type to be able to compare
 
         DateFormat df = new SimpleDateFormat("dd MMMM");
 
         Episode nextEp = null;
         // Make sure the database returns any episodes
-        if (episodes != null) {
+        if (!episodes.isEmpty()) {
             for (Episode episode : episodes) {
                 if (episode.getWatchCount() == 0 && episode.getSeasonNumber() > 0) {
                     nextEp = episode;
@@ -100,7 +69,7 @@ public class Series
         }
 
         if (nextEp != null) {
-            Date firstAired = nextEp.getFirstAired();
+            Date firstAired = nextEp.getFirstAired(); //We decided to use date since it seemed simple to implement
             if (firstAired != null && currentDate.compareTo(firstAired) < 0) {
                 nextAirDate = "Next ep: " + df.format(firstAired);
                 return;

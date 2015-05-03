@@ -37,11 +37,15 @@ public final class FileHandler {
                     if (file.isDirectory()) {
                         deleteDirectory(file);
                     } else {
+                        // Return result not needed.
+                        //noinspection ResultOfMethodCallIgnored
                         file.delete();
                     }
                 }
             }
         }
+        // Return result no needed.
+        //noinspection ResultOfMethodCallIgnored
         directory.delete();
     }
 
@@ -52,6 +56,8 @@ public final class FileHandler {
         File showDataFolder = new File(DOWNLOAD_FOLDER);
 
         if (!showDataFolder.exists()) {
+            // Return result not needed
+            //noinspection ResultOfMethodCallIgnored
             showDataFolder.mkdir();
         }
     }
@@ -79,9 +85,8 @@ public final class FileHandler {
     /**
      * Downloads the zipfile containing the series information and unpacks it.
      * @param tvDbId The tvdb id for the series
-     * @throws IOException
      */
-    public static void fetchZip(int tvDbId) throws IOException {
+    public static void fetchZip(int tvDbId) {
         String fileUrl = String.format(ZIP_URL, tvDbId);
         downloadFile(fileUrl, DOWNLOAD_FOLDER + tvDbId, null);
         UnZip.unZipIt(tvDbId);
@@ -93,7 +98,6 @@ public final class FileHandler {
      * @param fileURL The url for the file
      * @param dlFolder The folder where the file is saved
      * @param newName New name for the file, can be null
-     * @throws IOException
      */
     public static void downloadFile(String fileURL, String dlFolder, String newName)
     {
@@ -101,15 +105,16 @@ public final class FileHandler {
 
         File folder = new File(dlFolder);
         if (!folder.exists()) {
+            // Return result not needed.
+            //noinspection ResultOfMethodCallIgnored
             folder.mkdir();
         }
 
-        HttpURLConnection httpConnection = null;
         FileOutputStream outputStream = null;
         InputStream inputStream = null;
         try {
             URL url = new URL(fileURL);
-            httpConnection = (HttpURLConnection) url.openConnection();
+            HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
             int responseCode = httpConnection.getResponseCode();
 
 
@@ -133,15 +138,15 @@ public final class FileHandler {
                 }
 
                 String saveFilePath = dlFolder + File.separator + fileName;
-
                 outputStream = new FileOutputStream(saveFilePath);
 
-                int bytesRead = -1;
+
                 byte[] buffer = new byte[BUFFER_SIZE];
 
-
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                int bytesRead = inputStream.read(buffer);
+                while (bytesRead != -1) {
                     outputStream.write(buffer, 0, bytesRead);
+                    bytesRead = inputStream.read(buffer);
                 }
             }
             httpConnection.disconnect();

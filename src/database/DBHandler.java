@@ -43,7 +43,8 @@ public class DBHandler  {
 	try {
 	    if (updateStatement.startsWith("UPDATE") || updateStatement.startsWith("INSERT") ||
 		updateStatement.startsWith("DELETE") || updateStatement.startsWith("CREATE")) {
-		statement.executeUpdate(updateStatement);
+		//noinspection JDBCExecuteWithNonConstantString
+		statement.executeUpdate(updateStatement); // The database is local thus there is no need to worry about security
 	    } else {
 		System.out.println("Unknown query type: ");
 		System.out.println(updateStatement);
@@ -73,6 +74,8 @@ public class DBHandler  {
 	    for (String updateStatement : updateStatements) {
 		if (updateStatement.startsWith("UPDATE") || updateStatement.startsWith("INSERT") ||
 		    updateStatement.startsWith("DELETE") || updateStatement.startsWith("CREATE")) {
+
+		    //noinspection JDBCExecuteWithNonConstantString
 		    statement.executeUpdate(updateStatement);
 		} else {
 		    System.out.println("Unknown query type.");

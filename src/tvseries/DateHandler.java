@@ -19,7 +19,7 @@ public final class DateHandler{
      * @param dateString String containing the date to be converted.
      * @return Date
      */
-    public static Date stringToDate(String dateString) {
+    public static Date stringToDate(String dateString) { //We decided to use date since it seemed simple to implement
 	Date date = null;
 	try {
 	    date = simpleDateFormat.parse(dateString);
@@ -34,7 +34,7 @@ public final class DateHandler{
      * @param date The date to be converted.
      * @return String containing the date.
      */
-    public static String dateToString(Date date){
+    public static String dateToString(Date date){ //We decided to use date since it seemed simple to implement
 	return simpleDateFormat.format(date);
     }
 }
