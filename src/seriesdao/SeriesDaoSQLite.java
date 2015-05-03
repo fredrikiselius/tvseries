@@ -5,7 +5,9 @@ import database.QueryType;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -34,12 +36,6 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 
     private static final String SELECT_ALL_IDS = "SELECT tvdb_id FROM Series";
 
-
-
-    public SeriesDaoSQLite() {
-
-    }
-
     /**
      * Updated the database based on the query type. It can update, insert and delete.
      * @param series	The series to be updated
@@ -57,11 +53,9 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
      * @param queryType		The query type to be used.
      */
     public void updateMultipleSeries(List<Series> seriesList, QueryType queryType) {
-	List<String> updatestatements = new ArrayList<>();
-	for (Series series : seriesList) {
-	    updatestatements.add(createStatement(series, queryType));
-	}
-	executeMultipleUpdates(updatestatements);
+	Collection<String> updateStatements =
+		seriesList.stream().map(series -> createStatement(series, queryType)).collect(Collectors.toList());
+	executeMultipleUpdates(updateStatements);
     }
 
     /**
@@ -96,10 +90,8 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
     @Override public Series getSeries(int seriesID) {
 	createConnection();
 
-	ResultSet resultSet;
 	Series series = null;
-	try {
-	    resultSet = statement.executeQuery(SELECT_STATEMENT + " WHERE tvdb_id=" + seriesID);
+	try (ResultSet resultSet = statement.executeQuery(SELECT_STATEMENT + " WHERE tvdb_id=" + seriesID)){
 	    while (resultSet.next()) {
 		String name = resultSet.getString("show_name");
 		String network = resultSet.getString("network");
@@ -125,7 +117,6 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 	    try {
 		statement.close();
 		connection.close();
-
 	    } catch (SQLException e) {
 		e.printStackTrace();
 	    }
@@ -141,9 +132,7 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 	createConnection();
 
 	List<Series> allSeries = new ArrayList<>();
-	ResultSet resultSet;
-	try {
-	    resultSet = statement.executeQuery(SELECT_STATEMENT);
+	try (ResultSet resultSet = statement.executeQuery(SELECT_STATEMENT)) {
 	    while (resultSet.next()) {
 		int id = resultSet.getInt("tvdb_id");
 		String name = resultSet.getString("show_name");
@@ -172,7 +161,6 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
 	    try {
 		statement.close();
 		connection.close();
-
 	    } catch (SQLException e) {
 		e.printStackTrace();
 	    }
@@ -187,10 +175,8 @@ public class SeriesDaoSQLite extends DBHandler implements SeriesDao
      */
     public List<String> selectAllIds() {
 	createConnection();
-	ResultSet queriedIds;
 	List<String> loadedIds = new ArrayList<>();
-	try {
-	    queriedIds = statement.executeQuery(SELECT_ALL_IDS);
+	try (ResultSet queriedIds = statement.executeQuery(SELECT_ALL_IDS)) {
 	    while (queriedIds.next()) {
 		loadedIds.add(queriedIds.getString("tvdb_id"));
 	    }

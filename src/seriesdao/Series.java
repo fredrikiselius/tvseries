@@ -2,6 +2,7 @@ package seriesdao;
 
 import episodedao.Episode;
 import episodedao.EpisodeComparator;
+import episodedao.EpisodeDao;
 import episodedao.EpisodeDaoSQLite;
 
 import java.text.DateFormat;
@@ -17,15 +18,15 @@ import java.util.List;
 public class Series
 {
     private int tvDbId;
-    private String showName;
-    private String network;
-    private String airday;
-    private String airtime;
-    private String overview;
-    private String status;
+    private String showName = null;
+    private String network = null;
+    private String airday = null;
+    private String airtime = null;
+    private String overview = null;
+    private String status = null;
     private int runtime;
-    private String nextAirDate;
-    private Date firstAired;
+    private String nextAirDate = null;
+    private Date firstAired = null;
 
 
     public Series() {
@@ -78,7 +79,7 @@ public class Series
      * set to the shows status..
      */
     private void calculateNextEp() {
-        EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
+        EpisodeDao episodeDb = new EpisodeDaoSQLite();
         List<Episode> episodes = episodeDb.getAllEpisodes(this.tvDbId);
         Collections.sort(episodes, new EpisodeComparator());
         Date currentDate = new Date(); // must be of Date type to be able to compare

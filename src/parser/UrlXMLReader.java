@@ -15,11 +15,13 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UrlXMLReader
-{
+/**
+ * This class is used to read the search results from a series search.
+ */
+public class UrlXMLReader {
     private String xmlSource;
-    public static NodeList nodeList = null;
-    public Map<String, String> result = new HashMap<String, String>();
+    private NodeList nodeList = null;
+    private Map<String, String> result = new HashMap<>();
 
 
     public UrlXMLReader(String xmlSource) {
@@ -29,12 +31,12 @@ public class UrlXMLReader
 
 
     private void createNodeList() {
-	Document document;
 	try {
 	    DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
 	    DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
 
-	    document = docBuilder.parse(new URL("http://thetvdb.com/api/GetSeries.php?seriesname="+xmlSource).openStream());
+	    Document document =
+		    docBuilder.parse(new URL("http://thetvdb.com/api/GetSeries.php?seriesname=" + xmlSource).openStream());
 
 	    if (document != null) {
 		document.getDocumentElement().normalize();
@@ -64,5 +66,9 @@ public class UrlXMLReader
 	} else {
 	    System.out.println("LOG: (XMLReader) Search gave no results.");
 	}
+    }
+
+    public Map<String, String> getResult() {
+	return result;
     }
 }

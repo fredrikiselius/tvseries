@@ -9,14 +9,17 @@ import java.io.IOException;
 /**
  * loads the images needed
  */
-public class PictureLoader
+public final class PictureLoader
 {
     private final static int POSTER_WIDTH = 180;
     private final static int POSTER_HEIGHT = 265;
 
+    private PictureLoader() {}
+
 
     /**
-     * @param tvDbId
+     * @param tvDbId the tvdb id for the series to whom the poster belongs
+     *
      * @return ImageIcon
      */
 
@@ -41,10 +44,10 @@ public class PictureLoader
 	    img = ImageIO.read(poster);
 	} catch (IOException ioe) {
 	    ioe.printStackTrace();
-	} finally {
-	    if (img != null) {
-		return new ImageIcon(img.getScaledInstance(width, height, Image.SCALE_DEFAULT));
-	    }
+	}
+
+	if (img != null) {
+	    return new ImageIcon(img.getScaledInstance(width, height, Image.SCALE_DEFAULT));
 	}
 	return null;
     }

@@ -12,35 +12,36 @@ import javax.swing.*;
 
 import javax.swing.event.MouseInputAdapter;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-public class SingleSeriesView extends JPanel
-{
+/**
+ * The SingleSeriesView is used to display information about a single series.
+ * The view contains basic information about the series such as the overview and a episode list.
+ */
+public class SingleSeriesView extends JPanel {
 
-    EpisodeDaoSQLite episodeDb;
+    private EpisodeDaoSQLite episodeDb;
 
     private List<ViewListener> viewListeners;
     private List<Episode> episodes;
     private JPanel episodePanel = new JPanel(new MigLayout(""));
-	private JScrollPane episodeListScroller;
 
     private int selectedSeason;
     private Episode nextEpisode;
 
-    public SingleSeriesView(Series s) {
+    public SingleSeriesView(Series series) {
 	this.setLayout(new MigLayout("fill, gap 0, insets 0, top", "", ""));
 	episodeDb = new EpisodeDaoSQLite();
 
 	// episode list
 	this.viewListeners = new ArrayList<>();
-	this.episodes = episodeDb.getAllEpisodes(s.getTvDbId()); // get all episodes for the Series
+	this.episodes = episodeDb.getAllEpisodes(series.getTvDbId()); // get all episodes for the Series
 	Collections.sort(episodes, new EpisodeComparator()); // sort the episode list
 
 	getNextEpisode();
@@ -52,22 +53,17 @@ public class SingleSeriesView extends JPanel
 
 
 
-	JPanel headerContent = new SingleSeriesPanel(s);
+	JPanel headerContent = new SingleSeriesPanel(series);
 	this.add(headerContent,
 		 "wrap, w " + headerContent.getPreferredSize().width + "!, h " +
 		 headerContent.getPreferredSize().height + "!");
 	JButton backButton = new JButton("<< Back");
 	this.add(backButton, "split 3, gapleft 8");
-	if (episodes.size() > 0) {
-	    createEpisodeList(s.getTvDbId());
+	if (!episodes.isEmpty()) {
+	    createEpisodeList();
 	}
 
-	    backButton.addActionListener(new ActionListener()
-	    {
-		@Override public void actionPerformed(final ActionEvent e) {
-		    notifyViewListeners();
-		}
-	    });
+	    backButton.addActionListener(e -> notifyViewListeners());
 
     }
 
@@ -88,7 +84,7 @@ public class SingleSeriesView extends JPanel
 	}
     }
 
-    private void createEpisodeList(int tvDbId) {
+    private void createEpisodeList() {
 
 	// Get number of seasons
 	int numberOfSeasons = -1;
@@ -130,7 +126,7 @@ public class SingleSeriesView extends JPanel
 
 	// create the episode list and add to scroller
 	createEpisodePanel(selectedSeason);
-	this.episodeListScroller = new JScrollPane(episodePanel);
+	JScrollPane episodeListScroller = new JScrollPane(episodePanel);
 	this.add(episodeListScroller, "grow");
 
 
@@ -142,7 +138,7 @@ public class SingleSeriesView extends JPanel
      * @param season The season to mark as watched
      */
     private void markSeasonWatched(int season) {
-	List<Episode> episodesWithSeason = new ArrayList<>();
+	Collection<Episode> episodesWithSeason = new ArrayList<>();
 	for (Episode episode : episodes) {
 	    if (episode.getSeasonNumber() == season) {
 		episode.setWatchedStatus(true);
@@ -182,7 +178,7 @@ public class SingleSeriesView extends JPanel
 		    episodeName.setForeground(Color.decode("#FF9900"));
 		}
 
-		episodePanel.add(new JLabel(episode.getEpisodeNumber() + ""), "");
+		episodePanel.add(new JLabel(Integer.toString(episode.getEpisodeNumber())), "");
 		episodePanel.add(episodeName, "gapleft 10, grow 2");
 		JLabel incrementWatchCount = new JLabel("+");
 		JLabel decreaseWatchCount = new JLabel("-");

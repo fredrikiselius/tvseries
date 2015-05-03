@@ -3,7 +3,7 @@ package database;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * CreateDatabase is used to create the database if there is none.
@@ -19,13 +19,11 @@ public class CreateDatabase extends DBHandler
 
     /**
      * Creates the nessecary tables in the database if they are not already there.
-     * @throws SQLException
-     * @throws IOException
      */
     public void createTables() {
 	createConnection();
 	System.out.println("LOG: (CreateDatabase) Creating tables if necessary.");
-	List<String> tables = new ArrayList<>();
+	Collection<String> tables = new ArrayList<>();
 	final String seriesTable = ("CREATE TABLE IF NOT EXISTS series " +
 			      "(tvdb_id INTEGER NOT NULL PRIMARY KEY UNIQUE," +
 			      " show_name TEXT NOT NULL," +

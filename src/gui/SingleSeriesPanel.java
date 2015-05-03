@@ -23,9 +23,9 @@ public class SingleSeriesPanel extends JPanel
     private static final int TEXT_Y_OFFSET = FANART_HEIGHT + 20;
     private static final int TEXT_X_OFFSET = 10;
     private static final int OVERVIEW_HEIGHT = 100;
-    public static final int SPACING = 20;
+    private static final int SPACING = 20;
 
-    private BufferedImage fanart;
+    private BufferedImage fanart = null;
     private Series series;
     private int width;
     private int height;

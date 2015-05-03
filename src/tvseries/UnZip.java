@@ -10,51 +10,63 @@ import java.util.zip.ZipInputStream;
 /**
  * UnZip is used to unpack files.
  */
-public class UnZip {
+public final class UnZip
+{
     private final static int BYTE_SIZE = 1024;
-    private final static  String INPUT_ZIP_FILE = "showdata/%s/en.zip";
-    private final static  String OUTPUT_FOLDER = "showdata/%s/";
+    private final static String INPUT_ZIP_FILE = "showdata/%s/en.zip";
+    private final static String OUTPUT_FOLDER = "showdata/%s/";
+
+    private UnZip() {}
 
 
     /**
-     * Unzips the en.zip file, which needs to be downloaded from the tvdb first.
-     * The code is copied from an unknow source.
+     * Unzips the en.zip file, which needs to be downloaded from the tvdb first. The code is copied from an unknow source.
+     *
      * @param tvDbId The tvdb is used to specify the path to the zipfile.
      */
     public static void unZipIt(int tvDbId) {
 	String outputFolder = String.format(OUTPUT_FOLDER, tvDbId);
 	String zipFile = String.format(INPUT_ZIP_FILE, tvDbId);
-    	byte[] buffer = new byte[BYTE_SIZE];
-    	try {
-    	    File folder = new File(outputFolder);
+
+	FileOutputStream outputStream = null;
+	try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+	    File folder = new File(outputFolder);
 	    if (!folder.exists()) {
 		folder.mkdir();
 	    }
 
-	    ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
+	    //zis = new ZipInputStream(new FileInputStream(zipFile));
 	    ZipEntry ze = zis.getNextEntry();
 
+	    byte[] buffer = new byte[BYTE_SIZE];
 	    while (ze != null) {
 		String fileName = ze.getName();
 		File newFile = new File(outputFolder + File.separator + fileName);
 
 		new File(newFile.getParent()).mkdirs();
 
-		FileOutputStream fos = new FileOutputStream(newFile);
+		outputStream = new FileOutputStream(newFile);
 
 		int len;
-		while ((len = zis.read(buffer)) > 0) {
-		    fos.write(buffer, 0, len);
+		while (0 < (len = zis.read(buffer))) {
+		    outputStream.write(buffer, 0, len);
 		}
 
-		fos.close();
+		outputStream.close();
 		ze = zis.getNextEntry();
 	    }
 	    zis.closeEntry();
-	    zis.close();
 
-    	} catch (IOException e) {
+	} catch (IOException e) {
 	    e.printStackTrace();
+	} finally {
+	    if (outputStream != null) {
+		try {
+		    outputStream.close();
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
+	    }
 	}
-        }
+    }
 }

@@ -2,6 +2,7 @@ package gui;
 
 import database.QueryType;
 import episodedao.Episode;
+import episodedao.EpisodeDao;
 import episodedao.EpisodeDaoSQLite;
 import net.miginfocom.swing.MigLayout;
 import seriesdao.Series;
@@ -36,7 +37,7 @@ public class MultipleSeriesView extends JPanel {
     private List<Series> series; // contains all loaded shows from the database
 
     private SeriesDaoSQLite seriesDb;
-    private SingleSeriesView ssv;
+    private SingleSeriesView ssv = null;
 
     private int screenWidth;
 
@@ -76,12 +77,12 @@ public class MultipleSeriesView extends JPanel {
         }
     }
 
-    private void createSeriesPanel(Series s) {
+    private void createSeriesPanel(Series series) {
         JPanel seriesPanel = new JPanel(new MigLayout("wrap"));
 
-        JLabel poster = new JLabel(PictureLoader.loadPoster(s.getTvDbId()));
-        JLabel name = new JLabel(s.getShowName());
-        JLabel next = new JLabel(s.getNextAirDate());
+        JLabel poster = new JLabel(PictureLoader.loadPoster(series.getTvDbId()));
+        JLabel name = new JLabel(series.getShowName());
+        JLabel next = new JLabel(series.getNextAirDate());
         JLabel removeSeries = new JLabel("X");
 
         poster.setBorder(darkBorder);
@@ -104,14 +105,14 @@ public class MultipleSeriesView extends JPanel {
             public void mousePressed(final MouseEvent e) {
                 super.mousePressed(e);
                 // Remove episodes
-                EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
-                List<Episode> episodesToRemove = episodeDb.getAllEpisodes(s.getTvDbId());
+                EpisodeDao episodeDb = new EpisodeDaoSQLite();
+                List<Episode> episodesToRemove = episodeDb.getAllEpisodes(series.getTvDbId());
                 episodeDb.updateMultipleEpisodes(episodesToRemove, QueryType.DELETE);
 
-                series.remove(s);
+                MultipleSeriesView.this.series.remove(series);
                 updateView();
-                seriesDb.updateSeries(s, QueryType.DELETE);
-                FileHandler.deleteShowDir(s.getTvDbId());
+                seriesDb.updateSeries(series, QueryType.DELETE);
+                FileHandler.deleteShowDir(series.getTvDbId());
                 notifyViewListeners();
             }
 
@@ -130,8 +131,8 @@ public class MultipleSeriesView extends JPanel {
             @Override
             public void mousePressed(final MouseEvent e) {
                 super.mousePressed(e);
-                System.out.println("LOG: (MultipleSeriesView) Opening " + s.getShowName() + ".");
-                ssv = new SingleSeriesView(s);
+                System.out.println("LOG: (MultipleSeriesView) Opening " + series.getShowName() + ".");
+                ssv = new SingleSeriesView(series);
                 notifyViewListeners(ssv);
 
             }
@@ -151,8 +152,8 @@ public class MultipleSeriesView extends JPanel {
         {
             @Override public void mousePressed(final MouseEvent e) {
                 super.mousePressed(e);
-                System.out.println("LOG: (MultipleSeriesView) Opening " + s.getShowName() + ".");
-                ssv = new SingleSeriesView(s);
+                System.out.println("LOG: (MultipleSeriesView) Opening " + series.getShowName() + ".");
+                ssv = new SingleSeriesView(series);
                 notifyViewListeners(ssv);
 
             }
@@ -173,16 +174,16 @@ public class MultipleSeriesView extends JPanel {
 
     public void updateView() {
         this.removeAll();
-        for (Series s : series) {
-            createSeriesPanel(s);
+        for (Series show : series) {
+            createSeriesPanel(show);
         }
         this.repaint();
         this.revalidate();
     }
 
-    public void addSeriesToView(Series s) {
-        series.add(s);
-        Collections.sort(series, new SeriesComparator());
+    public void addSeriesToView(Series series) {
+        this.series.add(series);
+        Collections.sort(this.series, new SeriesComparator());
     }
 
     @Override
@@ -206,7 +207,7 @@ public class MultipleSeriesView extends JPanel {
         }
     }
 
-    public List<Series> getLoadedSeries() {
+    public Iterable<Series> getLoadedSeries() {
         return series;
     }
 

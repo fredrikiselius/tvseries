@@ -5,16 +5,15 @@ import database.CreateDatabase;
 import database.UpdateDatabase;
 import gui.SeriesFrame;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
 
 /**
  * Tester is as the name suggests, a tester class to run the program from
  */
-public class Tester
+public final class Tester
 {
-    public static void main(String[] args) throws SQLException, IOException {
+    private Tester() {}
+
+    public static void main(String[] args) {
 		// setup properties
 	PropHandler propHandler = new PropHandler();
 	// create the local database

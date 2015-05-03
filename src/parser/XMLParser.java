@@ -17,7 +17,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * XMLParser is used to parse all the downloaded series information.
+ */
 public class XMLParser{
     private static final String XML_INFO_FILE_PATH = "showdata/%d/en.xml";
     private static final String XML_IMAGES_FILE_PATH = "showdata/%d/banners.xml";
@@ -28,9 +32,9 @@ public class XMLParser{
 
 	NodeList nodeList = null;
 	if (xmlFile.exists()) {
-	    Document document = null;
 	    try {
 		DocumentBuilder builder = factory.newDocumentBuilder();
+		Document document = null;
 		if (parseType == ParseType.IMAGE) {
 		    document = builder.parse(new File(String.format(XML_IMAGES_FILE_PATH, seriesID)));
 		} else {
@@ -48,6 +52,8 @@ public class XMLParser{
 		    case IMAGE:
 			nodeList = document.getElementsByTagName("Banner");
 			break;
+		    case FANART:
+		    case POSTER:
 		    default:
 			System.out.println("Unknown parse type");
 		}
@@ -163,7 +169,7 @@ public class XMLParser{
 	return episodes;
     }
 
-    public HashMap<ParseType, String> getImageURLs(int seriesID) {
+    public Map<ParseType, String> getImageURLs(int seriesID) {
 	NodeList nodeList = parseSeriesInfo(seriesID, ParseType.IMAGE);
 
 	double fanartRating = 0;
@@ -172,7 +178,7 @@ public class XMLParser{
 	String fanartBannerPath = "";
 	String posterBannerPath = "";
 
-	HashMap<ParseType, String> imagePaths = new HashMap<>();
+	Map<ParseType, String> imagePaths = new HashMap<>();
 
 	for (int bannerIndex = 0; bannerIndex < nodeList.getLength(); bannerIndex++) {
 	    Node bannerNode = nodeList.item(bannerIndex);

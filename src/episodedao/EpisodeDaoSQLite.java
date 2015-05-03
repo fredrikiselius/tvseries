@@ -7,9 +7,14 @@ import tvseries.DateHandler;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
+/**
+ * This class is used to both fetch and store information in the episode table in the database.
+ */
 public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 {
 
@@ -42,8 +47,8 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 
     /**
      * Preforms a database update on the episode
-     * @param episode
-     * @param queryType
+     * @param episode The episode to b update
+     * @param queryType The type of statement to be used
      */
     @Override
     public void updateEpisode(Episode episode, QueryType queryType) {
@@ -52,12 +57,10 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
     }
 
     public void updateMultipleEpisodes(List<Episode> episodes, QueryType queryType) {
-	List<String> updatestatements = new ArrayList<>();
+	Collection<String> updateStatements =
+		episodes.stream().map(episode -> createStatement(episode, queryType)).collect(Collectors.toList());
 
-	for (Episode episode : episodes) {
-	    updatestatements.add(createStatement(episode, queryType));
-	}
-	executeMultipleUpdates(updatestatements);
+	executeMultipleUpdates(updateStatements);
     }
 
     private String createStatement(Episode episode, QueryType queryType) {
@@ -82,10 +85,8 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 
     public Episode getEpisode(int episodeId) {
 	createConnection();
-	ResultSet resultSet;
 	Episode episode = null;
-	try {
-	    resultSet = statement.executeQuery(String.format(SELECT_ONE_STATEMENT, episodeId));
+	try (ResultSet resultSet = statement.executeQuery(String.format(SELECT_ONE_STATEMENT, episodeId))) {
 	    while (resultSet.next()) {
 		int showId = resultSet.getInt("show_id");
 		int episodeNumber = resultSet.getInt("episodenumber");
@@ -101,7 +102,7 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 		episode.deciedWatchedStatus(watchCount);
 		episode.setFirstAired(firstAired);
 	    }
-
+	    resultSet.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	} finally {
@@ -118,9 +119,7 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
     @Override public List<Episode> getAllEpisodes(int seriesId) {
 	createConnection();
 	List<Episode> episodes = new ArrayList<>();
-	ResultSet resultSet;
-	try {
-	    resultSet = statement.executeQuery(String.format(SELECT_ALL_STATEMENT, seriesId));
+	try (ResultSet resultSet = statement.executeQuery(String.format(SELECT_ALL_STATEMENT, seriesId))) {
 	    while (resultSet.next()) {
 		int episodeId = resultSet.getInt("tvdb_id");
 		int episodeNumber = resultSet.getInt("episodenumber");
@@ -160,8 +159,8 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
 	executeUpdate(updateStatement);
     }
 
-    public void updateWatchCountMultipleEpisodes(List<Episode> episodes) {
-	List<String> updateStatements = new ArrayList<>();
+    public void updateWatchCountMultipleEpisodes(Iterable<Episode> episodes) {
+	Collection<String> updateStatements = new ArrayList<>();
 	String currentDate = DateHandler.dateToString(new Date());
 	for (Episode episode : episodes) {
 	    String updateStatement =
@@ -183,9 +182,7 @@ public class EpisodeDaoSQLite extends DBHandler implements EpisodeDao
     public List<Date> getWatchHistoryForEpisode(Episode episode) {
 	createConnection();
 	List<Date> dates = new ArrayList<>();
-	ResultSet resultSet;
-	try {
-	    resultSet = statement.executeQuery(String.format("SELECT watch_date from history WHERE episode_id=%d", episode.getTvDbId()));
+	try (ResultSet resultSet = statement.executeQuery(String.format("SELECT watch_date from history WHERE episode_id=%d", episode.getTvDbId()))) {
 	    while (resultSet.next()) {
 		Date date = DateHandler.stringToDate(resultSet.getString("watch_date"));
 		dates.add(date);

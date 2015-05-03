@@ -6,18 +6,17 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 
 
 /**
  * DBHandler is used to extend other dataase classes.
  * It has methods for updating and querieing a database.
  */
-public abstract class DBHandler  {
+public class DBHandler  {
     protected static final String DATABASE_NAME = PropHandler.getDatabaseName();
 
-    protected Connection connection;
-    protected Statement statement;
+    protected Connection connection = null;
+    protected Statement statement = null;
 
     /**
      * Opens a connection to the database
@@ -67,7 +66,7 @@ public abstract class DBHandler  {
      * It can either be UPDATE, INSERT or DELETE statements.
      * @param updateStatements The statements to be updated.
      */
-    protected void executeMultipleUpdates(List<String> updateStatements) {
+    protected void executeMultipleUpdates(Iterable<String> updateStatements) {
 	createConnection();
 	try {
 	    statement.executeUpdate("BEGIN");

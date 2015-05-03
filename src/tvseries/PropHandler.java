@@ -14,7 +14,7 @@ import java.util.Properties;
 public class PropHandler {
     private static final String PROP_FILE = "config.properties";
     private static final String DEFAULT_DB_NAME = "tvseries";
-    private static String databaseName;
+    private static String databaseName = null;
     private int lastUpdate = 0;
 
     public PropHandler() {
@@ -34,16 +34,10 @@ public class PropHandler {
 	try {
 	    output = new FileOutputStream(PROP_FILE);
 
-	    if (databaseName == null) {
-		databaseName = DEFAULT_DB_NAME;
-	    }
 
-	    if (lastUpdate == 0) {
-		lastUpdate = 0000000000;
-	    }
 
-	    prop.setProperty("databaseName", databaseName);
-	    prop.setProperty("lastUpdate", lastUpdate + "");
+	    prop.setProperty("databaseName", getDatabaseName());
+	    prop.setProperty("lastUpdate", Integer.toString(lastUpdate));
 
 	    prop.store(output, null);
 	} catch (IOException io) {
@@ -83,7 +77,10 @@ public class PropHandler {
     }
 
     public static String getDatabaseName() {
-	return databaseName;
+	if (databaseName != null) {
+	    return databaseName;
+	}
+	return DEFAULT_DB_NAME;
     }
 
     public int getLastUpdate() {

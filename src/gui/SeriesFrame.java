@@ -2,11 +2,13 @@ package gui;
 
 import database.QueryType;
 import episodedao.Episode;
+import episodedao.EpisodeDao;
 import episodedao.EpisodeDaoSQLite;
 import net.miginfocom.swing.MigLayout;
 import parser.ParseType;
 import parser.XMLParser;
 import seriesdao.Series;
+import seriesdao.SeriesDao;
 import seriesdao.SeriesDaoSQLite;
 import tvseries.FileHandler;
 import parser.UrlXMLReader;
@@ -15,28 +17,32 @@ import javax.swing.*;
 import javax.swing.border.Border;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
-public class SeriesFrame extends JFrame implements ViewListener
-{
+/**
+ * SeriesFrame is the main frame of the application. It is launched at the start of the program and can display two different viewa,
+ * MultipleSeriesView and SingleSeriesView. The MultipleSeriesView is the one displayed at launch.
+ */
+public class SeriesFrame extends JFrame implements ViewListener {
 
     private final static int PREFERRED_FRAME_WIDTH = 1280;
     private final static int PREFERRED_FRAM_HEIGHT = 720;
     private final static int MIN_FRAME_WIDTH = 800;
     private final static int MIN_FRAME_HEIGHT = 600;
     private final static int MENU_WIDTH = 200;
+    private static final int MINUTES_MONTH = 43829;
+    private static final int MINUTES_DAY = 1440;
+    private static final int MINUTES_HOUR = 60;
 
-    private Map<String, String> searchResults = new HashMap<String, String>();
+    private Map<String, String> searchResults = new HashMap<>();
 
 
     // Custom borders and colors
     private Border darkBorder = BorderFactory.createLineBorder(Color.decode("#444444"), 1);
-    JList<String> resultList = null;
+    private JList<String> resultList = null;
 
 
     private JScrollPane mySeries;
@@ -44,7 +50,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 
     // views
     private MultipleSeriesView msv;
-    private SingleSeriesView ssv;
+    private SingleSeriesView ssv = null;
 
 
     public SeriesFrame() {
@@ -83,8 +89,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 
     /**
      * Creates the left bar containing the search window
-     *
-     * @return
+     * @return JPanel containing the left menu
      */
     private JPanel createLeftMenu() {
 	JPanel menuPane = new JPanel(new MigLayout("", "[]", "[][::" + MENU_WIDTH + "px][]"));
@@ -118,7 +123,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 	watchTimeDisplay.setBorder(darkBorder);
 	watchTimeDisplay.setBackground(Color.decode("#191919"));
 	watchTimeDisplay.setForeground(Color.decode("#999999"));
-	watchTimeDisplay.setText(getTotalWatchTime() + "");
+	watchTimeDisplay.setText(getTotalWatchTime());
 
 	// set style to the result window
 	resultScroll.setBorder(darkBorder);
@@ -140,65 +145,59 @@ public class SeriesFrame extends JFrame implements ViewListener
 	menuPane.add(watchTimeDisplay, "grow");
 
 	// adds action to search on enter
-	searchField.addActionListener(new ActionListener()
-	{
-	    @Override public void actionPerformed(final ActionEvent e) {
-		String searchString = searchField.getText();
+	searchField.addActionListener(e -> {
+	    String searchString = searchField.getText();
 
-		if (!searchString.isEmpty()) {
-		    updateResultScroll(searchString);
-		    resultScroll.setViewportView(resultList);
-		    resultScroll.revalidate();
-		    resultScroll.setVisible(true);
+	    if (!searchString.isEmpty()) {
+		updateResultScroll(searchString);
+		resultScroll.setViewportView(resultList);
+		resultScroll.revalidate();
+		resultScroll.setVisible(true);
 
-		    addBtn.setVisible(true);
-		    searchField.setText("");
-		}
-
-
+		addBtn.setVisible(true);
+		searchField.setText("");
 	    }
+
+
 	});
 
 	// Adds a new show
-	addBtn.addActionListener(new ActionListener()
-	{
-	    @Override public void actionPerformed(final ActionEvent e) {
-		// Hides the resultpane and button
-		resultScroll.setVisible(false);
-		addBtn.setVisible(false);
+	addBtn.addActionListener(e -> {
+	    // Hides the resultpane and button
+	    resultScroll.setVisible(false);
+	    addBtn.setVisible(false);
 
-		new SwingWorker<Void, Void>()
-		{
-		    @Override public Void doInBackground() {
-			// get series id
-			String name = resultList.getSelectedValue();
-			int id = Integer.parseInt(searchResults.get(name));
+	    new SwingWorker<Void, Void>()
+	    {
+		@Override public Void doInBackground() {
+		    // get series id
+		    String name = resultList.getSelectedValue();
+		    int id = Integer.parseInt(searchResults.get(name));
 
-			SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
-			List<String> seriesInDb = seriesDb.selectAllIds();
+		    SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
+		    List<String> seriesInDb = seriesDb.selectAllIds();
 
 
-			if (!seriesInDb.contains(id + "")) {
-			    addShow(id);
-			} else {
-			    System.out.println("The series " + "'" + name + "'" + " is already in the database.");
-			}
-			return null;
+		    if (!seriesInDb.contains(Integer.toString(id))) {
+			addShow(id);
+		    } else {
+			System.out.println("The series " + "'" + name + "'" + " is already in the database.");
 		    }
+		    return null;
+		}
 
-		    @Override public void done() {
-			System.out.println("LOG: (SeriesFrame) Done saving changes.");
+		@Override public void done() {
+		    System.out.println("LOG: (SeriesFrame) Done saving changes.");
 
-			resultList = null;
-			searchResults.clear();
-			searchField.setEditable(true);
+		    resultList = null;
+		    searchResults.clear();
+		    searchField.setEditable(true);
 
-		    }
-		}.execute();
-		mySeries.setPreferredSize(msv.getPreferredSize());
-		mySeries.getViewport().revalidate();
-		mySeries.getViewport().repaint();
-	    }
+		}
+	    }.execute();
+	    mySeries.setPreferredSize(msv.getPreferredSize());
+	    mySeries.getViewport().revalidate();
+	    mySeries.getViewport().repaint();
 	});
 	return menuPane;
     }
@@ -209,7 +208,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 
 	    // parse show
 	    XMLParser xmlParser = new XMLParser();
-	    HashMap<ParseType, String> imagePaths = xmlParser.getImageURLs(id);
+	    Map<ParseType, String> imagePaths = xmlParser.getImageURLs(id);
 
 
 	    Series series = xmlParser.getSeries(id);
@@ -221,14 +220,14 @@ public class SeriesFrame extends JFrame implements ViewListener
 
 
 	    // write Series to db
-	    SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
+	    SeriesDao seriesDb = new SeriesDaoSQLite();
 	    seriesDb.updateSeries(series, QueryType.INSERT);
 
 	    // write episodes to db
 
 	    List<Episode> parsedEpisodes = xmlParser.getEpisodes(id);
 
-	    EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
+	    EpisodeDao episodeDb = new EpisodeDaoSQLite();
 	    episodeDb.updateMultipleEpisodes(parsedEpisodes, QueryType.INSERT);
 
 	    //update view
@@ -244,7 +243,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 	System.out.println("LOG: (SeriesFrame) Searching THETVDB for: " + searchString);
 
 	UrlXMLReader xmlReader = new UrlXMLReader(searchString.replaceAll(" ", "%20"));
-	searchResults = xmlReader.result;
+	searchResults = xmlReader.getResult();
 	String[] shows = new String[searchResults.keySet().size()];
 	int iterIndex = 0;
 	for (String showName : searchResults.keySet()) {
@@ -292,7 +291,7 @@ public class SeriesFrame extends JFrame implements ViewListener
 	int episodesWatched = 0;
 
 
-	EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
+	EpisodeDao episodeDb = new EpisodeDaoSQLite();
 	for (Series series : msv.getLoadedSeries()) {
 	    List<Episode> episodes = episodeDb.getAllEpisodes(series.getTvDbId());
 	    for (Episode episode : episodes) {
@@ -307,18 +306,18 @@ public class SeriesFrame extends JFrame implements ViewListener
 	StringBuilder builder = new StringBuilder();
 	builder.append("Episodes: " + episodesWatched + "\n");
 
-	int monthsWatched = minutesWatched / 43829;
-	minutesWatched %= 43829;
+	int monthsWatched = minutesWatched / MINUTES_MONTH;
+	minutesWatched %= MINUTES_MONTH;
 	builder.append("Months: " + monthsWatched + "\n");
 
 
-	int daysWatched = minutesWatched / 1440;
-	minutesWatched %= 1440;
+	int daysWatched = minutesWatched / MINUTES_DAY;
+	minutesWatched %= MINUTES_DAY;
 	builder.append("Days: " + daysWatched + "\n");
 
 
-	int hoursWatched = minutesWatched / 60;
-	minutesWatched %= 60;
+	int hoursWatched = minutesWatched / MINUTES_HOUR;
+	minutesWatched %= MINUTES_HOUR;
 	builder.append("Hours: " + hoursWatched + "\n");
 	builder.append("Minutes: " + minutesWatched);
 

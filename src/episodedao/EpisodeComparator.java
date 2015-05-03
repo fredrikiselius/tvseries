@@ -2,6 +2,9 @@ package episodedao;
 
 import java.util.Comparator;
 
+/**
+ * EpisodeComparator is used to sort a list of Episode objects first by season number and then by episode number.
+ */
 public class EpisodeComparator implements Comparator<Episode> {
 
     @Override

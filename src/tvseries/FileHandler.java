@@ -12,12 +12,14 @@ import java.net.URL;
  * This class is used to handle the files used by the application.
  * It can download files, delete directories and so on.
  */
-public class FileHandler {
+public final class FileHandler {
     private static final String ZIP_URL = "http://thetvdb.com/api/6A988698B3E59C3C/series/%d/all/en.zip";
 
     private static final int BUFFER_SIZE = 4096;
-    public static final String DOWNLOAD_FOLDER = "showdata/";
-    public static final String DOWNLOAD_FOLDER_IMG = "showdata/";
+    private static final String DOWNLOAD_FOLDER = "showdata/";
+    private static final String DOWNLOAD_FOLDER_IMG = "showdata/";
+
+    private FileHandler() {}
 
     public static void deleteShowDir(int tvDbId) {
         deleteDirectory(new File("showdata/" + tvDbId + "/"));
@@ -31,11 +33,11 @@ public class FileHandler {
         if (directory.exists()) {
             File[] files = directory.listFiles();
             if (null != files) {
-                for (int i = 0; i < files.length; i++) {
-                    if (files[i].isDirectory()) {
-                        deleteDirectory(files[i]);
+                for (final File file : files) {
+                    if (file.isDirectory()) {
+                        deleteDirectory(file);
                     } else {
-                        files[i].delete();
+                        file.delete();
                     }
                 }
             }
@@ -61,11 +63,7 @@ public class FileHandler {
      */
     public static void fetchPoster(String posterPath, int tvDbId) {
         String posterUrl = "http://thetvdb.com/banners/_cache/" + posterPath;
-        try {
-            downloadFile(posterUrl, DOWNLOAD_FOLDER_IMG + tvDbId + "/", "poster");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        downloadFile(posterUrl, DOWNLOAD_FOLDER_IMG + tvDbId + "/", "poster");
     }
 
     /**
@@ -75,11 +73,7 @@ public class FileHandler {
      */
     public static void fetchFanart(String fanartPath, int tvDbId) {
         String posterUrl = "http://thetvdb.com/banners/" + fanartPath;
-        try {
-            downloadFile(posterUrl, DOWNLOAD_FOLDER_IMG + tvDbId + "/", "fanart");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        downloadFile(posterUrl, DOWNLOAD_FOLDER_IMG + tvDbId + "/", "fanart");
     }
 
     /**
@@ -101,51 +95,69 @@ public class FileHandler {
      * @param newName New name for the file, can be null
      * @throws IOException
      */
-    public static void downloadFile(String fileURL, String dlFolder, String newName) throws IOException {
+    public static void downloadFile(String fileURL, String dlFolder, String newName)
+    {
         System.out.println("LOG: (DownloadFile) Downloading file from: " + fileURL);
-        URL url = new URL(fileURL);
+
         File folder = new File(dlFolder);
         if (!folder.exists()) {
             folder.mkdir();
         }
-        HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
-        int responseCode = httpConnection.getResponseCode();
+
+        HttpURLConnection httpConnection = null;
+        FileOutputStream outputStream = null;
+        InputStream inputStream = null;
+        try {
+            URL url = new URL(fileURL);
+            httpConnection = (HttpURLConnection) url.openConnection();
+            int responseCode = httpConnection.getResponseCode();
 
 
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            String fileName = "";
-            String disposition = httpConnection.getHeaderField("Content-Disposition");
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                String fileName = "";
+                String disposition = httpConnection.getHeaderField("Content-Disposition");
 
-            if (disposition != null) {
-                int index = disposition.indexOf("filename=");
-                if (index > 0) {
-                    fileName = disposition.substring(index + 10, disposition.length() - 1);
+                if (disposition != null) {
+                    int index = disposition.indexOf("filename=");
+                    if (index > 0) {
+                        fileName = disposition.substring(index + 10, disposition.length() - 1);
+                    }
+                } else {
+                    fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1, fileURL.length());
                 }
-            } else {
-                fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1, fileURL.length());
+
+                inputStream = httpConnection.getInputStream();
+
+                if (newName != null) {
+                    fileName = newName + ".jpg";
+                }
+
+                String saveFilePath = dlFolder + File.separator + fileName;
+
+                outputStream = new FileOutputStream(saveFilePath);
+
+                int bytesRead = -1;
+                byte[] buffer = new byte[BUFFER_SIZE];
+
+
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
             }
-
-            InputStream inputStream = httpConnection.getInputStream();
-
-            if (newName != null) {
-                fileName = newName + ".jpg";
+            httpConnection.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-            String saveFilePath = dlFolder + File.separator + fileName;
-
-            FileOutputStream outputStream = new FileOutputStream(saveFilePath);
-
-            int bytesRead = -1;
-            byte[] buffer = new byte[BUFFER_SIZE];
-
-
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-
-            outputStream.close();
-            inputStream.close();
         }
-        httpConnection.disconnect();
     }
 }

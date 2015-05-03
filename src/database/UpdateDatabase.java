@@ -1,6 +1,7 @@
 package database;
 
 import episodedao.Episode;
+import episodedao.EpisodeDao;
 import episodedao.EpisodeDaoSQLite;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -18,12 +19,18 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-public class UpdateDatabase extends DBHandler {
+/**
+ * UpdateDatabase is used to update the information of the series already in the database.
+ */
+public class UpdateDatabase extends DBHandler
+{
 
     /**
      * Gets the current server time from thetvdb.com
+     *
      * @return int Server time
      */
     private static int getCurrentServerTime() {
@@ -45,7 +52,9 @@ public class UpdateDatabase extends DBHandler {
 
     /**
      * Fetech series ids to be updated
+     *
      * @param lastUpdate Server time from last update
+     *
      * @return List<String> Series ids
      */
     private static List<String> getSeriesToUpdate(int lastUpdate) {
@@ -73,7 +82,7 @@ public class UpdateDatabase extends DBHandler {
     public static void update() {
 	PropHandler pHandler = new PropHandler();
 	SeriesDaoSQLite seriesDb = new SeriesDaoSQLite();
-	EpisodeDaoSQLite episodeDb = new EpisodeDaoSQLite();
+	EpisodeDao episodeDb = new EpisodeDaoSQLite();
 	XMLParser xmlParser = new XMLParser();
 
 
@@ -81,14 +90,12 @@ public class UpdateDatabase extends DBHandler {
 	List<String> seriesInDb = seriesDb.selectAllIds();
 	// fetch all ids updated since last update
 	List<String> seriesUpdatedSinceLast = getSeriesToUpdate(pHandler.getLastUpdate());
-	List<String> seriesToUpdate = new ArrayList<>();
+	Collection<String> seriesToUpdate = new ArrayList<>();
 
-	for (String id : seriesUpdatedSinceLast) {
-	    if (seriesInDb.contains(id)) {
-		seriesToUpdate.add(id);
-		System.out.println("Series ID TO UPDATE: " + id);
-	    }
-	}
+	seriesUpdatedSinceLast.stream().filter(id -> seriesInDb.contains(id)).forEach(id -> {
+	    seriesToUpdate.add(id);
+	    System.out.println("Series ID TO UPDATE: " + id);
+	});
 
 	List<Series> series = new ArrayList<>();
 	List<Episode> episodes = new ArrayList<>();
@@ -97,16 +104,17 @@ public class UpdateDatabase extends DBHandler {
 	    // fetch new data
 	    try {
 		FileHandler.fetchZip(id);
+		// parse new data
+		Series show = xmlParser.getSeries(id);
+		List<Episode> parsedEpisodes = xmlParser.getEpisodes(id);
+
+		series.add(show);
+		episodes.addAll(parsedEpisodes);
 	    } catch (IOException e) {
 		e.printStackTrace();
 	    }
 
-	    // parse new data
-	    Series s = xmlParser.getSeries(id);
-	    List<Episode> parsedEpisodes = xmlParser.getEpisodes(id);
 
-	    series.add(s);
-	    episodes.addAll(parsedEpisodes);
 	}
 
 	episodeDb.updateMultipleEpisodes(episodes, QueryType.UPDATE);

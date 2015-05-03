@@ -1,12 +1,14 @@
 package gui;
 
+/**
+ * Used to notify the SeriesFrame when there are changes in the different views.
+ */
 public interface ViewListener {
-
     // Go from multiple to single view
-    public void multipleViewChanged(SingleSeriesView ssv);
+    void multipleViewChanged(SingleSeriesView ssv);
 
     // Go from single to multiple
-    public void singleViewChanged();
+    void singleViewChanged();
 
-    public void totalTimeChanged();
+    void totalTimeChanged();
 }

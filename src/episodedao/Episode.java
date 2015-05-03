@@ -2,7 +2,6 @@ package episodedao;
 
 
 
-import javax.swing.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -12,8 +11,8 @@ import java.util.Date;
  */
 public class Episode
 {
-    private String name;
-    private String overview;
+    private String name = "TBA";
+    private String overview ="TBA";
 
     private int showId;
     private int tvDbId;
@@ -22,7 +21,7 @@ public class Episode
     private int absoluteNumber;
     private int watchCount;
 
-    private Date firstAired;
+    private Date firstAired = null;
     private boolean watchedStatus;
 
 
@@ -96,7 +95,7 @@ public class Episode
     }
 
     public Date getFirstAired() {
-	return firstAired;
+	return (Date) firstAired.clone();
     }
 
     public int getShowId() {
