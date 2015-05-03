@@ -47,6 +47,9 @@ public final class UnZip
 		//noinspection ResultOfMethodCallIgnored
 		new File(newFile.getParent()).mkdirs();
 
+		// Could not put the FileOutputStream as "try-with-resources" since it then becomes a final,
+		// and we get the newFile name within the try block.
+		// It is opened in front of the try block and closed in the finally.
 		outputStream = new FileOutputStream(newFile);
 
 		int len = zis.read(buffer);

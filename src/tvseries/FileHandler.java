@@ -131,6 +131,7 @@ public final class FileHandler {
                     fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1, fileURL.length());
                 }
 
+                // Could not put it as "try-with-resources" since the httpConnection is declared after.
                 inputStream = httpConnection.getInputStream();
 
                 if (newName != null) {
@@ -138,7 +139,8 @@ public final class FileHandler {
                 }
 
                 String saveFilePath = dlFolder + File.separator + fileName;
-                outputStream = new FileOutputStream(saveFilePath);
+                // Could not put it as "try-with-resources" since the full path is declard inside the try block.
+                outputStream = new FileOutputStream(saveFilePath); // It is opened in front of the try block and closed in the finally.
 
 
                 byte[] buffer = new byte[BUFFER_SIZE];

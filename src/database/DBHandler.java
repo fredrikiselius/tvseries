@@ -24,6 +24,7 @@ public class DBHandler  {
     protected void createConnection() {
 	try {
 	    Class.forName("org.sqlite.JDBC");
+	    // Could not get Datasource to work so used DriverManager instead.
 	    connection = DriverManager.getConnection("jdbc:sqlite:" + DATABASE_NAME + ".db");
 	    statement = connection.createStatement();
 
