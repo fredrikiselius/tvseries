@@ -1,0 +1,96 @@
+package se.liu.ida.freis685poniv820.tddd78.tvseries.gui;
+
+import net.miginfocom.swing.MigLayout;
+import se.liu.ida.freis685poniv820.tddd78.tvseries.seriesdao.Series;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.File;
+
+/**
+ * Custom JPanel used in the SingleSeriesView to display fanart,
+ * basic information such as airdays and airtime.
+ * It also displays the overview for the Series
+ */
+public class SingleSeriesPanel extends JPanel
+{
+    private static final int FONT_SIZE = 12;
+    private static final int MENU_WIDTH = 200;
+    private static final int FANART_HEIGHT = 150;
+    private static final int TEXT_Y_OFFSET = FANART_HEIGHT + 20;
+    private static final int TEXT_X_OFFSET = 10;
+    private static final int OVERVIEW_HEIGHT = 100;
+    private static final int SPACING = 20;
+
+    private BufferedImage fanart = null;
+    private Series series;
+    private int width;
+
+    public SingleSeriesPanel(Series series) {
+	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	this.series = series;
+	this.width = screenSize.width - MENU_WIDTH;
+
+	File fanartUrl = new File("showdata/" + series.getTvDbId() + "/fanart.jpg");
+	if (fanartUrl.exists()) {
+	    try {
+		fanart = ImageIO.read(fanartUrl);
+	    } catch (IOException e) {
+		e.printStackTrace();
+	    }
+	} else {
+	    fanart = null;
+	}
+
+	setLayout(new MigLayout());
+	addOverview();
+
+	int height = (FANART_HEIGHT + SPACING * 2 + 10 + OVERVIEW_HEIGHT);
+	this.setPreferredSize(new Dimension(width, height));
+    }
+
+    private void addOverview() {
+
+	JScrollPane overviewScroller = new JScrollPane();
+
+	JTextArea jTextArea = new JTextArea();
+	jTextArea.setText(series.getOverview());
+
+	jTextArea.setEditable(false);
+	jTextArea.setLineWrap(true);
+	jTextArea.setWrapStyleWord(true);
+
+	overviewScroller.setViewportView(jTextArea);
+	overviewScroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+	jTextArea.setCaretPosition(0); // to make sure to display the top of the scrollpane first
+	this.add(overviewScroller, "w 550!, h " + OVERVIEW_HEIGHT + "! , gaptop " + (FANART_HEIGHT + (SPACING * 2)) + ", gapleft 8");
+
+    }
+
+    @Override public void paintComponent(Graphics g) {
+	super.paintComponent(g);
+	final Graphics2D g2d = (Graphics2D) g;
+	Font font = new Font("Arial", Font.BOLD, FONT_SIZE);
+
+	String info = series.getShowName()+ " - " + series.getAirday() + " at " + series.getAirtime() + " - "
+					   + series.getNetwork() + " - " + series.getStatus();
+
+	// draw header image, fanart
+	g2d.setColor(Color.BLACK);
+	g2d.fillRect(0, 0, width, FANART_HEIGHT);
+	if (fanart != null) {
+	    g2d.drawImage(fanart, 0, 0, Math.min(width, fanart.getWidth()), FANART_HEIGHT, // area to draw
+			  0, TEXT_Y_OFFSET, Math.min(width, fanart.getWidth()), TEXT_Y_OFFSET + FANART_HEIGHT,
+			  // area to draw from
+			  this);
+	}
+
+	// draw Series information
+	g2d.setFont(font);
+	g2d.drawString(info, TEXT_X_OFFSET, TEXT_Y_OFFSET);
+    }
+}
